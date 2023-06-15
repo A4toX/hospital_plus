@@ -74,6 +74,13 @@
                 <profiles.active>dev</profiles.active>
                 <logging.level>debug</logging.level>
             </properties>
+        </profile>
+        <profile>
+            <id>local</id>
+            <properties>
+                <profiles.active>local</profiles.active>
+                <logging.level>debug</logging.level>
+            </properties>
             <activation>
                 <!-- 默认环境 -->
                 <activeByDefault>true</activeByDefault>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.attendance.mapper.AttendanceFlowMapper">
+
+    <insert id="handleNoAttendanceFlow">
+        INSERT INTO attendance_flow(hos_id, user_id, attend_group_id, attend_classes_id, attend_type, attend_status, attend_date, attend_number, attend_kind, area_outside, automatic_flag, need_attend_flag)
+        SELECT
+            ag.hos_id, agu.user_id, agc.group_id, agc.classes_id, ag.group_type, 4, #{date}, #{attendNumber}, #{attendKind}, '2', '1', '1'
+        FROM
+            attendance_group_classes agc
+                JOIN attendance_group_user agu ON agc.group_id = agu.group_id AND agu.is_delete = 1
+                JOIN attendance_group ag ON agc.group_id = ag.id AND ag.is_delete = 1
+        WHERE agc.id = #{groupClassesId}
+          AND NOT EXISTS(SELECT 1 FROM attendance_flow af WHERE af.attend_group_id=agc.group_id AND af.attend_classes_id=agc.classes_id AND af.attend_kind=#{attendKind} AND af.attend_number=#{attendNumber} AND af.attend_date = #{date})
+    </insert>
+
+    <insert id="handleAutoAttendanceFlow">
+        INSERT INTO attendance_flow(hos_id, user_id, attend_group_id, attend_classes_id, attend_type, attend_status, attend_date, attend_time, attend_number, attend_kind, area_outside, automatic_flag, need_attend_flag)
+        SELECT
+            ag.hos_id, agu.user_id, agc.group_id, agc.classes_id, ag.group_type, 1, #{date}, ac.after_time, #{attendNumber}, #{attendKind}, '2', '1', '1'
+        FROM
+            attendance_group_classes agc
+                JOIN attendance_group_user agu ON agc.group_id = agu.group_id AND agu.is_delete = 1
+                JOIN attendance_group ag ON agc.group_id = ag.id AND ag.is_delete = 1
+                JOIN attendance_classes ac ON agc.classes_id = ac.id AND ac.is_delete = 1
+        WHERE agc.id = #{groupClassesId}
+          AND NOT EXISTS(SELECT 1 FROM attendance_flow af WHERE af.attend_group_id=agc.group_id AND af.attend_classes_id=agc.classes_id AND af.attend_kind=#{attendKind} AND af.attend_number=#{attendNumber} AND af.attend_date = #{date})
+    </insert>
+</mapper>

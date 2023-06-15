@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.attendance.mapper.AttendanceGroupClassesMapper">
+    <select id="selectByGroupId" resultType="com.demo.hospital.attendance.model.vo.AttendanceGroupClassVO">
+        SELECT
+            agc.id AS groupClassesId,
+            agc.group_id AS groupId,
+            agc.classes_id AS classesId,
+            agc.weekly AS weekly,
+            ac.name AS classesName,
+            ac.work_time AS workTime,
+            ac.after_time AS afterTime,
+            ac.work_late_min AS workLateMin,
+            ac.is_serious_late AS isSeriousLate,
+            ac.work_serious_late_min AS workSeriousLateMin,
+            ac.work_abs_min AS workAbsMin,
+            ac.is_auto_after AS isAutoAfter,
+            ac.after_abs_min AS afterAbsMin,
+            ac.after_Leave_early AS afterLeaveEarly,
+            agc.status AS status
+        FROM
+            attendance_group_classes agc
+                INNER JOIN attendance_classes ac ON agc.classes_id = ac.id
+        WHERE
+            agc.group_id = #{groupId}
+    </select>
+
+
+    <select id="selectByGroupIdSimple"
+            resultType="com.demo.hospital.attendance.model.vo.AttendanceGroupClassesSimpleRespVO">
+        SELECT
+            agc.id AS groupClassesId,
+            agc.group_id AS groupId,
+            agc.classes_id AS classesId,
+            agc.weekly AS weekly,
+            ac.name AS classesName,
+            ac.work_time AS workTime,
+            ac.after_time AS afterTime
+        FROM
+            attendance_group_classes agc
+                INNER JOIN attendance_classes ac ON agc.classes_id = ac.id
+        WHERE
+            agc.group_id = #{groupId}
+    </select>
+</mapper>
