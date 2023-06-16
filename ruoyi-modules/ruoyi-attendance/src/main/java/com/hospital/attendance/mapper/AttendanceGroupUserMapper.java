@@ -1,10 +1,11 @@
 package com.hospital.attendance.mapper;
 
-import com.demo.hospital.attendance.model.AttendanceGroupUser;
-import com.demo.hospital.attendance.model.AttendanceGroupUserExample;
-import com.demo.hospital.attendance.model.vo.attendUser.AttendanceUserReqVO;
-import com.demo.hospital.attendance.model.vo.attendUser.AttendanceUserRespVO;
-import com.demo.hospital.common.base.dao.MyBatisBaseDao;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hospital.attendance.domain.AttendanceGroupUser;
+import com.hospital.attendance.domain.vo.AttendanceGroupUserVo;
+import com.hospital.attendance.domain.vo.attendUser.AttendanceUserReqVO;
+import com.hospital.attendance.domain.vo.attendUser.AttendanceUserRespVO;
+import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
 
 import java.util.List;
 
@@ -13,23 +14,12 @@ import java.util.List;
  *
  * @author yaoyingjie
  */
-public interface AttendanceGroupUserMapper extends MyBatisBaseDao<AttendanceGroupUser, Integer, AttendanceGroupUserExample> {
+public interface AttendanceGroupUserMapper extends BaseMapperPlus<AttendanceGroupUser, AttendanceGroupUserVo> {
 
-    default List<AttendanceGroupUser> selectByUserId(Integer userId) {
-        AttendanceGroupUserExample example = new AttendanceGroupUserExample();
-        example.createCriteria()
-                .andUserIdEqualTo(userId)
-                .andIsDeleteEqualTo("1");
-        return selectByExample(example);
+    default List<AttendanceGroupUser> selectByUserId(Long userId) {
+        return selectList(new LambdaQueryWrapper<AttendanceGroupUser>().eq(AttendanceGroupUser::getUserId, userId));
     }
 
     List<AttendanceUserRespVO> listByGroupId(AttendanceUserReqVO reqVO);
-
-    default List<AttendanceGroupUser> selectAll() {
-        AttendanceGroupUserExample example = new AttendanceGroupUserExample();
-        example.createCriteria()
-                .andIsDeleteEqualTo("1");
-        return selectByExample(example);
-    }
 }
 

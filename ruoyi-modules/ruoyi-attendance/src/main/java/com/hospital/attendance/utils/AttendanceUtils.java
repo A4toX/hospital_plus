@@ -2,28 +2,27 @@ package com.hospital.attendance.utils;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.task.Task;
-import com.demo.hospital.attendance.dao.*;
-import com.demo.hospital.attendance.enums.AttendanceKindEnum;
-import com.demo.hospital.attendance.enums.AttendanceStatusEnum;
-import com.demo.hospital.attendance.model.*;
-import com.demo.hospital.attendance.model.vo.AttendanceFlowCountDetailByDateRangeVO;
-import com.demo.hospital.attendance.model.vo.AttendanceFlowCountDetailByDayVO;
-import com.demo.hospital.attendance.model.vo.AttendanceGroupClassVO;
-import com.demo.hospital.common.redis.RedisUtils;
-import com.demo.hospital.common.security.UserUtil;
-import com.demo.hospital.common.util.CronUtils;
-import com.demo.hospital.common.util.DateUtils;
-import com.demo.hospital.common.util.NumberUtils;
-import com.demo.hospital.common.util.SpringUtils;
-import com.demo.hospital.systemcode.enums.YesNoEnum;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import com.hospital.attendance.domain.*;
+import com.hospital.attendance.domain.vo.*;
+import com.hospital.attendance.enums.AttendanceKindEnum;
+import com.hospital.attendance.enums.AttendanceStatusEnum;
+import com.hospital.attendance.mapper.*;
+import org.dromara.common.core.enums.YesNoEnum;
+import org.dromara.common.core.utils.DateUtils;
+import org.dromara.common.core.utils.SpringUtils;
+import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.core.utils.system.UserUtils;
+import org.dromara.common.redis.utils.RedisUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,14 +34,14 @@ import java.util.stream.Collectors;
  */
 public class AttendanceUtils {
 
-    private static final Map<Integer, Set<String>> scheduleIds = new HashMap<>();
+    private static final Map<Long, Set<String>> scheduleIds = new HashMap<>();
     private static final String ATTEND_CONFIG_PREFIX = "attendance:config:";
-    private static final AttendanceClassesDao classesDao = SpringUtils.getBean(AttendanceClassesDao.class);
-    private static final AttendanceGroupDao groupDao = SpringUtils.getBean(AttendanceGroupDao.class);
-    private static final AttendanceGroupClassesDao groupClassesDao = SpringUtils.getBean(AttendanceGroupClassesDao.class);
-    private static final AttendanceGroupAreaDao groupAreaDao = SpringUtils.getBean(AttendanceGroupAreaDao.class);
-    private static final AttendanceGroupUserDao groupUserDao = SpringUtils.getBean(AttendanceGroupUserDao.class);
-    private static final AttendanceFlowDao attendanceFlowDao = SpringUtils.getBean(AttendanceFlowDao.class);
+    private static final AttendanceClassesMapper classesMapper = SpringUtils.getBean(AttendanceClassesMapper.class);
+    private static final AttendanceGroupMapper groupMapper = SpringUtils.getBean(AttendanceGroupMapper.class);
+    private static final AttendanceGroupClassesMapper groupClassesMapper = SpringUtils.getBean(AttendanceGroupClassesMapper.class);
+    private static final AttendanceGroupAreaMapper groupAreaMapper = SpringUtils.getBean(AttendanceGroupAreaMapper.class);
+    private static final AttendanceGroupUserMapper groupUserMapper = SpringUtils.getBean(AttendanceGroupUserMapper.class);
+    private static final AttendanceFlowMapper attendanceFlowMapper = SpringUtils.getBean(AttendanceFlowMapper.class);
 
     /**
      * 根据用户ID获取对应的考勤组信息集合
@@ -50,8 +49,8 @@ public class AttendanceUtils {
      * @param userId 用户ID
      * @return 用户所在的考勤组
      */
-    public static List<AttendanceGroup> getMyGroup(Integer userId) {
-        List<Integer> groupIds = getMyGroupId(userId);
+    public static List<AttendanceGroupVo> getMyGroup(Long userId) {
+        List<Long> groupIds = getMyGroupId(userId);
         if (CollUtil.isNotEmpty(groupIds)) {
             return groupIds.stream()
                     .distinct()
@@ -67,9 +66,9 @@ public class AttendanceUtils {
      * @param userId 用户ID
      * @return 用户所在的考勤组
      */
-    public static List<Integer> getMyGroupId(Integer userId) {
+    public static List<Long> getMyGroupId(Long userId) {
         String userKey = getKey(CacheTypeEnum.users, "users");
-        Map<Integer, List<Integer>> userMap = RedisUtils.getCacheObject(userKey);
+        Map<Long, List<Long>> userMap = RedisUtils.getCacheObject(userKey);
         if (userMap == null) {
             initUserGroupCache();
             userMap = RedisUtils.getCacheObject(userKey);
@@ -83,9 +82,9 @@ public class AttendanceUtils {
      * @param groupId 考勤组ID
      * @return 在该考勤组的用户
      */
-    public static List<Integer> getUsersByGroupId(Integer groupId) {
+    public static List<Long> getUsersByGroupId(Long groupId) {
         String groupKey = getKey(CacheTypeEnum.users, "groups");
-        Map<Integer, List<Integer>> groupMap = RedisUtils.getCacheObject(groupKey);
+        Map<Long, List<Long>> groupMap = RedisUtils.getCacheObject(groupKey);
         if (groupMap == null) {
             initUserGroupCache();
             groupMap = RedisUtils.getCacheObject(groupKey);
@@ -110,11 +109,11 @@ public class AttendanceUtils {
     public static void initUserGroupCache() {
         String userKey = getKey(CacheTypeEnum.users, "users");
         String groupKey = getKey(CacheTypeEnum.users, "groups");
-        List<AttendanceGroupUser> groupUsers = groupUserDao.selectAll();
-        Map<Integer, List<Integer>> userMap = groupUsers.stream()
+        List<AttendanceGroupUser> groupUsers = groupUserMapper.selectList();
+        Map<Long, List<Long>> userMap = groupUsers.stream()
                 .collect(Collectors.groupingBy(AttendanceGroupUser::getUserId, Collectors.mapping(AttendanceGroupUser::getGroupId, Collectors.toList())));
 
-        Map<Integer, List<Integer>> groupMap = groupUsers.stream()
+        Map<Long, List<Long>> groupMap = groupUsers.stream()
                 .collect(Collectors.groupingBy(AttendanceGroupUser::getGroupId, Collectors.mapping(AttendanceGroupUser::getGroupId, Collectors.toList())));
         removeGroupUserCache();
         RedisUtils.setCacheObject(userKey, userMap);
@@ -127,9 +126,9 @@ public class AttendanceUtils {
      * @param groupId 考勤组ID
      * @return 考勤组信息
      */
-    public static AttendanceGroup getGroup(Integer groupId) {
+    public static AttendanceGroupVo getGroup(Long groupId) {
         String key = getKey(CacheTypeEnum.group, groupId);
-        AttendanceGroup group = RedisUtils.getCacheObject(key);
+        AttendanceGroupVo group = RedisUtils.getCacheObject(key);
         if (Objects.isNull(group)) {
             initGroupCache(groupId);
             group = RedisUtils.getCacheObject(key);
@@ -139,13 +138,9 @@ public class AttendanceUtils {
 
     /**
      * 清除考勤组缓存
-     *
-     * @return 成功状态
      */
-    public static boolean removeGroupCache() {
-        Collection<String> keys = RedisUtils.keys(getKey(CacheTypeEnum.group, "*"));
-        long size = RedisUtils.deleteObject(keys);
-        return keys.size() == size;
+    public static void removeGroupCache() {
+        RedisUtils.deleteKeys(getKey(CacheTypeEnum.group, "*"));
     }
 
 
@@ -155,7 +150,7 @@ public class AttendanceUtils {
      * @param groupId 考勤组ID
      * @return 成功状态
      */
-    public static boolean removeGroupCache(Integer groupId) {
+    public static boolean removeGroupCache(Long groupId) {
         return RedisUtils.deleteObject(getKey(CacheTypeEnum.group, groupId));
     }
 
@@ -163,7 +158,7 @@ public class AttendanceUtils {
      * 更新所有考勤组缓存
      */
     public static void initGroupCache() {
-        List<AttendanceGroup> attendanceGroups = groupDao.selectAll();
+        List<AttendanceGroupVo> attendanceGroups = groupMapper.selectVoList();
         removeGroupCache();
         attendanceGroups.parallelStream().forEach(group -> {
             String key = getKey(CacheTypeEnum.group, group.getId());
@@ -176,8 +171,8 @@ public class AttendanceUtils {
      *
      * @param groupId 考勤组ID
      */
-    public static void initGroupCache(Integer groupId) {
-        AttendanceGroup group = groupDao.selectByPrimaryKey(groupId);
+    public static void initGroupCache(Long groupId) {
+        AttendanceGroupVo group = groupMapper.selectVoById(groupId);
         removeGroupCache(groupId);
         if (Objects.nonNull(group)) {
             String key = getKey(CacheTypeEnum.group, group.getId());
@@ -191,7 +186,7 @@ public class AttendanceUtils {
      * @param groupId 考勤组ID
      * @return 考勤组当日的考勤班次
      */
-    public static AttendanceGroupClassVO getGroupClass(Integer groupId) {
+    public static AttendanceGroupClassVO getGroupClass(Long groupId) {
         return getGroupClass(groupId, new Date());
     }
 
@@ -202,7 +197,7 @@ public class AttendanceUtils {
      * @param date    日期
      * @return 考勤组指定日期的考勤班次
      */
-    public static AttendanceGroupClassVO getGroupClass(Integer groupId, Date date) {
+    public static AttendanceGroupClassVO getGroupClass(Long groupId, Date date) {
         List<AttendanceGroupClassVO> groupClasses = getGroupClasses(groupId);
         if (CollUtil.isNotEmpty(groupClasses)) {
             int week = DateUtils.getWeekOfDate(date);
@@ -215,7 +210,7 @@ public class AttendanceUtils {
         return null;
     }
 
-    public static AttendanceGroupClassVO getGroupClass(Integer groupId, String date) {
+    public static AttendanceGroupClassVO getGroupClass(Long groupId, String date) {
         return getGroupClass(groupId, DateUtils.parseDate(date));
     }
 
@@ -226,7 +221,7 @@ public class AttendanceUtils {
      * @param classId 考勤班次ID
      * @return
      */
-    public static AttendanceGroupClassVO getGroupClass(Integer groupId, Integer classId) {
+    public static AttendanceGroupClassVO getGroupClass(Long groupId, Long classId) {
         List<AttendanceGroupClassVO> groupClasses = getGroupClasses(groupId);
         if (CollUtil.isNotEmpty(groupClasses) && classId != null) {
             for (AttendanceGroupClassVO groupClass : groupClasses) {
@@ -244,11 +239,11 @@ public class AttendanceUtils {
      * @param groupId 考勤组ID
      * @return
      */
-    public static List<AttendanceGroupClassVO> getGroupClasses(Integer groupId) {
+    public static List<AttendanceGroupClassVO> getGroupClasses(Long groupId) {
         String key = getKey(CacheTypeEnum.groupClasses, groupId);
         List<AttendanceGroupClassVO> groupClasses = RedisUtils.getCacheObject(key);
         if (CollUtil.isEmpty(groupClasses)) {
-            groupClasses = groupClassesDao.selectByGroupId(groupId);
+            groupClasses = groupClassesMapper.selectByGroupId(groupId);
             if (CollUtil.isNotEmpty(groupClasses)) {
                 RedisUtils.setCacheObject(key, groupClasses);
             }
@@ -261,10 +256,8 @@ public class AttendanceUtils {
      *
      * @return
      */
-    public static boolean removeGroupClassesCache() {
-        Collection<String> keys = RedisUtils.keys(getKey(CacheTypeEnum.groupClasses, "*"));
-        long size = RedisUtils.deleteObject(keys);
-        return keys.size() == size;
+    public static void removeGroupClassesCache() {
+        RedisUtils.deleteKeys(getKey(CacheTypeEnum.groupClasses, "*"));
     }
 
     /**
@@ -273,7 +266,7 @@ public class AttendanceUtils {
      * @param groupId 考勤组ID
      * @return
      */
-    public static boolean removeGroupClassesCache(Integer groupId) {
+    public static boolean removeGroupClassesCache(Long groupId) {
         return RedisUtils.deleteObject(getKey(CacheTypeEnum.groupClasses, groupId));
     }
 
@@ -283,11 +276,11 @@ public class AttendanceUtils {
      * @param groupId
      * @return
      */
-    public static List<AttendanceGroupArea> getGroupAreas(Integer groupId) {
+    public static List<AttendanceGroupAreaVo> getGroupAreas(Long groupId) {
         String key = getKey(CacheTypeEnum.area, groupId);
-        List<AttendanceGroupArea> areas = RedisUtils.getCacheObject(key);
+        List<AttendanceGroupAreaVo> areas = RedisUtils.getCacheObject(key);
         if (CollUtil.isEmpty(areas)) {
-            areas = groupAreaDao.selectByGroupId(groupId);
+            areas = groupAreaMapper.selectByGroupId(groupId);
             if (CollUtil.isNotEmpty(areas)) {
                 RedisUtils.setCacheObject(key, areas);
             }
@@ -295,7 +288,7 @@ public class AttendanceUtils {
         return areas;
     }
 
-    public static boolean removeGroupAreasCache(Integer groupId) {
+    public static boolean removeGroupAreasCache(Long groupId) {
         return RedisUtils.deleteObject(getKey(CacheTypeEnum.area, groupId));
     }
 
@@ -305,7 +298,7 @@ public class AttendanceUtils {
      * @param id 班次ID
      * @return 班次信息
      */
-    public static AttendanceClasses getClassesById(Integer id) {
+    public static AttendanceClasses getClassesById(Long id) {
         String key = getKey(CacheTypeEnum.classes, id);
         AttendanceClasses classes = RedisUtils.getCacheObject(key);
         if (classes == null) {
@@ -330,7 +323,7 @@ public class AttendanceUtils {
      * @param classesId 班次ID
      * @return
      */
-    public static boolean removeClassesCache(Integer classesId) {
+    public static boolean removeClassesCache(Long classesId) {
         return RedisUtils.deleteObject(getKey(CacheTypeEnum.classes, classesId));
     }
 
@@ -339,16 +332,16 @@ public class AttendanceUtils {
      */
     public static void initClassesCache() {
         String key = getKey(CacheTypeEnum.classes, "");
-        List<AttendanceClasses> attendanceClasses = classesDao.selectAll();
-        for (Map.Entry<Integer, Set<String>> entity : scheduleIds.entrySet()) {
+        List<AttendanceClasses> attendanceClasses = classesMapper.selectList();
+        for (Map.Entry<Long, Set<String>> entity : scheduleIds.entrySet()) {
             for (String scheduleId : entity.getValue()) {
-                CronUtils.remove(scheduleId);
+                CronUtil.remove(scheduleId);
             }
         }
         for (AttendanceClasses attendanceClass : attendanceClasses) {
             initClassesCache(attendanceClass);
         }
-        CronUtils.start();
+        CronUtil.start();
     }
 
     /**
@@ -356,12 +349,12 @@ public class AttendanceUtils {
      *
      * @param classesId 班次ID
      */
-    public static void initClassesCache(Integer classesId) {
-        AttendanceClasses attendanceClass = classesDao.selectByPrimaryKey(classesId);
+    public static void initClassesCache(Long classesId) {
+        AttendanceClasses attendanceClass = classesMapper.selectById(classesId);
         if (scheduleIds.containsKey(classesId)) {
             Set<String> set = scheduleIds.get(classesId);
             for (String scheduleId : set) {
-                CronUtils.remove(scheduleId);
+                CronUtil.remove(scheduleId);
             }
             scheduleIds.remove(classesId);
         }
@@ -375,21 +368,22 @@ public class AttendanceUtils {
      */
     public static void initClassesCache(AttendanceClasses attendanceClass) {
         if (attendanceClass != null) {
-            String endWorkScheduleId = CronUtil.getScheduler().setMatchSecond(true).schedule(CronUtils.getDailyCron(0, 0, 0), (Task) () -> {
-                handleNoAttendance(attendanceClass.getId(), 1, "2", DateUtils.offsetDay(new Date(), -1));
+
+            String endWorkScheduleId = CronUtil.getScheduler().setMatchSecond(true).schedule(StringUtils.getDailyCron(0, 0, 0), (Task) () -> {
+                handleNoAttendance(attendanceClass.getId(), 1, "2", DateUtil.offsetDay(new Date(), -1));
             });
             scheduleIds.put(attendanceClass.getId(), Sets.newHashSet(endWorkScheduleId));
             if (attendanceClass.getWorkAbsMin() != null && attendanceClass.getWorkAbsMin() > 0) {
-                DateTime dateTime = DateUtils.offsetMinute(DateUtils.parseTime(attendanceClass.getWorkTime()), attendanceClass.getWorkAbsMin());
-                String workScheduleId = CronUtil.getScheduler().setMatchSecond(true).schedule(CronUtils.getDailyCron(dateTime.hour(true), dateTime.minute(), dateTime.second()), (Task) () -> {
-                    handleNoAttendance(attendanceClass.getId(), 1, "1", DateUtils.date());
+                DateTime dateTime = DateUtil.offsetMinute(DateUtil.parseTime(attendanceClass.getWorkTime()), attendanceClass.getWorkAbsMin());
+                String workScheduleId = CronUtil.getScheduler().setMatchSecond(true).schedule(StringUtils.getDailyCron(dateTime.hour(true), dateTime.minute(), dateTime.second()), (Task) () -> {
+                    handleNoAttendance(attendanceClass.getId(), 1, "1", DateUtil.date());
                 });
                 scheduleIds.get(attendanceClass.getId()).add(workScheduleId);
             }
-            if (attendanceClass.getIsAutoAfter() != null && YesNoEnum.yes.getValue().equals(attendanceClass.getIsAutoAfter().toString())) {
-                DateTime dateTime = DateUtils.parseTime(attendanceClass.getAfterTime());
-                String autoAttendScheduleId = CronUtil.getScheduler().setMatchSecond(true).schedule(CronUtils.getDailyCron(dateTime.hour(true), dateTime.minute(), dateTime.second()), (Task) () -> {
-                    handleAutoAttendance(attendanceClass.getId(), 1, DateUtils.offsetDay(new Date(), -1));
+            if (attendanceClass.getIsAutoAfter() != null && YesNoEnum.YES.getValue().equals(attendanceClass.getIsAutoAfter().toString())) {
+                DateTime dateTime = DateUtil.parseTime(attendanceClass.getAfterTime());
+                String autoAttendScheduleId = CronUtil.getScheduler().setMatchSecond(true).schedule(StringUtils.getDailyCron(dateTime.hour(true), dateTime.minute(), dateTime.second()), (Task) () -> {
+                    handleAutoAttendance(attendanceClass.getId(), 1, DateUtil.offsetDay(new Date(), -1));
                 });
                 scheduleIds.get(attendanceClass.getId()).add(autoAttendScheduleId);
             }
@@ -438,7 +432,7 @@ public class AttendanceUtils {
      * @param date    日期字符串， 格式 yyyy-MM-dd
      * @return
      */
-    public static boolean checkNeedAttendance(Integer groupId, String date) {
+    public static boolean checkNeedAttendance(Long groupId, String date) {
         return checkNeedAttendance(groupId, DateUtils.parseDate(date));
     }
 
@@ -449,19 +443,19 @@ public class AttendanceUtils {
      * @param date    日期
      * @return
      */
-    public static boolean checkNeedAttendance(Integer groupId, Date date) {
+    public static boolean checkNeedAttendance(Long groupId, Date date) {
         AttendanceGroupClassVO groupClass = getGroupClass(groupId);
-        AttendanceGroup group = getGroup(groupId);
-        if (YesNoEnum.yes.getIntValue().equals(groupClass.getStatus())) {
-            if (YesNoEnum.yes.getIntValue().equals(group.getHolidayLeave())) {
+        AttendanceGroupVo group = getGroup(groupId);
+        if (YesNoEnum.YES.getName().equals(groupClass.getStatus())) {
+            if (YesNoEnum.YES.getValue().equals(group.getHolidayLeave())) {
                 // 需要打卡时， 判断是否节假日
-                return !HolidayUtils.checkHoliday(DateUtils.formatDate(date));
+                return !HolidayUtils.checkHoliday(DateUtil.formatDate(date));
             }
             return true;
         }
-        if (YesNoEnum.yes.getIntValue().equals(group.getHolidayLeave())) {
+        if (YesNoEnum.YES.getValue().equals(group.getHolidayLeave())) {
             // 无需打卡时， 判断是否调休打卡
-            return HolidayUtils.checkWork(DateUtils.formatDate(date));
+            return HolidayUtils.checkWork(DateUtil.formatDate(date));
         }
         return false;
     }
@@ -474,15 +468,15 @@ public class AttendanceUtils {
      * @param endDate   结束时间
      * @return 天数
      */
-    public static int getNeedAttendanceDays(Integer groupId, String startDate, String endDate) {
-        DateTime start = DateUtils.parseDate(startDate);
-        DateTime end = DateUtils.parseDate(endDate);
+    public static int getNeedAttendanceDays(Long groupId, String startDate, String endDate) {
+        DateTime start = DateUtil.parseDate(startDate);
+        DateTime end = DateUtil.parseDate(endDate);
         int days = 0;
         while (start.before(end)) {
             if (checkNeedAttendance(groupId, start)) {
                 days++;
             }
-            start = DateUtils.offsetDay(start, 1);
+            start = DateUtil.offsetDay(start, 1);
         }
         return days;
     }
@@ -499,33 +493,33 @@ public class AttendanceUtils {
             flow.setAttendStatus(AttendanceStatusEnum.normal.getStatus());
         } else {
             if (AttendanceKindEnum.start_work.getType().equals(flow.getAttendKind())) {
-                int offsetSeconds = DateUtils.getOffsetSeconds(DateUtils.parse(DateUtils.formatDate(nowDate) + groupClass.getWorkTime(), "yyyy-MM-ddHH:mm:ss"), nowDate);
+                int offsetSeconds = DateUtils.getOffsetSeconds(DateUtil.parse(DateUtil.formatDate(nowDate) + groupClass.getWorkTime(), "yyyy-MM-ddHH:mm:ss"), nowDate);
                 // 超时打卡优先判断是否记缺卡， 然后判断是否严重迟到，如果都不满足条件则记为迟到
                 if (offsetSeconds <= 0) {
                     flow.setAttendStatus(AttendanceStatusEnum.normal.getStatus());
                 } else if (groupClass.getWorkAbsMin() != null && groupClass.getWorkAbsMin() > 0 && offsetSeconds > groupClass.getWorkAbsMin() * 60) {
                     flow.setAttendStatus(AttendanceStatusEnum.away_work.getStatus());
-                    flow.setErrMinutes(NumberUtils.ceilDiv(offsetSeconds, 60));
-                } else if (YesNoEnum.yes.getValue().equals(groupClass.getIsSeriousLate().toString()) && groupClass.getWorkSeriousLateMin() != null && groupClass.getWorkSeriousLateMin() > 0 && offsetSeconds > groupClass.getWorkSeriousLateMin() * 60) {
+                    flow.setErrMinutes(NumberUtil.ceilDiv(offsetSeconds, 60));
+                } else if (YesNoEnum.YES.getValue().equals(groupClass.getIsSeriousLate().toString()) && groupClass.getWorkSeriousLateMin() != null && groupClass.getWorkSeriousLateMin() > 0 && offsetSeconds > groupClass.getWorkSeriousLateMin() * 60) {
                     flow.setAttendStatus(AttendanceStatusEnum.serious_late.getStatus());
-                    flow.setErrMinutes(NumberUtils.ceilDiv(offsetSeconds, 60));
+                    flow.setErrMinutes(NumberUtil.ceilDiv(offsetSeconds, 60));
                 } else if (groupClass.getWorkLateMin() != null && groupClass.getWorkLateMin() > 0 && offsetSeconds > groupClass.getWorkLateMin() * 60) {
                     flow.setAttendStatus(AttendanceStatusEnum.late.getStatus());
-                    flow.setErrMinutes(NumberUtils.ceilDiv(offsetSeconds, 60));
+                    flow.setErrMinutes(NumberUtil.ceilDiv(offsetSeconds, 60));
                 } else {
                     // 如果都不满足，默认正常打卡
                     flow.setAttendStatus(AttendanceStatusEnum.normal.getStatus());
                 }
             } else if (AttendanceKindEnum.end_work.getType().equals(flow.getAttendKind())) {
-                int offsetSeconds = DateUtils.getOffsetSeconds(nowDate, DateUtils.parse(DateUtils.formatDate(nowDate) + groupClass.getAfterTime(), "yyyy-MM-ddHH:mm:ss"));
+                int offsetSeconds = DateUtils.getOffsetSeconds(nowDate, DateUtil.parse(DateUtil.formatDate(nowDate) + groupClass.getAfterTime(), "yyyy-MM-ddHH:mm:ss"));
                 if (offsetSeconds <= 0) {
                     flow.setAttendStatus(AttendanceStatusEnum.normal.getStatus());
                 } else if (groupClass.getAfterAbsMin() != null && groupClass.getAfterAbsMin() > 0 && offsetSeconds > groupClass.getAfterAbsMin() * 60) {
                     flow.setAttendStatus(AttendanceStatusEnum.away_work.getStatus());
-                    flow.setErrMinutes(NumberUtils.ceilDiv(offsetSeconds, 60));
+                    flow.setErrMinutes(NumberUtil.ceilDiv(offsetSeconds, 60));
                 } else if (groupClass.getAfterLeaveEarly() != null && groupClass.getAfterLeaveEarly() > 0 && offsetSeconds > groupClass.getAfterLeaveEarly() * 60) {
                     flow.setAttendStatus(AttendanceStatusEnum.early.getStatus());
-                    flow.setErrMinutes(NumberUtils.ceilDiv(offsetSeconds, 60));
+                    flow.setErrMinutes(NumberUtil.ceilDiv(offsetSeconds, 60));
                 } else {
                     // 如果都不满足，默认正常打卡
                     flow.setAttendStatus(AttendanceStatusEnum.normal.getStatus());
@@ -536,12 +530,12 @@ public class AttendanceUtils {
         }
     }
 
-    public static AttendanceFlowCountDetailByDayVO getUserFlowCountForOneDay(List<AttendanceFlow> flows) {
+    public static AttendanceFlowCountDetailByDayVO getUserFlowCountForOneDay(List<AttendanceFlowVo> flows) {
         AttendanceFlowCountDetailByDayVO data = new AttendanceFlowCountDetailByDayVO();
         if (CollUtil.isNotEmpty(flows)) {
-            AttendanceFlow firstFlow = flows.get(0);
+            AttendanceFlowVo firstFlow = flows.get(0);
             data.setUserId(flows.get(0).getUserId());
-            data.setUsername(UserUtil.getUser(flows.get(0).getUserId()).getUserName());
+            data.setUsername(UserUtils.getUser(flows.get(0).getUserId()).getUserName());
 
             Set<Integer> statusList = new HashSet<>();
 
@@ -551,37 +545,37 @@ public class AttendanceUtils {
             int earlyNum = 0;
             int noAttendNum = 0;
             int outsideNum = 0;
-            String attendFlag = YesNoEnum.no.getValue();
-            String outsideFlag = YesNoEnum.no.getValue();
-            Table<Integer, String, AttendanceFlow> flowTable = HashBasedTable.create();
-            for (AttendanceFlow flow : flows) {
+            String attendFlag = YesNoEnum.NO.getValue();
+            String outsideFlag = YesNoEnum.NO.getValue();
+            Table<Integer, String, AttendanceFlowVo> flowTable = HashBasedTable.create();
+            for (AttendanceFlowVo flow : flows) {
                 if (flow.getAttendStatus() == AttendanceStatusEnum.normal.getStatus()) {
-                    attendFlag = YesNoEnum.yes.getValue();
+                    attendFlag = YesNoEnum.YES.getValue();
                 }
                 if (flow.getAttendStatus() == AttendanceStatusEnum.late.getStatus()) {
                     lateNum++;
                     statusList.add(flow.getAttendStatus());
-                    attendFlag = YesNoEnum.yes.getValue();
+                    attendFlag = YesNoEnum.YES.getValue();
                 } else if (flow.getAttendStatus() == AttendanceStatusEnum.serious_late.getStatus()) {
                     seriousLateNum++;
                     statusList.add(flow.getAttendStatus());
-                    attendFlag = YesNoEnum.yes.getValue();
+                    attendFlag = YesNoEnum.YES.getValue();
                 } else if (flow.getAttendStatus() == AttendanceStatusEnum.early.getStatus()) {
                     earlyNum++;
                     statusList.add(flow.getAttendStatus());
-                    attendFlag = YesNoEnum.yes.getValue();
+                    attendFlag = YesNoEnum.YES.getValue();
                 } else if (flow.getAttendStatus() == AttendanceStatusEnum.away_work.getStatus()) {
                     noAttendNum++;
                     statusList.add(flow.getAttendStatus());
                 }
-                if (YesNoEnum.yes.getValue().equals(flow.getAreaOutside().toString())) {
+                if (YesNoEnum.YES.getValue().equals(flow.getAreaOutside().toString())) {
                     outsideNum++;
-                    outsideFlag = YesNoEnum.yes.getValue();
+                    outsideFlag = YesNoEnum.YES.getValue();
                 }
                 if (flow.getAttendStatus() != AttendanceStatusEnum.away_work.getStatus() && StrUtil.isNotBlank(flow.getAttendTime())) {
-                    AttendanceFlow reverseFlow = flowTable.get(flow.getAttendNumber(), AttendanceKindEnum.getReverseType(flow.getAttendKind()));
+                    AttendanceFlowVo reverseFlow = flowTable.get(flow.getAttendNumber(), AttendanceKindEnum.getReverseType(flow.getAttendKind()));
                     if (reverseFlow != null) {
-                        workSeconds += DateUtils.getOffsetSeconds(DateUtils.parseTime(flow.getAttendTime()), DateUtils.parseTime(reverseFlow.getAttendTime()));
+                        workSeconds += DateUtils.getOffsetSeconds(DateUtil.parseTime(flow.getAttendTime()), DateUtil.parseTime(reverseFlow.getAttendTime()));
                     } else {
                         flowTable.put(flow.getAttendNumber(), flow.getAttendKind(), flow);
                     }
@@ -590,17 +584,17 @@ public class AttendanceUtils {
             if (statusList.isEmpty()) {
                 statusList.add(AttendanceStatusEnum.normal.getStatus());
             }
-            if (YesNoEnum.yes.getValue().equals(outsideFlag)) {
+            if (YesNoEnum.YES.getValue().equals(outsideFlag)) {
                 statusList.add(AttendanceStatusEnum.outside.getStatus());
             }
             data.setUserId(firstFlow.getUserId())
-                    .setUsername(UserUtil.getUsername(firstFlow.getUserId()))
+                    .setUsername(UserUtils.getUserName(firstFlow.getUserId()))
                     .setLateNum(lateNum)
                     .setSeriousLateNum(seriousLateNum)
                     .setEarlyNum(earlyNum)
                     .setNoAttendNum(noAttendNum)
                     .setOutsideNum(outsideNum)
-                    .setWorkHours(NumberUtils.div(workSeconds, 3600, 1))
+                    .setWorkHours(NumberUtil.div(workSeconds, 3600, 1))
                     .setAttendFlag(attendFlag)
                     .setAttendStatus(statusList.stream().sorted().map(AttendanceStatusEnum::getNameByStatus).collect(Collectors.joining(",")))
             ;
@@ -610,7 +604,7 @@ public class AttendanceUtils {
         return data;
     }
 
-    public static AttendanceFlowCountDetailByDateRangeVO getUserFlowCountForDateRange(Integer groupId, String startDate, String endDate, List<AttendanceFlow> flows) {
+    public static AttendanceFlowCountDetailByDateRangeVO getUserFlowCountForDateRange(Long groupId, String startDate, String endDate, List<AttendanceFlow> flows) {
         AttendanceFlowCountDetailByDateRangeVO data = new AttendanceFlowCountDetailByDateRangeVO();
         data.setNeedAttendDays(getNeedAttendanceDays(groupId, startDate, endDate));
         if (CollUtil.isNotEmpty(flows)) {
@@ -624,13 +618,13 @@ public class AttendanceUtils {
                 data.setEarlyNum(data.getEarlyNum() + countOneDay.getEarlyNum());
                 data.setNoAttendNum(data.getNoAttendNum() + countOneDay.getNoAttendNum());
                 data.setOutsideNum(data.getOutsideNum() + countOneDay.getOutsideNum());
-                if (YesNoEnum.no.getValue().equals(countOneDay.getAttendFlag())) {
+                if (YesNoEnum.NO.getValue().equals(countOneDay.getAttendFlag())) {
                     data.setNoAttendDays(data.getNoAttendDays() + 1);
                 }
             }
         }
         if (data.getNeedAttendDays() > 0) {
-            data.setAverageWorkHours(NumberUtils.div(data.getAverageWorkHours(), data.getNeedAttendDays(), 1));
+            data.setAverageWorkHours(NumberUtil.div(data.getAverageWorkHours(), data.getNeedAttendDays(), 1));
         }
         return data;
     }
@@ -642,12 +636,12 @@ public class AttendanceUtils {
      * @param attendNumber 考勤次数
      * @param attendKind   考勤类型
      */
-    public static void handleNoAttendance(Integer classesId, Integer attendNumber, String attendKind, DateTime date) {
+    public static void handleNoAttendance(Long classesId, Integer attendNumber, String attendKind, DateTime date) {
         int week = DateUtils.getWeekOfDate(date);
-        List<AttendanceGroupClasses> groupClasses = groupClassesDao.getGroupIds(classesId, week);
+        List<AttendanceGroupClasses> groupClasses = groupClassesMapper.getGroupIds(classesId, week);
         groupClasses.parallelStream().forEach(classes -> {
             if (checkNeedAttendance(classes.getGroupId(), date)) {
-                attendanceFlowDao.handleNoAttendanceFlow(classes.getId(), date.toDateStr(), attendNumber, attendKind);
+                attendanceFlowMapper.handleNoAttendanceFlow(classes.getId(), date.toDateStr(), attendNumber, attendKind);
             }
         });
     }
@@ -658,12 +652,12 @@ public class AttendanceUtils {
      * @param classesId    考勤班次
      * @param attendNumber 考勤次数
      */
-    public static void handleAutoAttendance(Integer classesId, Integer attendNumber, DateTime date) {
+    public static void handleAutoAttendance(Long classesId, Integer attendNumber, DateTime date) {
         int week = DateUtils.getWeekOfDate(date);
-        List<AttendanceGroupClasses> groupClasses = groupClassesDao.getGroupIds(classesId, week);
+        List<AttendanceGroupClasses> groupClasses = groupClassesMapper.getGroupIds(classesId, week);
         groupClasses.parallelStream().forEach(classes -> {
             if (checkNeedAttendance(classes.getGroupId(), date)) {
-                attendanceFlowDao.handleAutoAttendanceFlow(classes.getId(), date.toDateStr(), attendNumber, AttendanceKindEnum.end_work.getType());
+                attendanceFlowMapper.handleAutoAttendanceFlow(classes.getId(), date.toDateStr(), attendNumber, AttendanceKindEnum.end_work.getType());
             }
         });
     }

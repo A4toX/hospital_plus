@@ -12,8 +12,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AttendanceTypeEnum {
 
-    position("定位打卡", 1),
-    scan("扫码打卡", 2);
+    fixed_time("固定班次", 1),
+    free_time("自由打卡", 2);
 
     String name;
 

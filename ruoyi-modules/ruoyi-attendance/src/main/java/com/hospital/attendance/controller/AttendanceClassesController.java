@@ -1,20 +1,16 @@
 package com.hospital.attendance.controller;
 
-import com.demo.hospital.attendance.model.AttendanceClasses;
-import com.demo.hospital.attendance.model.AttendanceClassesPageReq;
-import com.demo.hospital.attendance.service.AttendanceClassesService;
-import com.demo.hospital.common.base.controller.BaseController;
-import com.demo.hospital.common.base.controller.Result;
-import com.demo.hospital.common.page.Page;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
+import com.hospital.attendance.domain.bo.AttendanceClassesBo;
+import com.hospital.attendance.domain.vo.AttendanceClassesVo;
+import com.hospital.attendance.service.IAttendanceClassesService;
 import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.domain.R;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.web.core.BaseController;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -24,14 +20,11 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/attendanceClasses")
-@Api(tags = "班次设置表")
 @Validated
 @RequiredArgsConstructor
 public class AttendanceClassesController extends BaseController {
 
-    @Resource
-    private AttendanceClassesService attendanceClassesService;
-
+    private IAttendanceClassesService attendanceClassesService;
 
     /**
      * 创建考勤班次
@@ -39,9 +32,8 @@ public class AttendanceClassesController extends BaseController {
      * @return
      */
     @PostMapping("/insert")
-    @ApiOperation("创建考勤班次")
-    public Result insert(@RequestBody AttendanceClasses entity) {
-        return attendanceClassesService.insert(entity);
+    public R<Void> insert(@RequestBody AttendanceClassesBo entity) {
+        return toAjax(attendanceClassesService.insert(entity));
     }
 
 
@@ -51,22 +43,19 @@ public class AttendanceClassesController extends BaseController {
      * @return
      */
     @PostMapping("/update")
-    @ApiOperation("修改")
-    public Result update(@RequestBody AttendanceClasses entity) {
-        return attendanceClassesService.update(entity);
+    public R<Void> update(@RequestBody AttendanceClassesBo entity) {
+        return toAjax(attendanceClassesService.update(entity));
     }
 
 
     /**
      * 获取班次列表(分页)
-     * @param pageReq
+     * @param bo
      * @return
      */
     @GetMapping("/findPage")
-    @ApiOperation("分页查询")
-    public Result<Page<AttendanceClasses>> findPage(AttendanceClassesPageReq pageReq) {
-        Page<AttendanceClasses> page = attendanceClassesService.findPage(pageReq);
-        return Result.success(page);
+    public TableDataInfo<AttendanceClassesVo> findPage(AttendanceClassesBo bo, PageQuery pageQuery) {
+        return attendanceClassesService.selectPageList(bo, pageQuery);
     }
 
 
@@ -76,10 +65,8 @@ public class AttendanceClassesController extends BaseController {
      * @return
      */
     @GetMapping("/get")
-    @ApiOperation("根据ID查询")
-    @ApiImplicitParam(name = "id", value = "主键", required = true, dataTypeClass = Integer.class)
-    public AttendanceClasses get(Integer id) {
-        return attendanceClassesService.get(id);
+    public R<AttendanceClassesVo> get(Long id) {
+        return R.ok(attendanceClassesService.selectById(id));
     }
 
 
@@ -89,11 +76,9 @@ public class AttendanceClassesController extends BaseController {
      * @return
      */
     @GetMapping("/listByHosId")
-    @ApiOperation("根据ID查询")
-    @ApiImplicitParam(name = "hosId", value = "医院id", required = true, dataTypeClass = Integer.class)
-    public Result<List<AttendanceClasses>> listByHosId(Integer hosId) {
-        List<AttendanceClasses> list = attendanceClassesService.listByHosId(hosId);
-        return Result.success(list);
+    public R<List<AttendanceClassesVo>> listByHosId(Long hosId) {
+        List<AttendanceClassesVo> list = attendanceClassesService.listByHosId(hosId);
+        return R.ok(list);
     }
 
 
@@ -103,10 +88,8 @@ public class AttendanceClassesController extends BaseController {
      * @return
      */
     @DeleteMapping("/delete")
-    @ApiOperation("删除")
-    @ApiImplicitParam(name = "id", value = "主键", required = true, dataTypeClass = Integer.class)
-    public Result delete(@RequestParam("id") Integer id) {
-        return attendanceClassesService.delete(id);
+    public R<Void> delete(@RequestParam("id") Long id) {
+        return toAjax(attendanceClassesService.deleteById(id));
     }
 }
 

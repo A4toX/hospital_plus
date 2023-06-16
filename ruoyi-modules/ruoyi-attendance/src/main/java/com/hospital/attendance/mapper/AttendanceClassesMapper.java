@@ -1,12 +1,11 @@
 package com.hospital.attendance.mapper;
 
-import com.demo.hospital.attendance.model.AttendanceClasses;
-import com.demo.hospital.attendance.model.AttendanceClassesExample;
-import com.demo.hospital.common.base.dao.MyBatisBaseDao;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hospital.attendance.domain.AttendanceClasses;
+import com.hospital.attendance.domain.vo.AttendanceClassesVo;
+import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
 
 import java.util.List;
-
-import static com.demo.hospital.common.constant.Constant.YES;
 
 /**
  * 班次设置表(AttendanceClasses) DAO
@@ -14,19 +13,10 @@ import static com.demo.hospital.common.constant.Constant.YES;
  * @author makejava
  * @since 2023-05-21 17:37:13
  */
-public interface AttendanceClassesMapper extends MyBatisBaseDao<AttendanceClasses, Integer, AttendanceClassesExample> {
+public interface AttendanceClassesMapper extends BaseMapperPlus<AttendanceClasses, AttendanceClassesVo> {
 
-   default List<AttendanceClasses> listByHosId(Integer hosId){
-         AttendanceClassesExample example = new AttendanceClassesExample();
-         example.createCriteria().andHosIdEqualTo(hosId).andIsDeleteEqualTo(YES);
-         return selectByExample(example);
+   default List<AttendanceClassesVo> listByHosId(Long hosId){
+        return selectVoList(new LambdaQueryWrapper<AttendanceClasses>().eq(AttendanceClasses::getHosId, hosId));
    }
-
-    default List<AttendanceClasses> selectAll() {
-        AttendanceClassesExample example = new AttendanceClassesExample();
-        example.createCriteria()
-                .andIsDeleteEqualTo(YES);
-        return selectByExample(example);
-    }
 }
 

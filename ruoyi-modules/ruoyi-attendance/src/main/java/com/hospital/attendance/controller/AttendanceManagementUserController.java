@@ -1,16 +1,19 @@
 package com.hospital.attendance.controller;
 
-import com.demo.hospital.attendance.model.AttendanceManagementUser;
-import com.demo.hospital.attendance.model.AttendanceManagementUserPageReq;
-import com.demo.hospital.attendance.model.vo.attendUser.*;
-import com.demo.hospital.attendance.service.AttendanceManagementUserService;
-import com.demo.hospital.common.base.controller.BaseController;
-import com.demo.hospital.common.base.controller.Result;
-import com.demo.hospital.common.page.Page;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import com.hospital.attendance.domain.bo.AttendanceManagementUserBo;
+import com.hospital.attendance.domain.vo.AttendanceManagementUserVo;
+import com.hospital.attendance.domain.vo.attendUser.AddAttendanceUserVo;
+import com.hospital.attendance.domain.vo.attendUser.AttendanceMUserReqVO;
+import com.hospital.attendance.domain.vo.attendUser.AttendanceMUserRespVo;
+import com.hospital.attendance.service.IAttendanceManagementUserService;
+import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.domain.R;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.web.core.BaseController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -21,17 +24,15 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/attendanceManagementUser")
-@Api(tags = "考勤组负责人")
+@Validated
+@RequiredArgsConstructor
 public class AttendanceManagementUserController extends BaseController {
 
-    @Resource
-    private AttendanceManagementUserService attendanceManagementUserService;
+    private IAttendanceManagementUserService attendanceManagementUserService;
 
     @GetMapping("/findPage")
-    @ApiOperation("分页查询")
-    public Result<Page<AttendanceManagementUser>> findPage(AttendanceManagementUserPageReq pageReq) {
-        Page<AttendanceManagementUser> page = attendanceManagementUserService.findPage(pageReq);
-        return Result.success(page);
+    public TableDataInfo<AttendanceManagementUserVo> findPage(AttendanceManagementUserBo bo, PageQuery pageQuery) {
+        return attendanceManagementUserService.selectPageList(bo, pageQuery);
     }
 
     /**
@@ -40,9 +41,9 @@ public class AttendanceManagementUserController extends BaseController {
      * @return
      */
     @PostMapping("/insert")
-    @ApiOperation("新增考勤组负责人")
-    public Result insert(@RequestBody AddAttendanceUserVO entity) {
-        return attendanceManagementUserService.insert(entity);
+    public R<Void> insert(@RequestBody AddAttendanceUserVo entity) {
+        attendanceManagementUserService.addUser(entity);
+        return R.ok();
     }
 
 
@@ -51,10 +52,9 @@ public class AttendanceManagementUserController extends BaseController {
      * @return
      */
     @GetMapping("/listByGroupId")
-    @ApiOperation("获取考勤组管理员列表")
-    public Result<List<AttendanceMUserRespVO>> listByGroupId(AttendanceMUserReqVO reqVO) {
-        List<AttendanceMUserRespVO> list = attendanceManagementUserService.listByGroupId(reqVO);
-        return Result.success(list);
+    public R<List<AttendanceMUserRespVo>> listByGroupId(AttendanceMUserReqVO reqVO) {
+        List<AttendanceMUserRespVo> list = attendanceManagementUserService.listByGroupId(reqVO);
+        return R.ok(list);
     }
 
 
@@ -64,10 +64,9 @@ public class AttendanceManagementUserController extends BaseController {
      * @return
      */
     @GetMapping("/listAllStaffByHosId")
-    @ApiOperation("获取医院下所有员工")
-    public Result<List<AttendanceMUserRespVO>> listAllStaffByHosId(AttendanceMUserReqVO reqVO) {
-        List<AttendanceMUserRespVO> list = attendanceManagementUserService.listAllStaffByHosId(reqVO);
-        return Result.success(list);
+    public R<List<AttendanceMUserRespVo>> listAllStaffByHosId(AttendanceMUserReqVO reqVO) {
+        List<AttendanceMUserRespVo> list = attendanceManagementUserService.listAllStaffByHosId(reqVO);
+        return R.ok(list);
     }
 }
 

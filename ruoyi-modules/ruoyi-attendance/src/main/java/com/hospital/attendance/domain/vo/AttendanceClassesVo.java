@@ -23,10 +23,10 @@ public class AttendanceClassesVo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ExcelProperty(value = "主键")
-    private Integer id;
+    private Long id;
 
     @ExcelProperty(value = "医院id")
-    private Integer hosId;
+    private Long hosId;
 
     @ExcelProperty(value = "班次名称")
     private String name;

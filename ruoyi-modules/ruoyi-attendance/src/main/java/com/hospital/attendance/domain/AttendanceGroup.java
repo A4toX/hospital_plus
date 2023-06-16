@@ -23,12 +23,12 @@ public class AttendanceGroup extends TenantEntity {
      * 主键
      */
     @TableId
-    private Integer id;
+    private Long id;
 
     /**
      * 医院id
      */
-    private Integer hosId;
+    private Long hosId;
 
     /**
      * 考勤组名称
@@ -46,12 +46,12 @@ public class AttendanceGroup extends TenantEntity {
     private Integer groupMethod;
 
     /**
-     * 是否允许外勤打卡 1是 2否
+     * 是否允许外勤打卡
      */
-    private Integer areaOutside;
+    private String areaOutside;
 
     /**
-     * 是否使用动态二维码1是2否
+     * 是否使用动态二维码
      */
     private Integer groupCode;
 
@@ -61,14 +61,15 @@ public class AttendanceGroup extends TenantEntity {
     private Integer codeFreshTime;
 
     /**
-     * 法定节日是否自动排休(1是2否)
+     * 法定节日是否自动排休
      */
-    private Integer holidayLeave;
+    private String holidayLeave;
 
     /**
      * 删除标志（0代表存在 2代表删除）
      */
-    private String delDelete;
+    @TableLogic
+    private String delFlag;
 
     /**
      * 备注

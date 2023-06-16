@@ -8,8 +8,8 @@
             ag.hos_id, agu.user_id, agc.group_id, agc.classes_id, ag.group_type, 4, #{date}, #{attendNumber}, #{attendKind}, '2', '1', '1'
         FROM
             attendance_group_classes agc
-                JOIN attendance_group_user agu ON agc.group_id = agu.group_id AND agu.is_delete = 1
-                JOIN attendance_group ag ON agc.group_id = ag.id AND ag.is_delete = 1
+                JOIN attendance_group_user agu ON agc.group_id = agu.group_id AND agu.del_flag = '0'
+                JOIN attendance_group ag ON agc.group_id = ag.id AND ag.del_flag = '0'
         WHERE agc.id = #{groupClassesId}
           AND NOT EXISTS(SELECT 1 FROM attendance_flow af WHERE af.attend_group_id=agc.group_id AND af.attend_classes_id=agc.classes_id AND af.attend_kind=#{attendKind} AND af.attend_number=#{attendNumber} AND af.attend_date = #{date})
     </insert>
@@ -20,9 +20,9 @@
             ag.hos_id, agu.user_id, agc.group_id, agc.classes_id, ag.group_type, 1, #{date}, ac.after_time, #{attendNumber}, #{attendKind}, '2', '1', '1'
         FROM
             attendance_group_classes agc
-                JOIN attendance_group_user agu ON agc.group_id = agu.group_id AND agu.is_delete = 1
-                JOIN attendance_group ag ON agc.group_id = ag.id AND ag.is_delete = 1
-                JOIN attendance_classes ac ON agc.classes_id = ac.id AND ac.is_delete = 1
+                JOIN attendance_group_user agu ON agc.group_id = agu.group_id AND agu.del_flag = '0'
+                JOIN attendance_group ag ON agc.group_id = ag.id AND ag.del_flag = '0'
+                JOIN attendance_classes ac ON agc.classes_id = ac.id AND ac.del_flag = '0'
         WHERE agc.id = #{groupClassesId}
           AND NOT EXISTS(SELECT 1 FROM attendance_flow af WHERE af.attend_group_id=agc.group_id AND af.attend_classes_id=agc.classes_id AND af.attend_kind=#{attendKind} AND af.attend_number=#{attendNumber} AND af.attend_date = #{date})
     </insert>

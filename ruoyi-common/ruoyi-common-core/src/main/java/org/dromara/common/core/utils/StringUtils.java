@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.util.AntPathMatcher;
 
+import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -318,4 +319,11 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
             .collect(Collectors.toList());
     }
 
+    public static String getDailyCron(LocalTime time) {
+        return getDailyCron(time.getSecond(), time.getMinute(), time.getHour());
+    }
+
+    public static String getDailyCron(int hour, int minute, int second) {
+        return String.format("%d %d %d ? * *", second, minute, hour);
+    }
 }

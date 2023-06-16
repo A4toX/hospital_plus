@@ -1,46 +1,50 @@
 package com.hospital.attendance.domain;
 
-import com.demo.hospital.common.base.entity.BaseEntity;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.dromara.common.tenant.core.TenantEntity;
 
 /**
- * 考勤参与人员 model
+ * 考勤参与人员
  *
- * @author yaoyingjie
+ * @author liguoxian
  */
-@ApiModel("考勤参与人员")
-public class AttendanceGroupUser extends BaseEntity<Integer> implements Serializable {
+@Data
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@TableName("attendance_group_user")
+public class AttendanceGroupUser extends TenantEntity {
+
+    /**
+     * 主键
+     */
+    @TableId
+    private Long id;
 
     /**
      * 考勤组id
      */
-    @ApiModelProperty("考勤组id")
-    private Integer groupId;
+    private Long groupId;
 
     /**
      * 用户id
      */
-    @ApiModelProperty("用户id")
-    private Integer userId;
+    private Long userId;
 
+    /**
+     * 删除标志（0代表存在 2代表删除）
+     */
+    @TableLogic
+    private String delFlag;
 
-    public Integer getGroupId() {
-        return groupId;
-    }
+    /**
+     * 备注
+     */
+    private String remark;
 
-    public void setGroupId(Integer groupId) {
-        this.groupId = groupId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
 }
 

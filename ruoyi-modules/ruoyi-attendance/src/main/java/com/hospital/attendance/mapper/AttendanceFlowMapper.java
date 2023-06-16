@@ -1,9 +1,10 @@
 package com.hospital.attendance.mapper;
 
-import com.demo.hospital.attendance.model.AttendanceFlow;
-import com.demo.hospital.attendance.model.AttendanceFlowExample;
-import com.demo.hospital.common.base.dao.MyBatisBaseDao;
+import com.hospital.attendance.domain.AttendanceFlow;
+import com.hospital.attendance.domain.vo.AttendanceFlowVo;
 import org.apache.ibatis.annotations.Param;
+import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.LambdaQueryWrapperX;
 
 import java.util.List;
 
@@ -12,44 +13,33 @@ import java.util.List;
  *
  * @author liguoxian
  */
-public interface AttendanceFlowMapper extends MyBatisBaseDao<AttendanceFlow, Integer, AttendanceFlowExample> {
+public interface AttendanceFlowMapper extends BaseMapperPlus<AttendanceFlow, AttendanceFlowVo> {
 
-    default List<AttendanceFlow> selectByDate(Integer groupId, Integer userId, String date) {
-        AttendanceFlowExample example = new AttendanceFlowExample();
-        AttendanceFlowExample.Criteria criteria = example.createCriteria();
-        criteria.andAttendGroupIdEqualTo(groupId)
-                .andAttendDateEqualTo(date);
-        if(userId != null) {
-            criteria.andUserIdEqualTo(userId);
-        }
-        example.setOrderByClause(" user_id, attend_number, attend_kind");
-        return selectByExample(example);
+    default List<AttendanceFlowVo> selectByDate(Long groupId, Long userId, String date) {
+        return selectVoList(new LambdaQueryWrapperX<AttendanceFlow>()
+            .eq(AttendanceFlow::getAttendGroupId, groupId)
+            .eq(AttendanceFlow::getAttendDate, date)
+            .eqIfPresent(AttendanceFlow::getUserId, userId));
     }
 
-    default List<AttendanceFlow> selectByDateRange(Integer groupId, Integer userId, String startDate, String endDate) {
-        AttendanceFlowExample example = new AttendanceFlowExample();
-        AttendanceFlowExample.Criteria criteria = example.createCriteria();
-        criteria.andAttendGroupIdEqualTo(groupId)
-                .andAttendDateGreaterThanOrEqualTo(startDate)
-                .andAttendDateLessThanOrEqualTo(endDate);
-        if(userId != null) {
-            criteria.andUserIdEqualTo(userId);
-        }
-        example.setOrderByClause(" user_id, attend_date, attend_number, attend_kind");
-        return selectByExample(example);
+    default List<AttendanceFlow> selectByDateRange(Long groupId, Integer userId, String startDate, String endDate) {
+        return selectList(new LambdaQueryWrapperX<AttendanceFlow>()
+            .eqIfPresent(AttendanceFlow::getUserId, userId)
+            .eq(AttendanceFlow::getAttendGroupId, groupId)
+            .ge(AttendanceFlow::getAttendDate, startDate)
+            .le(AttendanceFlow::getAttendDate, endDate)
+            .orderByAsc(AttendanceFlow::getUserId, AttendanceFlow::getAttendDate, AttendanceFlow::getAttendNumber, AttendanceFlow::getAttendKind));
     }
 
-    default List<AttendanceFlow> selectByUserIdAndMonth(Integer groupId, Integer userId, String month) {
-        AttendanceFlowExample example = new AttendanceFlowExample();
-        example.createCriteria()
-                .andAttendGroupIdEqualTo(groupId)
-                .andUserIdEqualTo(userId)
-                .andAttendDateLike(month + "%");
-        return selectByExample(example);
+    default List<AttendanceFlowVo> selectByUserIdAndMonth(Long groupId, Long userId, String month) {
+        return selectVoList(new LambdaQueryWrapperX<AttendanceFlow>()
+            .eqIfPresent(AttendanceFlow::getUserId, userId)
+            .eq(AttendanceFlow::getAttendGroupId, groupId)
+            .like(AttendanceFlow::getAttendDate, month + "%"));
     }
 
-    void handleNoAttendanceFlow(@Param("groupClassesId") Integer groupClassesId, @Param("date")String date, @Param("attendNumber")Integer attendNumber, @Param("attendKind")String attendKind);
+    void handleNoAttendanceFlow(@Param("groupClassesId") Long groupClassesId, @Param("date")String date, @Param("attendNumber")Integer attendNumber, @Param("attendKind")String attendKind);
 
-    void handleAutoAttendanceFlow(@Param("groupClassesId") Integer groupClassesId, @Param("date")String date, @Param("attendNumber")Integer attendNumber, @Param("attendKind")String attendKind);
+    void handleAutoAttendanceFlow(@Param("groupClassesId") Long groupClassesId, @Param("date")String date, @Param("attendNumber")Integer attendNumber, @Param("attendKind")String attendKind);
 }
 

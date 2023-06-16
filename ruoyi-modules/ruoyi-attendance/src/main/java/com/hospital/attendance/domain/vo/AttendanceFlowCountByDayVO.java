@@ -14,7 +14,7 @@ public class AttendanceFlowCountByDayVO {
     /**
      * 考勤组ID
      */
-    private Integer groupId;
+    private Long groupId;
 
     /**
      * 考勤日期

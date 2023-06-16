@@ -1,14 +1,14 @@
 package com.hospital.attendance.controller;
 
-import com.demo.hospital.attendance.model.AttendanceGroupArea;
-import com.demo.hospital.attendance.service.AttendanceGroupAreaService;
-import com.demo.hospital.common.base.controller.BaseController;
-import com.demo.hospital.common.base.controller.Result;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
+import com.hospital.attendance.domain.bo.AttendanceGroupAreaBo;
+import com.hospital.attendance.domain.vo.AttendanceGroupAreaVo;
+import com.hospital.attendance.service.IAttendanceGroupAreaService;
+import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.domain.R;
+import org.dromara.common.web.core.BaseController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -18,73 +18,70 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/attendanceGroupArea")
-@Api(tags = "考勤地点表")
+@Validated
+@RequiredArgsConstructor
 public class AttendanceGroupAreaController extends BaseController {
 
-    @Resource
-    private AttendanceGroupAreaService attendanceGroupAreaService;
+    private IAttendanceGroupAreaService attendanceGroupAreaService;
 
     /**
      * 新增考勤组下的考勤地点
+     *
      * @param entity
      * @return
      */
     @PostMapping("/insert")
-    @ApiOperation("新增考勤组下的考勤地点")
-    public Result insert(@RequestBody AttendanceGroupArea entity) {
-        return attendanceGroupAreaService.insert(entity);
+    public R<Void> insert(@RequestBody AttendanceGroupAreaBo entity) {
+        return toAjax(attendanceGroupAreaService.insert(entity));
     }
 
 
     /**
      * 更新考勤地点信息
+     *
      * @param entity
      * @return
      */
     @PostMapping("/update")
-    @ApiOperation("修改")
-    public Result update(@RequestBody AttendanceGroupArea entity) {
-        return attendanceGroupAreaService.update(entity);
+    public R<Void> update(@RequestBody AttendanceGroupAreaBo entity) {
+        return toAjax(attendanceGroupAreaService.update(entity));
     }
 
 
     /**
      * 获取考勤地点详细信息
+     *
      * @param id
      * @return
      */
     @GetMapping("/get")
-    @ApiOperation("根据ID查询")
-    @ApiImplicitParam(name = "id", value = "主键", required = true, dataTypeClass = Integer.class)
-    public AttendanceGroupArea get(Integer id) {
-        return attendanceGroupAreaService.get(id);
+    public R<AttendanceGroupAreaVo> get(Long id) {
+        return R.ok(attendanceGroupAreaService.selectById(id));
     }
 
 
     /**
      * 删除考勤地点
+     *
      * @param id
      * @return
      */
     @DeleteMapping("/delete")
-    @ApiOperation("删除")
-    @ApiImplicitParam(name = "id", value = "主键", required = true, dataTypeClass = Integer.class)
-    public Result delete(@RequestParam("id") Integer id) {
-        return attendanceGroupAreaService.delete(id);
+    public R<Void> delete(@RequestParam("id") Long id) {
+        return toAjax(attendanceGroupAreaService.deleteById(id));
     }
 
 
     /**
      * 获取历史考勤地点
+     *
      * @param hosId
      * @return
      */
     @GetMapping("/getHistoryByHosId")
-    @ApiOperation("获取历史考勤地点")
-    @ApiImplicitParam(name = "hosId", value = "医院id", required = true, dataTypeClass = Integer.class)
-    public Result<List<AttendanceGroupArea>> getHistoryByHosId(Integer hosId) {
-        List<AttendanceGroupArea> list = attendanceGroupAreaService.getHistoryByHosId(hosId);
-        return Result.success(list);
+    public R<List<AttendanceGroupAreaVo>> getHistoryByHosId(Long hosId) {
+        List<AttendanceGroupAreaVo> list = attendanceGroupAreaService.getHistoryByHosId(hosId);
+        return R.ok(list);
     }
 }
 

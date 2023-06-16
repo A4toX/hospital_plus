@@ -1,17 +1,15 @@
 package com.hospital.attendance.controller;
 
-import com.demo.hospital.attendance.model.AttendanceGroup;
-import com.demo.hospital.attendance.model.AttendanceGroupPageReq;
-import com.demo.hospital.attendance.model.vo.AttendanceGroupVO;
-import com.demo.hospital.attendance.service.AttendanceGroupService;
-import com.demo.hospital.common.base.controller.BaseController;
-import com.demo.hospital.common.base.controller.Result;
-import com.demo.hospital.common.page.Page;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-
-import javax.annotation.Resource;
+import com.hospital.attendance.domain.bo.AttendanceGroupBo;
+import com.hospital.attendance.domain.vo.AttendanceGroupVo;
+import com.hospital.attendance.service.IAttendanceGroupService;
+import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.domain.R;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.web.core.BaseController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 新考勤-考勤组信息
@@ -20,11 +18,11 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping("/attendanceGroup")
-@Api(tags = "考勤组信息表")
+@Validated
+@RequiredArgsConstructor
 public class AttendanceGroupController extends BaseController {
 
-    @Resource
-    private AttendanceGroupService attendanceGroupService;
+    private IAttendanceGroupService attendanceGroupService;
 
     /**
      * 创建考勤组
@@ -32,9 +30,8 @@ public class AttendanceGroupController extends BaseController {
      * @return
      */
     @PostMapping("/insert")
-    @ApiOperation("创建考勤组")
-    public Result insert(@RequestBody AttendanceGroup entity) {
-        return attendanceGroupService.insert(entity);
+    public R<Void> insert(@RequestBody AttendanceGroupBo entity) {
+        return toAjax(attendanceGroupService.insert(entity));
     }
 
 
@@ -44,22 +41,19 @@ public class AttendanceGroupController extends BaseController {
      * @return
      */
     @PostMapping("/update")
-    @ApiOperation("修改考勤组信息")
-    public Result update(@RequestBody AttendanceGroup entity) {
-        return attendanceGroupService.update(entity);
+    public R<Void> update(@RequestBody AttendanceGroupBo entity) {
+        return toAjax(attendanceGroupService.update(entity));
     }
 
 
     /**
      * 分页查询考勤组信息
-     * @param pageReq
+     * @param bo
      * @return
      */
     @GetMapping("/findPage")
-    @ApiOperation("分页查询考勤组信息")
-    public Result<Page<AttendanceGroup>> findPage(AttendanceGroupPageReq pageReq) {
-        Page<AttendanceGroup> page = attendanceGroupService.findPage(pageReq);
-        return Result.success(page);
+    public TableDataInfo<AttendanceGroupVo> findPage(AttendanceGroupBo bo, PageQuery pageQuery) {
+        return attendanceGroupService.selectPageList(bo, pageQuery);
     }
 
 
@@ -69,10 +63,8 @@ public class AttendanceGroupController extends BaseController {
      * @return
      */
     @GetMapping("/get")
-    @ApiOperation("根据考勤组id查询考勤组详细信息")
-    @ApiImplicitParam(name = "id", value = "考勤组主键", required = true, dataTypeClass = Integer.class)
-    public AttendanceGroupVO get(Integer id) {
-        return attendanceGroupService.get(id);
+    public R<AttendanceGroupVo> get(Long id) {
+        return R.ok(attendanceGroupService.selectById(id));
     }
 
 
@@ -82,11 +74,8 @@ public class AttendanceGroupController extends BaseController {
      * @return
      */
     @DeleteMapping("/delete")
-    @ApiOperation("删除")
-    @ApiImplicitParam(name = "id", value = "主键", required = true, dataTypeClass = Integer.class)
-    public Result delete(@RequestParam("id") Integer id) {
-        attendanceGroupService.delete(id);
-        return Result.success();
+    public R<Void> delete(@RequestParam("id") Long id) {
+        return toAjax(attendanceGroupService.deleteById(id));
     }
 }
 

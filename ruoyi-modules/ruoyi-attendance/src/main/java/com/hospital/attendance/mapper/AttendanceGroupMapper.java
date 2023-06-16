@@ -1,7 +1,7 @@
 package com.hospital.attendance.mapper;
 
 import com.hospital.attendance.domain.AttendanceGroup;
-import com.hospital.attendance.domain.vo.AttendanceGroupVO;
+import com.hospital.attendance.domain.vo.AttendanceGroupVo;
 import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
 
 /**
@@ -9,7 +9,7 @@ import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
  *
  * @author yaoyingjie
  */
-public interface AttendanceGroupMapper extends BaseMapperPlus<AttendanceGroup, AttendanceGroupVO> {
+public interface AttendanceGroupMapper extends BaseMapperPlus<AttendanceGroup, AttendanceGroupVo> {
 
 }
 

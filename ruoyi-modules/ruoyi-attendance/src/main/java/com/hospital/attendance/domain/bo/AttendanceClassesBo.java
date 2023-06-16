@@ -19,12 +19,12 @@ public class AttendanceClassesBo extends BaseEntity {
     /**
      * 主键
      */
-    private Integer id;
+    private Long id;
 
     /**
      * 医院id
      */
-    private Integer hosId;
+    private Long hosId;
 
     /**
      * 班次名称
@@ -47,7 +47,7 @@ public class AttendanceClassesBo extends BaseEntity {
     private Integer workLateMin;
 
     /**
-     * 是否开启严重迟到(1是2否)
+     * 是否开启严重迟到
      */
     private Integer isSeriousLate;
 
@@ -62,7 +62,7 @@ public class AttendanceClassesBo extends BaseEntity {
     private Integer workAbsMin;
 
     /**
-     * 是否开启下班自动打卡(1是2否)
+     * 是否开启下班自动打卡
      */
     private Integer isAutoAfter;
 

@@ -1,10 +1,11 @@
 package com.hospital.attendance.mapper;
 
-import com.demo.hospital.attendance.model.AttendanceGroupClasses;
-import com.demo.hospital.attendance.model.AttendanceGroupClassesExample;
-import com.demo.hospital.attendance.model.vo.AttendanceGroupClassVO;
-import com.demo.hospital.attendance.model.vo.AttendanceGroupClassesSimpleRespVO;
-import com.demo.hospital.common.base.dao.MyBatisBaseDao;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hospital.attendance.domain.AttendanceGroupClasses;
+import com.hospital.attendance.domain.vo.AttendanceGroupClassVO;
+import com.hospital.attendance.domain.vo.AttendanceGroupClassesSimpleRespVO;
+import com.hospital.attendance.domain.vo.AttendanceGroupClassesVo;
+import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
 
 import java.util.List;
 
@@ -14,22 +15,27 @@ import java.util.List;
  * @author makejava
  * @since 2023-05-21 17:56:38
  */
-public interface AttendanceGroupClassesMapper extends MyBatisBaseDao<AttendanceGroupClasses, Integer, AttendanceGroupClassesExample> {
+public interface AttendanceGroupClassesMapper extends BaseMapperPlus<AttendanceGroupClasses, AttendanceGroupClassesVo> {
 
-    List<AttendanceGroupClassVO> selectByGroupId(Integer id);
+    List<AttendanceGroupClassVO> selectByGroupId(Long id);
 
-    default List<AttendanceGroupClasses> exsitGroupByWeek(Integer groupId, Integer weekly){
-        AttendanceGroupClassesExample example = new AttendanceGroupClassesExample();
-        example.createCriteria().andGroupIdEqualTo(groupId).andWeeklyEqualTo(weekly);
-        return selectByExample(example);
+    default List<AttendanceGroupClasses> exsitGroupByWeek(Long groupId, Integer weekly){
+        return selectList(new LambdaQueryWrapper<AttendanceGroupClasses>()
+            .eq(AttendanceGroupClasses::getGroupId, groupId)
+            .eq(AttendanceGroupClasses::getWeekly, weekly));
     }
 
-    default List<AttendanceGroupClasses> getGroupIds(Integer classesId, Integer weekly) {
-        AttendanceGroupClassesExample example = new AttendanceGroupClassesExample();
-        example.createCriteria().andClassesIdEqualTo(classesId).andWeeklyEqualTo(weekly);
-        return selectByExample(example);
+    default List<AttendanceGroupClasses> getGroupIds(Long classesId, Integer weekly) {
+        return selectList(new LambdaQueryWrapper<AttendanceGroupClasses>()
+            .eq(AttendanceGroupClasses::getClassesId, classesId)
+            .eq(AttendanceGroupClasses::getWeekly, weekly));
     }
 
-    List<AttendanceGroupClassesSimpleRespVO> selectByGroupIdSimple(Integer id);
+    default List<AttendanceGroupClasses> selectByClassesId(Long classesId) {
+        return selectList(new LambdaQueryWrapper<AttendanceGroupClasses>()
+           .eq(AttendanceGroupClasses::getClassesId, classesId));
+    }
+
+    List<AttendanceGroupClassesSimpleRespVO> selectByGroupIdSimple(Long id);
 }
 

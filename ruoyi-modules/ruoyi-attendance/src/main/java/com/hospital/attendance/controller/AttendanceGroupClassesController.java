@@ -1,17 +1,15 @@
 package com.hospital.attendance.controller;
 
-import com.demo.hospital.attendance.model.AttendanceGroupClasses;
-import com.demo.hospital.attendance.service.AttendanceGroupClassesService;
-import com.demo.hospital.common.base.controller.BaseController;
-import com.demo.hospital.common.base.controller.Result;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import com.hospital.attendance.domain.bo.AttendanceGroupClassesBo;
+import com.hospital.attendance.service.IAttendanceGroupClassesService;
+import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.domain.R;
+import org.dromara.common.web.core.BaseController;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * 新考勤-考勤班次关联表
@@ -21,11 +19,11 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping("/attendanceGroupClasses")
-@Api(tags = "排班班次表")
+@Validated
+@RequiredArgsConstructor
 public class AttendanceGroupClassesController extends BaseController {
 
-    @Resource
-    private AttendanceGroupClassesService attendanceGroupClassesService;
+    private IAttendanceGroupClassesService attendanceGroupClassesService;
 
 
     /**
@@ -34,9 +32,8 @@ public class AttendanceGroupClassesController extends BaseController {
      * @return
      */
     @PostMapping("/insert")
-    @ApiOperation("新增考勤班次关联")
-    public Result insert(@RequestBody AttendanceGroupClasses entity) {
-        return attendanceGroupClassesService.insert(entity);
+    public R<Void> insert(@RequestBody AttendanceGroupClassesBo entity) {
+        return toAjax(attendanceGroupClassesService.insert(entity));
     }
 
     /**
@@ -45,11 +42,8 @@ public class AttendanceGroupClassesController extends BaseController {
      * @return
      */
     @PostMapping("/update")
-    @ApiOperation("修改")
-    public Result update(@RequestBody AttendanceGroupClasses entity) {
-        return attendanceGroupClassesService.update(entity);
+    public R<Void> update(@RequestBody AttendanceGroupClassesBo entity) {
+        return toAjax(attendanceGroupClassesService.update(entity));
     }
-
-
 }
 

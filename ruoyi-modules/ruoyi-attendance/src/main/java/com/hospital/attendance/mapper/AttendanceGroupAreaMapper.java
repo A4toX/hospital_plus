@@ -1,8 +1,9 @@
 package com.hospital.attendance.mapper;
 
-import com.demo.hospital.attendance.model.AttendanceGroupArea;
-import com.demo.hospital.attendance.model.AttendanceGroupAreaExample;
-import com.demo.hospital.common.base.dao.MyBatisBaseDao;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hospital.attendance.domain.AttendanceGroupArea;
+import com.hospital.attendance.domain.vo.AttendanceGroupAreaVo;
+import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
 
 import java.util.List;
 
@@ -11,18 +12,14 @@ import java.util.List;
  *
  * @author yaoyingjie
  */
-public interface AttendanceGroupAreaMapper extends MyBatisBaseDao<AttendanceGroupArea, Integer, AttendanceGroupAreaExample> {
+public interface AttendanceGroupAreaMapper extends BaseMapperPlus<AttendanceGroupArea, AttendanceGroupAreaVo> {
 
-    default List<AttendanceGroupArea> selectByGroupId(Integer groupId) {
-        AttendanceGroupAreaExample example = new AttendanceGroupAreaExample();
-        example.createCriteria().andGroupIdEqualTo(groupId).andIsDeleteEqualTo("1");
-        return selectByExample(example);
+    default List<AttendanceGroupAreaVo> selectByGroupId(Long groupId) {
+        return selectVoList(new LambdaQueryWrapper<AttendanceGroupArea>().eq(AttendanceGroupArea::getGroupId, groupId));
     }
 
-    default List<AttendanceGroupArea> listByHosId(Integer hosId){
-        AttendanceGroupAreaExample example = new AttendanceGroupAreaExample();
-        example.createCriteria().andHosIdEqualTo(hosId);
-        return selectByExample(example);
+    default List<AttendanceGroupAreaVo> listByHosId(Long hosId){
+        return selectVoList(new LambdaQueryWrapper<AttendanceGroupArea>().eq(AttendanceGroupArea::getHosId, hosId));
     }
 
 }

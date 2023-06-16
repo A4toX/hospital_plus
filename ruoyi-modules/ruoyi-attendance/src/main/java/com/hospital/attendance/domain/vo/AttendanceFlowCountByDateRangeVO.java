@@ -14,7 +14,7 @@ public class AttendanceFlowCountByDateRangeVO {
     /**
      * 考勤组ID
      */
-    private Integer groupId;
+    private Long groupId;
 
     /**
      * 平均工时

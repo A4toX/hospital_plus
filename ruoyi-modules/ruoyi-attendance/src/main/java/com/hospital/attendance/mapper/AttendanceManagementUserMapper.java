@@ -1,10 +1,11 @@
 package com.hospital.attendance.mapper;
 
-import com.demo.hospital.attendance.model.AttendanceManagementUser;
-import com.demo.hospital.attendance.model.AttendanceManagementUserExample;
-import com.demo.hospital.attendance.model.vo.attendUser.AttendanceMUserReqVO;
-import com.demo.hospital.attendance.model.vo.attendUser.AttendanceMUserRespVO;
-import com.demo.hospital.common.base.dao.MyBatisBaseDao;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hospital.attendance.domain.AttendanceManagementUser;
+import com.hospital.attendance.domain.vo.AttendanceManagementUserVo;
+import com.hospital.attendance.domain.vo.attendUser.AttendanceMUserReqVO;
+import com.hospital.attendance.domain.vo.attendUser.AttendanceMUserRespVo;
+import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
 
 import java.util.List;
 
@@ -14,16 +15,14 @@ import java.util.List;
  * @author makejava
  * @since 2023-05-21 19:29:23
  */
-public interface AttendanceManagementUserMapper extends MyBatisBaseDao<AttendanceManagementUser, Integer, AttendanceManagementUserExample> {
+public interface AttendanceManagementUserMapper extends BaseMapperPlus<AttendanceManagementUser, AttendanceManagementUserVo> {
 
-    List<AttendanceMUserRespVO> listByGroupId(AttendanceMUserReqVO reqVO);
+    List<AttendanceMUserRespVo> listByGroupId(AttendanceMUserReqVO reqVO);
 
-    default List<AttendanceManagementUser> selectByUserId(Integer userId) {
-        AttendanceManagementUserExample example = new AttendanceManagementUserExample();
-        example.createCriteria().andUserIdEqualTo(userId).andIsDeleteEqualTo("1");
-        return selectByExample(example);
+    default List<AttendanceManagementUser> selectByUserId(Long userId) {
+        return selectList(new LambdaQueryWrapper<AttendanceManagementUser>().eq(AttendanceManagementUser::getUserId, userId));
     }
 
-    List<AttendanceMUserRespVO> listAllStaffByHosId(AttendanceMUserReqVO reqVO);
+    List<AttendanceMUserRespVo> listAllStaffByHosId(AttendanceMUserReqVO reqVO);
 }
 

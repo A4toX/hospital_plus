@@ -1,22 +1,20 @@
 package com.hospital.attendance.controller;
 
-import com.demo.hospital.attendance.model.*;
-import com.demo.hospital.attendance.model.vo.AttendanceFlowCountByDateRangeVO;
-import com.demo.hospital.attendance.model.vo.AttendanceFlowCountByDayVO;
-import com.demo.hospital.attendance.service.AttendanceFlowService;
-import com.demo.hospital.common.base.controller.BaseController;
-import com.demo.hospital.common.base.controller.Result;
-import com.demo.hospital.common.security.UserUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import com.hospital.attendance.domain.AttendReq;
+import com.hospital.attendance.domain.AttendanceQrResp;
+import com.hospital.attendance.domain.ScanAttendReq;
+import com.hospital.attendance.domain.vo.*;
+import com.hospital.attendance.service.IAttendanceFlowService;
+import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.domain.R;
+import org.dromara.common.satoken.utils.LoginHelper;
+import org.dromara.common.web.core.BaseController;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -27,155 +25,135 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/attendanceFlow")
-@Api(tags = "考勤记录表")
+@Validated
+@RequiredArgsConstructor
 public class AttendanceFlowController extends BaseController {
 
-    @Resource
-    private AttendanceFlowService attendanceFlowService;
+    private IAttendanceFlowService attendanceFlowService;
 
     /**
      * 获取当前登录人所在考勤组
+     *
      * @return
      */
     @GetMapping("/getAttendGroup")
-    @ApiOperation("获取当前登录人所在考勤组")
-    public Result<List<AttendanceGroup>> getAttendGroup() {
-        return Result.success(attendanceFlowService.getAttendGroup());
+    public R<List<AttendanceGroupVo>> getAttendGroup() {
+        return R.ok(attendanceFlowService.getAttendGroup());
     }
 
     /**
      * 获取当前登录人考勤组考勤信息
+     *
      * @param groupId 考勤组ID
      * @return
      */
     @GetMapping("/getAttendInfo")
-    @ApiOperation("获取当前登录人考勤组考勤信息")
-    @ApiImplicitParam(name = "groupId", value = "考勤组ID", required = true, dataTypeClass = Integer.class)
-    public Result<AttendanceInfoResp> getAttendInfo(Integer groupId) {
+    public R<AttendanceInfoResp> getAttendInfo(Long groupId) {
         AttendanceInfoResp resp = attendanceFlowService.getAttendInfo(groupId);
-        return Result.success(resp);
+        return R.ok(resp);
     }
 
     /**
      * 获取当前登录人管理的考勤组
+     *
      * @return
      */
     @GetMapping("/getManagerAttendGroup")
-    @ApiOperation("获取当前登录人管理的考勤组")
-    public Result<List<AttendanceGroup>> getManagerAttendGroup() {
-        return Result.success(attendanceFlowService.getManagerAttendGroup());
+    public R<List<AttendanceGroupVo>> getManagerAttendGroup() {
+        return R.ok(attendanceFlowService.getManagerAttendGroup());
     }
 
     /**
      * 教师获取考勤二维码信息
+     *
      * @param groupId 考勤组ID
      * @return
      */
     @GetMapping("/getQrCodeInfo")
-    @ApiOperation("教师获取考勤二维码信息")
-    public Result<AttendanceQrResp> getQrCodeInfo(Integer groupId) {
+    public R<AttendanceQrResp> getQrCodeInfo(Long groupId) {
         AttendanceQrResp resp = attendanceFlowService.getQrCodeInfo(groupId);
-        return Result.success(resp);
+        return R.ok(resp);
     }
 
     /**
      * 定位考勤打卡
+     *
      * @param req
      * @return
      */
     @PostMapping("/attend")
-    @ApiOperation("定位考勤打卡")
-    public Result<Boolean> attend(AttendReq req) {
-        return Result.of(attendanceFlowService.attend(req));
+    public R<Void> attend(AttendReq req) {
+        return toAjax(attendanceFlowService.attend(req));
     }
 
     /**
      * 扫码考勤打卡
+     *
      * @param req
      * @return
      */
     @PostMapping("scanAttend")
-    @ApiOperation("扫码考勤打卡")
-    public Result<Boolean> scanAttend(ScanAttendReq req) {
-        return Result.of(attendanceFlowService.scanAttend(req));
+    public R<Void> scanAttend(ScanAttendReq req) {
+        return toAjax(attendanceFlowService.scanAttend(req));
     }
 
     /**
      * 获取考勤记录
-     * @param userId 用户ID，默认当前登录人
+     *
+     * @param userId  用户ID，默认当前登录人
      * @param groupId 考勤组ID
-     * @param date 日期
+     * @param date    日期
      * @return
      */
     @GetMapping("/getAttendRecord")
-    @ApiOperation("获取考勤记录")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "userId", value = "用户ID，默认当前登录人", dataTypeClass = Integer.class),
-            @ApiImplicitParam(name = "groupId", value = "考勤组ID", required = true, dataTypeClass = Integer.class),
-            @ApiImplicitParam(name = "date", value = "日期", example = "2022-01-01", required = true, dataTypeClass = String.class)
-    })
-    public Result<List<AttendanceFlow>> getAttendRecord(Integer userId, Integer groupId, String date) {
-        if(userId == null) {
-            userId = UserUtil.getCurrentUserId();
+    public R<List<AttendanceFlowVo>> getAttendRecord(Long userId, Long groupId, String date) {
+        if (userId == null) {
+            userId = LoginHelper.getUserId();
         }
-        List<AttendanceFlow> list = attendanceFlowService.getAttendRecord(userId, groupId, date);
-        return Result.success(list);
+        List<AttendanceFlowVo> list = attendanceFlowService.getAttendRecord(userId, groupId, date);
+        return R.ok(list);
     }
 
     /**
      * 获取指定月份考勤记录
-     * @param userId 用户ID，默认当前登录人
+     *
+     * @param userId  用户ID，默认当前登录人
      * @param groupId 考勤组ID
-     * @param month 月份
+     * @param month   月份
      * @return
      */
     @GetMapping("/getAttendRecordByMonth")
-    @ApiOperation("获取指定月份考勤记录")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "userId", value = "用户ID，默认当前登录人", dataTypeClass = Integer.class),
-            @ApiImplicitParam(name = "groupId", value = "考勤组ID", required = true, dataTypeClass = Integer.class),
-            @ApiImplicitParam(name = "month", value = "月份", example = "2022-01", required = true, dataTypeClass = String.class)
-    })
-    public Result<Map<String, List<AttendanceFlow>>> getAttendRecordByMonth(Integer userId, Integer groupId, String month) {
-        if(userId == null) {
-            userId = UserUtil.getCurrentUserId();
+    public R<Map<String, List<AttendanceFlowVo>>> getAttendRecordByMonth(Long userId, Long groupId, String month) {
+        if (userId == null) {
+            userId = LoginHelper.getUserId();
         }
-        Map<String, List<AttendanceFlow>> list = attendanceFlowService.getAttendRecordByMonth(userId, groupId, month);
-        return Result.success(list);
+        Map<String, List<AttendanceFlowVo>> list = attendanceFlowService.getAttendRecordByMonth(userId, groupId, month);
+        return R.ok(list);
     }
 
     /**
      * 考勤组日统计汇总
+     *
      * @param groupId 考勤组ID
-     * @param date 日期
+     * @param date    日期
      * @return
      */
     @GetMapping("/attendCountByDay")
-    @ApiOperation("考勤组日统计汇总")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "groupId", value = "考勤组ID", required = true, dataTypeClass = Integer.class),
-            @ApiImplicitParam(name = "date", value = "日期", example = "2022-01-01", required = true, dataTypeClass = String.class)
-    })
-    public Result<AttendanceFlowCountByDayVO> attendCountByDay(Integer groupId, String date) {
-        return Result.success(attendanceFlowService.attendCountByDay(groupId, date));
+    public R<AttendanceFlowCountByDayVO> attendCountByDay(Long groupId, String date) {
+        return R.ok(attendanceFlowService.attendCountByDay(groupId, date));
     }
 
     /**
      * 考勤组日期范围统计汇总
-     * @param groupId 考勤组ID
+     *
+     * @param groupId   考勤组ID
      * @param startDate 开始日期
-     * @param endDate 结束日期
+     * @param endDate   结束日期
      * @return
      */
     @GetMapping("/attendCountByDateRange")
-    @ApiOperation("考勤组日期范围统计汇总")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "groupId", value = "考勤组ID", required = true, dataTypeClass = Integer.class),
-            @ApiImplicitParam(name = "startDate", value = "开始日期", example = "2022-01-01", required = true, dataTypeClass = String.class),
-            @ApiImplicitParam(name = "endDate", value = "结束日期", example = "2022-01-07", required = true, dataTypeClass = String.class)
-    })
-    public Result<AttendanceFlowCountByDateRangeVO> attendCountByDateRange(Integer groupId, String startDate, String endDate) {
-        return Result.success(attendanceFlowService.attendCountByDateRange(groupId, startDate, endDate));
+    public R<AttendanceFlowCountByDateRangeVO> attendCountByDateRange(Long groupId, String startDate, String endDate) {
+        return R.ok(attendanceFlowService.attendCountByDateRange(groupId, startDate, endDate));
     }
 }
 

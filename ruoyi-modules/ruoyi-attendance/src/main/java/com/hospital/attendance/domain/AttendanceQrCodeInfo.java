@@ -1,7 +1,7 @@
 package com.hospital.attendance.domain;
 
-import com.demo.hospital.attendance.model.vo.AttendanceGroupClassVO;
-import io.swagger.annotations.ApiModelProperty;
+import com.hospital.attendance.domain.vo.AttendanceGroupClassVO;
+import com.hospital.attendance.domain.vo.AttendanceGroupVo;
 import lombok.Data;
 
 /**
@@ -10,15 +10,23 @@ import lombok.Data;
 @Data
 public class AttendanceQrCodeInfo {
 
-    @ApiModelProperty("考勤组id")
-    private AttendanceGroup attendGroup;
+    /**
+     * 考勤组id
+     */
+    private AttendanceGroupVo attendGroup;
 
-    @ApiModelProperty("考勤班次")
+    /**
+     * 考勤班次
+     */
     private AttendanceGroupClassVO attendClass;
 
-    @ApiModelProperty("签到类型")
+    /**
+     * 签到类型
+     */
     private Integer attendType;
 
-    @ApiModelProperty("刷新时间")
+    /**
+     * 刷新时间
+     */
     private String freshTime;
 }
