@@ -1,22 +1,34 @@
 package com.hospital.attendance.domain;
 
-import com.demo.hospital.common.base.entity.BaseEntity;
-import com.hospital.attendance.domain.vo.AttendanceClassesVo;
-import com.hospital.attendance.domain.vo.AttendanceGroupVo;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
-
-import java.io.Serializable;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.dromara.common.tenant.core.TenantEntity;
 
 /**
- * 考勤记录表 model
+ * 考勤记录表
  *
  * @author liguoxian
  */
-@ApiModel("考勤记录表")
 @Data
-public class AttendanceFlow extends BaseEntity<Integer> implements Serializable {
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@TableName("attendance_flow")
+public class AttendanceFlow extends TenantEntity {
+
+    /**
+     * 主键
+     */
+    @TableId
+    private Long id;
+
+    /**
+     * 医院id
+     */
+    private Long hosId;
 
     /**
      * 用户id
@@ -81,10 +93,10 @@ public class AttendanceFlow extends BaseEntity<Integer> implements Serializable 
     /**
      * 请假流水id
      */
-    private Long leaveId;
+    private Integer leaveId;
 
     /**
-     * 是否外勤打卡 1是 2否
+     * 是否外勤打卡
      */
     private String areaOutside;
 
@@ -102,5 +114,17 @@ public class AttendanceFlow extends BaseEntity<Integer> implements Serializable 
      * 迟到早退分钟数
      */
     private Integer errMinutes;
+
+    /**
+     * 删除标志（0代表存在 2代表删除）
+     */
+    @TableLogic
+    private String delFlag;
+
+    /**
+     * 备注
+     */
+    private String remark;
+
 }
 

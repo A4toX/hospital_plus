@@ -8,10 +8,9 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
-import com.demo.hospital.attendance.utils.dto.Holiday;
-import com.demo.hospital.common.constant.ErrCode;
-import com.demo.hospital.common.exceptions.BizException;
-import com.demo.hospital.common.redis.RedisUtils;
+import com.hospital.attendance.utils.dto.Holiday;
+import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.redis.utils.RedisUtils;
 
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
@@ -67,7 +66,7 @@ public class HolidayUtils {
                 updateByApi();
                 RedisUtils.setCacheObject(key, "Y");
             } catch (Exception e) {
-                throw new BizException(ErrCode.ERROR, "同步处理假日数据失败");
+                throw new ServiceException("同步处理假日数据失败");
             } finally {
                 lock.unlock();
             }

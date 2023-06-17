@@ -22,8 +22,8 @@ public interface AttendanceFlowMapper extends BaseMapperPlus<AttendanceFlow, Att
             .eqIfPresent(AttendanceFlow::getUserId, userId));
     }
 
-    default List<AttendanceFlow> selectByDateRange(Long groupId, Integer userId, String startDate, String endDate) {
-        return selectList(new LambdaQueryWrapperX<AttendanceFlow>()
+    default List<AttendanceFlowVo> selectByDateRange(Long groupId, Integer userId, String startDate, String endDate) {
+        return selectVoList(new LambdaQueryWrapperX<AttendanceFlow>()
             .eqIfPresent(AttendanceFlow::getUserId, userId)
             .eq(AttendanceFlow::getAttendGroupId, groupId)
             .ge(AttendanceFlow::getAttendDate, startDate)

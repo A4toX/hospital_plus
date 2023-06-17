@@ -49,7 +49,7 @@ public class AttendanceUtils {
      * @param userId 用户ID
      * @return 用户所在的考勤组
      */
-    public static List<AttendanceGroupVo> getMyGroup(Long userId) {
+    public static List<AttendanceGroup> getMyGroup(Long userId) {
         List<Long> groupIds = getMyGroupId(userId);
         if (CollUtil.isNotEmpty(groupIds)) {
             return groupIds.stream()
@@ -126,9 +126,9 @@ public class AttendanceUtils {
      * @param groupId 考勤组ID
      * @return 考勤组信息
      */
-    public static AttendanceGroupVo getGroup(Long groupId) {
+    public static AttendanceGroup getGroup(Long groupId) {
         String key = getKey(CacheTypeEnum.group, groupId);
-        AttendanceGroupVo group = RedisUtils.getCacheObject(key);
+        AttendanceGroup group = RedisUtils.getCacheObject(key);
         if (Objects.isNull(group)) {
             initGroupCache(groupId);
             group = RedisUtils.getCacheObject(key);
@@ -158,7 +158,7 @@ public class AttendanceUtils {
      * 更新所有考勤组缓存
      */
     public static void initGroupCache() {
-        List<AttendanceGroupVo> attendanceGroups = groupMapper.selectVoList();
+        List<AttendanceGroup> attendanceGroups = groupMapper.selectList();
         removeGroupCache();
         attendanceGroups.parallelStream().forEach(group -> {
             String key = getKey(CacheTypeEnum.group, group.getId());
@@ -172,7 +172,7 @@ public class AttendanceUtils {
      * @param groupId 考勤组ID
      */
     public static void initGroupCache(Long groupId) {
-        AttendanceGroupVo group = groupMapper.selectVoById(groupId);
+        AttendanceGroup group = groupMapper.selectById(groupId);
         removeGroupCache(groupId);
         if (Objects.nonNull(group)) {
             String key = getKey(CacheTypeEnum.group, group.getId());
@@ -445,7 +445,7 @@ public class AttendanceUtils {
      */
     public static boolean checkNeedAttendance(Long groupId, Date date) {
         AttendanceGroupClassVO groupClass = getGroupClass(groupId);
-        AttendanceGroupVo group = getGroup(groupId);
+        AttendanceGroup group = getGroup(groupId);
         if (YesNoEnum.YES.getName().equals(groupClass.getStatus())) {
             if (YesNoEnum.YES.getValue().equals(group.getHolidayLeave())) {
                 // 需要打卡时， 判断是否节假日
@@ -604,13 +604,13 @@ public class AttendanceUtils {
         return data;
     }
 
-    public static AttendanceFlowCountDetailByDateRangeVO getUserFlowCountForDateRange(Long groupId, String startDate, String endDate, List<AttendanceFlow> flows) {
+    public static AttendanceFlowCountDetailByDateRangeVO getUserFlowCountForDateRange(Long groupId, String startDate, String endDate, List<AttendanceFlowVo> flows) {
         AttendanceFlowCountDetailByDateRangeVO data = new AttendanceFlowCountDetailByDateRangeVO();
         data.setNeedAttendDays(getNeedAttendanceDays(groupId, startDate, endDate));
         if (CollUtil.isNotEmpty(flows)) {
-            Map<String, List<AttendanceFlow>> flowMap = flows.stream().collect(Collectors.groupingBy(AttendanceFlow::getAttendDate, LinkedHashMap::new, Collectors.toList()));
-            for (Map.Entry<String, List<AttendanceFlow>> flowEntity : flowMap.entrySet()) {
-                List<AttendanceFlow> oneDayFlows = flowEntity.getValue();
+            Map<String, List<AttendanceFlowVo>> flowMap = flows.stream().collect(Collectors.groupingBy(AttendanceFlowVo::getAttendDate, LinkedHashMap::new, Collectors.toList()));
+            for (Map.Entry<String, List<AttendanceFlowVo>> flowEntity : flowMap.entrySet()) {
+                List<AttendanceFlowVo> oneDayFlows = flowEntity.getValue();
                 AttendanceFlowCountDetailByDayVO countOneDay = getUserFlowCountForOneDay(oneDayFlows);
                 data.setWorkHours(data.getWorkHours() + countOneDay.getWorkHours());
                 data.setLateNum(data.getLateNum() + countOneDay.getLateNum());

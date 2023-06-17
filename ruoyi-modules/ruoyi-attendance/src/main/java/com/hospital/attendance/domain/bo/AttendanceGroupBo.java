@@ -49,7 +49,7 @@ public class AttendanceGroupBo extends BaseEntity {
     /**
      * 是否使用动态二维码
      */
-    private Integer groupCode;
+    private String groupCode;
 
     /**
      * 二维码刷新时间

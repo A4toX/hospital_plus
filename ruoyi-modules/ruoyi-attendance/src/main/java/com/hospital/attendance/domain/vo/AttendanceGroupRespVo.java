@@ -14,7 +14,9 @@ import java.util.List;
 @Data
 public class AttendanceGroupRespVo implements Serializable {
 
-    @Serial
+    /**
+     * 考勤组信息
+     */
     private AttendanceGroupVo attendanceGroup;
 
     /**

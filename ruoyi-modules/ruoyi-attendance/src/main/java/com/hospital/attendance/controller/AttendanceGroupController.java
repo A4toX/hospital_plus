@@ -1,6 +1,7 @@
 package com.hospital.attendance.controller;
 
 import com.hospital.attendance.domain.bo.AttendanceGroupBo;
+import com.hospital.attendance.domain.vo.AttendanceGroupRespVo;
 import com.hospital.attendance.domain.vo.AttendanceGroupVo;
 import com.hospital.attendance.service.IAttendanceGroupService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 新考勤-考勤组信息
+ * 新考勤/考勤组信息
  *
  * @author yaoyingjie
  */
@@ -63,8 +64,8 @@ public class AttendanceGroupController extends BaseController {
      * @return
      */
     @GetMapping("/get")
-    public R<AttendanceGroupVo> get(Long id) {
-        return R.ok(attendanceGroupService.selectById(id));
+    public R<AttendanceGroupRespVo> get(Long id) {
+        return R.ok(attendanceGroupService.selectAllInfoById(id));
     }
 
 

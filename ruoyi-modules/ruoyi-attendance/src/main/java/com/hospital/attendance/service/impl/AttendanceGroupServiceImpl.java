@@ -110,6 +110,12 @@ public class AttendanceGroupServiceImpl extends BaseServiceImpl<AttendanceGroupM
 
     private LambdaQueryWrapper<AttendanceGroup> buildQueryWrapper(AttendanceGroupBo bo) {
         return new LambdaQueryWrapperX<AttendanceGroup>()
+            .eq(AttendanceGroup::getHosId, bo.getHosId())
+            .eqIfPresent(AttendanceGroup::getGroupType, bo.getGroupType())
+            .eqIfPresent(AttendanceGroup::getGroupMethod, bo.getGroupMethod())
+            .eqIfPresent(AttendanceGroup::getAreaOutside, bo.getAreaOutside())
+            .eqIfPresent(AttendanceGroup::getGroupCode, bo.getGroupCode())
+            .eqIfPresent(AttendanceGroup::getHolidayLeave, bo.getHolidayLeave())
             .like(AttendanceGroup::getGroupName, bo.getGroupName());
     }
 }

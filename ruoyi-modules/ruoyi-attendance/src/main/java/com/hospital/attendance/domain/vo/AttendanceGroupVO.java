@@ -8,7 +8,6 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * 考勤组信息表 视图对象
@@ -63,7 +62,7 @@ public class AttendanceGroupVo implements Serializable {
      * 是否使用动态二维码
      */
     @ExcelProperty(value = "是否使用动态二维码")
-    private Integer groupCode;
+    private String groupCode;
 
     /**
      * 二维码刷新时间
@@ -82,15 +81,5 @@ public class AttendanceGroupVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 考勤班次信息(固定班次)
-     */
-    private List<AttendanceGroupClassesSimpleRespVO> groupClasses;
-
-    /**
-     * 考勤地点信息(定位考勤)
-     */
-    private List<AttendanceGroupAreaVo> areas;
 }
 

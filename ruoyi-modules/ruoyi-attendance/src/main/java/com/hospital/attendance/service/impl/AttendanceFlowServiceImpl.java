@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.domain.model.LoginUser;
 import org.dromara.common.core.enums.YesNoEnum;
 import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.mybatis.core.service.BaseServiceImpl;
 import org.dromara.common.satoken.utils.LoginHelper;
 import org.springframework.stereotype.Service;
@@ -37,15 +38,17 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
 
     @Override
     public List<AttendanceGroupVo> getAttendGroup() {
-        return AttendanceUtils.getMyGroup(LoginHelper.getUserId());
+        List<AttendanceGroup> groups = AttendanceUtils.getMyGroup(LoginHelper.getUserId());
+        return MapstructUtils.convert(groups, AttendanceGroupVo.class);
     }
 
     @Override
     public List<AttendanceGroupVo> getManagerAttendGroup() {
         List<AttendanceManagementUser> managementUsers = attendanceManagementUserMapper.selectByUserId(LoginHelper.getUserId());
-        return managementUsers.stream()
+        List<AttendanceGroup> groups = managementUsers.stream()
             .map(groupUser -> AttendanceUtils.getGroup(groupUser.getGroupId()))
             .collect(Collectors.toList());
+        return MapstructUtils.convert(groups, AttendanceGroupVo.class);
     }
 
     @Override
@@ -60,14 +63,14 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
 
     @Override
     public AttendanceQrResp getQrCodeInfo(Long groupId) {
-        AttendanceGroupVo group = AttendanceUtils.getGroup(groupId);
+        AttendanceGroup group = AttendanceUtils.getGroup(groupId);
         if (group.getGroupMethod() != AttendanceMethodEnum.scan.getType()) {
             throw new ServiceException("该考勤组未启用扫码打卡");
         }
         DateTime dateTime = new DateTime();
         AttendanceQrCodeInfo qrCodeInfo = new AttendanceQrCodeInfo();
         AttendanceQrResp qrResp = new AttendanceQrResp();
-        qrCodeInfo.setAttendGroup(group);
+        qrCodeInfo.setAttendGroup(MapstructUtils.convert(group, AttendanceGroupVo.class));
         qrCodeInfo.setAttendType(AttendanceMethodEnum.scan.getType());
         if (YesNoEnum.YES.getValue().equals(group.getGroupCode())) {
             if (group.getCodeFreshTime() == null || group.getCodeFreshTime() <= 0) {
@@ -137,7 +140,7 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
     public List<AttendanceFlowVo> getAttendRecord(Long userId, Long groupId, String date) {
         List<AttendanceFlowVo> flows = mapper.selectByDate(groupId, userId, date);
         flows.forEach(flow -> {
-            flow.setAttendanceGroup(AttendanceUtils.getGroup(flow.getAttendGroupId()));
+            flow.setAttendanceGroup(MapstructUtils.convert(AttendanceUtils.getGroup(flow.getAttendGroupId()), AttendanceGroupVo.class));
             flow.setAttendanceClasses(AttendanceUtils.getGroupClass(flow.getAttendGroupId(), flow.getAttendClassesId()));
         });
         return flows;
@@ -147,7 +150,7 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
     public Map<String, List<AttendanceFlowVo>> getAttendRecordByMonth(Long userId, Long groupId, String month) {
         List<AttendanceFlowVo> flows = mapper.selectByUserIdAndMonth(groupId, userId, month);
         flows.forEach(flow -> {
-            flow.setAttendanceGroup(AttendanceUtils.getGroup(flow.getAttendGroupId()));
+            flow.setAttendanceGroup(MapstructUtils.convert(AttendanceUtils.getGroup(flow.getAttendGroupId()), AttendanceGroupVo.class));
             flow.setAttendanceClasses(AttendanceUtils.getGroupClass(flow.getAttendGroupId(), flow.getAttendClassesId()));
         });
         return flows.stream()
@@ -192,13 +195,13 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
         AttendanceFlowCountByDateRangeVO data = new AttendanceFlowCountByDateRangeVO();
         data.setGroupId(groupId);
 
-        List<AttendanceFlow> flows = mapper.selectByDateRange(groupId, null, startDate, endDate);
-        Map<Long, List<AttendanceFlow>> flowMap = flows.stream().collect(Collectors.groupingBy(AttendanceFlow::getUserId, LinkedHashMap::new, Collectors.toList()));
+        List<AttendanceFlowVo> flows = mapper.selectByDateRange(groupId, null, startDate, endDate);
+        Map<Long, List<AttendanceFlowVo>> flowMap = flows.stream().collect(Collectors.groupingBy(AttendanceFlowVo::getUserId, LinkedHashMap::new, Collectors.toList()));
         List<AttendanceFlowCountDetailByDateRangeVO> details = new ArrayList<>();
         double workHours = 0;
         int needAttendDays = 0;
-        for (Map.Entry<Long, List<AttendanceFlow>> entry : flowMap.entrySet()) {
-            List<AttendanceFlow> userFlows = entry.getValue();
+        for (Map.Entry<Long, List<AttendanceFlowVo>> entry : flowMap.entrySet()) {
+            List<AttendanceFlowVo> userFlows = entry.getValue();
             AttendanceFlowCountDetailByDateRangeVO countDateRange = AttendanceUtils.getUserFlowCountForDateRange(groupId, startDate, endDate, userFlows);
             details.add(countDateRange);
 
@@ -213,6 +216,7 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
         }
         data.setAverageWorkHours(needAttendDays > 0 ? NumberUtil.div(workHours, needAttendDays, 1) : 0);
         data.setDetails(details);
+
         return data;
     }
 }
