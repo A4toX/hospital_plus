@@ -100,4 +100,9 @@ public class SysTenant extends BaseEntity {
     @TableLogic
     private String delFlag;
 
+
+    /**
+     * 租户类型(1西医2中医)
+     */
+    private String tenantType;
 }

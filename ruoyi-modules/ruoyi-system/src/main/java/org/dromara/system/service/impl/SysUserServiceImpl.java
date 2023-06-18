@@ -358,7 +358,7 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
     public int updateUserProfile(SysUserBo user) {
         return baseMapper.update(null,
             new LambdaUpdateWrapper<SysUser>()
-                .set(ObjectUtil.isNotNull(user.getNickName()), SysUser::getNickName, user.getNickName())
+                .set(ObjectUtil.isNotNull(user.getRealName()), SysUser::getRealName, user.getRealName())
                 .set(SysUser::getPhonenumber, user.getPhonenumber())
                 .set(SysUser::getEmail, user.getEmail())
                 .set(SysUser::getSex, user.getSex())

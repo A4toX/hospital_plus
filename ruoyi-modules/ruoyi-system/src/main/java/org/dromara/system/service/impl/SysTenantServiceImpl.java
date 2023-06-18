@@ -148,7 +148,7 @@ public class SysTenantServiceImpl implements ISysTenantService {
         SysUser user = new SysUser();
         user.setTenantId(tenantId);
         user.setUserName(bo.getUsername());
-        user.setNickName(bo.getUsername());
+        user.setRealName(bo.getUsername());
         user.setPassword(BCrypt.hashpw(bo.getPassword()));
         user.setDeptId(deptId);
         userMapper.insert(user);

@@ -112,4 +112,11 @@ public class SysTenantVo implements Serializable {
     private String status;
 
 
+    /**
+     * 租户类型(1西医2中医)
+     */
+    @ExcelProperty(value = "租户类型", converter = ExcelDictConvert.class)
+    @ExcelDictFormat(readConverterExp = "1=西医,2=中医")
+    private String tenantType;
+
 }

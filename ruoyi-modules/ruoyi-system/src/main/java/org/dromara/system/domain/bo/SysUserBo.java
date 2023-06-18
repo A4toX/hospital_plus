@@ -51,7 +51,7 @@ public class SysUserBo extends BaseEntity {
      */
     @Xss(message = "用户昵称不能包含脚本字符")
     @Size(min = 0, max = 30, message = "用户昵称长度不能超过{max}个字符")
-    private String nickName;
+    private String realName;
 
     /**
      * 用户类型（sys_user系统用户）

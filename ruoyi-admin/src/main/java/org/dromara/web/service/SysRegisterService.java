@@ -49,7 +49,7 @@ public class SysRegisterService {
         }
         SysUserBo sysUser = new SysUserBo();
         sysUser.setUserName(username);
-        sysUser.setNickName(username);
+        sysUser.setRealName(username);
         sysUser.setPassword(BCrypt.hashpw(password));
         sysUser.setUserType(userType);
 

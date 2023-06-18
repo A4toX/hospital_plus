@@ -22,7 +22,7 @@ public class UserApiImpl implements UserApi {
         SysUser sysUser = userMapper.selectById(userId);
         User user = new User();
         user.setUserId(sysUser.getUserId());
-        user.setUserName(sysUser.getNickName());
+        user.setUserName(sysUser.getRealName());
         user.setPhone(sysUser.getPhonenumber());
         user.setDeptId(sysUser.getDeptId());
 

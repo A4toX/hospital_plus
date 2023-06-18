@@ -42,7 +42,7 @@ public class SysUserExportVo implements Serializable {
      * 用户昵称
      */
     @ExcelProperty(value = "用户名称")
-    private String nickName;
+    private String realName;
 
     /**
      * 用户邮箱

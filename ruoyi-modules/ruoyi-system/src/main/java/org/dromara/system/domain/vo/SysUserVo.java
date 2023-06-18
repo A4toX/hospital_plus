@@ -51,7 +51,7 @@ public class SysUserVo implements Serializable {
     /**
      * 用户昵称
      */
-    private String nickName;
+    private String realName;
 
     /**
      * 用户类型（sys_user系统用户）
@@ -69,6 +69,18 @@ public class SysUserVo implements Serializable {
      */
     @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String phonenumber;
+
+
+    /**
+     * 身份证件类型
+     */
+    private String idcardType;
+
+    /**
+     * 身份证件号码
+     */
+    @Sensitive(strategy = SensitiveStrategy.ID_CARD)
+    private String idcardNumb;
 
     /**
      * 用户性别（0男 1女 2未知）
@@ -137,5 +149,6 @@ public class SysUserVo implements Serializable {
      * 数据权限 当前角色ID
      */
     private Long roleId;
+
 
 }

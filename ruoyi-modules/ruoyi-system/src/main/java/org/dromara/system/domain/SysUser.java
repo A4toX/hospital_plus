@@ -40,7 +40,7 @@ public class SysUser extends TenantEntity {
     /**
      * 用户昵称
      */
-    private String nickName;
+    private String realName;
 
     /**
      * 用户类型（sys_user系统用户）
@@ -102,6 +102,16 @@ public class SysUser extends TenantEntity {
      * 备注
      */
     private String remark;
+
+    /**
+     * 身份证件类型
+     */
+    private String idcardType;
+
+    /**
+     * 身份证件号码
+     */
+    private String idcardNumb;
 
 
     public SysUser(Long userId) {
