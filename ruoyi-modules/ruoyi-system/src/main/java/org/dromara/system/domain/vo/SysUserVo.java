@@ -83,6 +83,12 @@ public class SysUserVo implements Serializable {
     private String idcardNumb;
 
     /**
+     * 用户身份(1员工2学员)
+     */
+    private String identity;
+
+
+    /**
      * 用户性别（0男 1女 2未知）
      */
     private String sex;

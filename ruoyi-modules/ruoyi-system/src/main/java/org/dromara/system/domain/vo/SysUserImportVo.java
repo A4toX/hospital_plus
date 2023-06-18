@@ -66,6 +66,9 @@ public class SysUserImportVo implements Serializable {
     @ExcelDictFormat(dictType = "sys_user_sex")
     private String sex;
 
+
+
+
     /**
      * 帐号状态（0正常 1停用）
      */

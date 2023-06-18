@@ -113,6 +113,10 @@ public class SysUser extends TenantEntity {
      */
     private String idcardNumb;
 
+    /**
+     * 用户身份(1员工2学员)
+     */
+    private String identity;
 
     public SysUser(Long userId) {
         this.userId = userId;

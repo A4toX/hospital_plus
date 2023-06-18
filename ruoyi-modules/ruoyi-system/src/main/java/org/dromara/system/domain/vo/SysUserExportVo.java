@@ -7,6 +7,8 @@ import io.github.linpeilie.annotations.AutoMapper;
 import io.github.linpeilie.annotations.ReverseAutoMapping;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dromara.common.sensitive.annotation.Sensitive;
+import org.dromara.common.sensitive.core.SensitiveStrategy;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -69,6 +71,26 @@ public class SysUserExportVo implements Serializable {
     @ExcelProperty(value = "帐号状态", converter = ExcelDictConvert.class)
     @ExcelDictFormat(dictType = "sys_normal_disable")
     private String status;
+
+    /**
+     * 身份证件类型
+     */
+    @ExcelProperty(value = "身份证件类型", converter = ExcelDictConvert.class)
+    @ExcelDictFormat(dictType = "sys_user_cert")
+    private String idcardType;
+
+    /**
+     * 身份证件号码
+     */
+    @ExcelProperty(value = "证件号码")
+    private String idcardNumb;
+
+    /**
+     * 用户身份(1员工2学员)
+     */
+    @ExcelProperty(value = "用户身份", converter = ExcelDictConvert.class)
+    @ExcelDictFormat(dictType = "sys_user_identity")
+    private String identity;
 
     /**
      * 最后登录IP
