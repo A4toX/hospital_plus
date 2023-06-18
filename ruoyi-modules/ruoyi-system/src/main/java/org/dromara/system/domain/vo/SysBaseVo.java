@@ -15,10 +15,10 @@ import java.util.Date;
 
 
 /**
- * 专业基地视图对象 sys_base
+ * 专业视图对象 sys_base
  *
  * @author yaoyingjie
- * @date 2023-06-15
+ * @date 2023-06-18
  */
 @Data
 @ExcelIgnoreUnannotated
@@ -32,7 +32,7 @@ public class SysBaseVo implements Serializable {
      * 主键
      */
     @ExcelProperty(value = "主键")
-    private Long id;
+    private Long baseId;
 
     /**
      * 专业名称
@@ -43,26 +43,9 @@ public class SysBaseVo implements Serializable {
     /**
      * 专业代码
      */
-    @ExcelProperty(value = "专业代码")
+    @ExcelProperty(value = "专业代码", converter = ExcelDictConvert.class)
+    @ExcelDictFormat(dictType = "sys_base")
     private String baseCode;
-
-    /**
-     * 专业负责人联系电话
-     */
-    @ExcelProperty(value = "专业负责人联系电话")
-    private String baseLeaderPhone;
-
-    /**
-     * 专业负责人名称
-     */
-    @ExcelProperty(value = "专业负责人名称")
-    private String baseLeaderName;
-
-    /**
-     * 备注
-     */
-    @ExcelProperty(value = "备注")
-    private String remark;
 
 
 }

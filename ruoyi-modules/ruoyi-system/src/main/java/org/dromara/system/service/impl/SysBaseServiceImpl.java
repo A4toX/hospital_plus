@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
+import org.dromara.system.domain.SysDictData;
+import org.dromara.system.mapper.SysDictDataMapper;
 import org.springframework.stereotype.Service;
 import org.dromara.system.domain.bo.SysBaseBo;
 import org.dromara.system.domain.vo.SysBaseVo;
@@ -15,32 +17,34 @@ import org.dromara.system.domain.SysBase;
 import org.dromara.system.mapper.SysBaseMapper;
 import org.dromara.system.service.ISysBaseService;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
 
 /**
- * 专业基地Service业务层处理
+ * 专业Service业务层处理
  *
  * @author yaoyingjie
- * @date 2023-06-15
+ * @date 2023-06-18
  */
 @RequiredArgsConstructor
 @Service
 public class SysBaseServiceImpl implements ISysBaseService {
 
     private final SysBaseMapper baseMapper;
+    private final SysDictDataMapper dictDataMapper;
 
     /**
-     * 查询专业基地
+     * 查询专业
      */
     @Override
-    public SysBaseVo queryById(Long id){
-        return baseMapper.selectVoById(id);
+    public SysBaseVo queryById(Long baseId){
+        return baseMapper.selectVoById(baseId);
     }
 
     /**
-     * 查询专业基地列表
+     * 查询专业列表
      */
     @Override
     public TableDataInfo<SysBaseVo> queryPageList(SysBaseBo bo, PageQuery pageQuery) {
@@ -50,7 +54,7 @@ public class SysBaseServiceImpl implements ISysBaseService {
     }
 
     /**
-     * 查询专业基地列表
+     * 查询专业列表
      */
     @Override
     public List<SysBaseVo> queryList(SysBaseBo bo) {
@@ -63,27 +67,30 @@ public class SysBaseServiceImpl implements ISysBaseService {
         LambdaQueryWrapper<SysBase> lqw = Wrappers.lambdaQuery();
         lqw.like(StringUtils.isNotBlank(bo.getBaseName()), SysBase::getBaseName, bo.getBaseName());
         lqw.eq(StringUtils.isNotBlank(bo.getBaseCode()), SysBase::getBaseCode, bo.getBaseCode());
-        lqw.eq(StringUtils.isNotBlank(bo.getBaseLeaderPhone()), SysBase::getBaseLeaderPhone, bo.getBaseLeaderPhone());
-        lqw.like(StringUtils.isNotBlank(bo.getBaseLeaderName()), SysBase::getBaseLeaderName, bo.getBaseLeaderName());
         return lqw;
     }
 
     /**
-     * 新增专业基地
+     * 新增专业
      */
     @Override
     public Boolean insertByBo(SysBaseBo bo) {
         SysBase add = MapstructUtils.convert(bo, SysBase.class);
+        String[] baseCode = add.getBaseCode().split(",");
         validEntityBeforeSave(add);
-        boolean flag = baseMapper.insert(add) > 0;
-        if (flag) {
-            bo.setId(add.getId());
-        }
-        return flag;
+        Arrays.asList(baseCode).forEach(item -> {
+            SysBase sysBase = new SysBase();
+            SysDictData dictData = dictDataMapper.selectOne(Wrappers.<SysDictData>lambdaQuery().eq(SysDictData::getDictType,"sys_base").eq(SysDictData::getDictValue, item));
+            sysBase.setBaseCode(item);
+            sysBase.setBaseName(dictData.getDictLabel());
+            baseMapper.insert(sysBase);
+        });
+
+        return true;
     }
 
     /**
-     * 修改专业基地
+     * 修改专业
      */
     @Override
     public Boolean updateByBo(SysBaseBo bo) {
@@ -96,11 +103,16 @@ public class SysBaseServiceImpl implements ISysBaseService {
      * 保存前的数据校验
      */
     private void validEntityBeforeSave(SysBase entity){
-        //TODO 做一些数据校验,如唯一约束
+        //新增时如果有重复数据，则直接抛出异常
+        String[] baseCode = entity.getBaseCode().split(",");
+        List<SysBase> list = baseMapper.selectList(Wrappers.<SysBase>lambdaQuery().in(SysBase::getBaseCode, baseCode));
+        if (!list.isEmpty()) {
+            throw new RuntimeException("专业编码已存在");
+        }
     }
 
     /**
-     * 批量删除专业基地
+     * 批量删除专业
      */
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {

@@ -10,10 +10,10 @@ import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
 
 /**
- * 专业基地业务对象 sys_base
+ * 专业业务对象 sys_base
  *
  * @author yaoyingjie
- * @date 2023-06-15
+ * @date 2023-06-18
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -24,12 +24,12 @@ public class SysBaseBo extends BaseEntity {
      * 主键
      */
     @NotNull(message = "主键不能为空", groups = { EditGroup.class })
-    private Long id;
+    private Long baseId;
 
     /**
      * 专业名称
      */
-    @NotBlank(message = "专业名称不能为空", groups = { AddGroup.class, EditGroup.class })
+//    @NotBlank(message = "专业名称不能为空", groups = { EditGroup.class })
     private String baseName;
 
     /**
@@ -37,23 +37,6 @@ public class SysBaseBo extends BaseEntity {
      */
     @NotBlank(message = "专业代码不能为空", groups = { AddGroup.class, EditGroup.class })
     private String baseCode;
-
-    /**
-     * 专业负责人联系电话
-     */
-    @NotBlank(message = "专业负责人联系电话不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String baseLeaderPhone;
-
-    /**
-     * 专业负责人名称
-     */
-    @NotBlank(message = "专业负责人名称不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String baseLeaderName;
-
-    /**
-     * 备注
-     */
-    private String remark;
 
 
 }
