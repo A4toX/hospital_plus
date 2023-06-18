@@ -63,6 +63,11 @@
 
         <dependency>
             <groupId>cn.hutool</groupId>
+            <artifactId>hutool-cron</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
             <artifactId>hutool-extra</artifactId>
         </dependency>
 
@@ -100,6 +105,10 @@
             <artifactId>ip2region</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

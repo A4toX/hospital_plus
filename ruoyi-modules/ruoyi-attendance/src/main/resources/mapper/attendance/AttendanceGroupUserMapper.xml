@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.attendance.mapper.AttendanceGroupUserMapper">
+    <select id="listByGroupId" resultType="com.hospital.attendance.domain.vo.attendUser.AttendanceUserRespVO">
+        SELECT
+        u.user_id AS userId,
+        u.user_name AS userName,
+        u.phone AS phone,
+        u.gender AS gender,
+        doc.get_year AS getYear,
+        doc.person_type AS personType,
+        doc.student_type AS studentType
+        FROM
+        attendance_group_user agu
+        INNER JOIN users u ON agu.user_id = u.user_id
+        INNER JOIN doctor_student doc on agu.user_id=doc.user_id
+        <where>
+                 agu.group_id = #{groupId}
+            <if test="userName != null and userName != ''">
+                AND u.user_name LIKE CONCAT('%', #{userName}, '%')
+            </if>
+            <if test="phone != null and phone != ''">
+                AND u.phone = #{phone}
+            </if>
+            <if test="gender != null and gender !=''">
+                AND u.gender = #{gender}
+            </if>
+            <if test="getYear != null and getYear !=''">
+                AND doc.get_year = #{getYear}
+            </if>
+            <if test="personType != null">
+                AND doc.person_type = #{personType}
+            </if>
+            <if test="studentType != null">
+                AND doc.student_type = #{studentType}
+            </if>
+        </where>
+    </select>
+
+</mapper>
