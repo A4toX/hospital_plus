@@ -7,6 +7,7 @@
         <groupId>org.dromara</groupId>
         <version>${revision}</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
     <modules>
@@ -15,6 +16,7 @@
         <module>ruoyi-job</module>
         <module>ruoyi-system</module>
         <module>ruoyi-attendance</module>
+        <module>ruoyi-report</module>
     </modules>
 
     <artifactId>ruoyi-modules</artifactId>
