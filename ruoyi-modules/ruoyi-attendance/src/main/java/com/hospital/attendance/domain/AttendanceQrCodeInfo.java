@@ -1,6 +1,6 @@
 package com.hospital.attendance.domain;
 
-import com.hospital.attendance.domain.vo.AttendanceGroupClassVO;
+import com.hospital.attendance.domain.vo.AttendanceGroupClassVo;
 import com.hospital.attendance.domain.vo.AttendanceGroupVo;
 import lombok.Data;
 
@@ -18,7 +18,7 @@ public class AttendanceQrCodeInfo {
     /**
      * 考勤班次
      */
-    private AttendanceGroupClassVO attendClass;
+    private AttendanceGroupClassVo attendClass;
 
     /**
      * 签到类型

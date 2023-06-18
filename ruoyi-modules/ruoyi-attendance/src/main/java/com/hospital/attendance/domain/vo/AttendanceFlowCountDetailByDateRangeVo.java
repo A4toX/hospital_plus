@@ -1,35 +1,30 @@
 package com.hospital.attendance.domain.vo;
 
 import lombok.Data;
-
-import java.util.List;
+import lombok.experimental.Accessors;
 
 /**
- * 考勤组日统计汇总
+ * 出勤人员列表
  * @author lgx
  */
 @Data
-public class AttendanceFlowCountByDayVO {
+@Accessors(chain = true)
+public class AttendanceFlowCountDetailByDateRangeVo {
 
     /**
-     * 考勤组ID
+     * 用户ID
      */
-    private Long groupId;
+    private Integer userId;
 
     /**
-     * 考勤日期
+     * 用户名称
      */
-    private String date;
+    private String username;
 
     /**
-     * 出勤人数
+     * 总工时
      */
-    private int attendNum;
-
-    /**
-     * 应出勤人数
-     */
-    private int expectedAttendNum;
+    private double workHours;
 
     /**
      * 平均工时
@@ -57,12 +52,17 @@ public class AttendanceFlowCountByDayVO {
     private int noAttendNum;
 
     /**
+     * 需要打卡天数
+     */
+    private int needAttendDays;
+
+    /**
+     * 未打卡天数
+     */
+    private int noAttendDays;
+
+    /**
      * 外勤数
      */
     private int outsideNum;
-
-    /**
-     * 出勤人员列表
-     */
-    private List<AttendanceFlowCountDetailByDayVO> details;
 }

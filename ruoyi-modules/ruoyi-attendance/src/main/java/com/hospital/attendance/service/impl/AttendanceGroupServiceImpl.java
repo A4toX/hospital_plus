@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hospital.attendance.domain.AttendanceGroup;
 import com.hospital.attendance.domain.bo.AttendanceGroupBo;
 import com.hospital.attendance.domain.vo.AttendanceGroupAreaVo;
-import com.hospital.attendance.domain.vo.AttendanceGroupClassesSimpleRespVO;
+import com.hospital.attendance.domain.vo.AttendanceGroupClassesSimpleRespVo;
 import com.hospital.attendance.domain.vo.AttendanceGroupRespVo;
 import com.hospital.attendance.domain.vo.AttendanceGroupVo;
 import com.hospital.attendance.enums.AttendanceMethodEnum;
@@ -51,7 +51,7 @@ public class AttendanceGroupServiceImpl extends BaseServiceImpl<AttendanceGroupM
         //如果考勤组为固定班次
         if (attendanceGroup.getGroupType() == AttendanceTypeEnum.fixed_time.getType()) {
             //根据考勤组id查询考勤班次信息
-            List<AttendanceGroupClassesSimpleRespVO> classVOList = attendanceGroupClassesMapper.selectByGroupIdSimple(id);
+            List<AttendanceGroupClassesSimpleRespVo> classVOList = attendanceGroupClassesMapper.selectByGroupIdSimple(id);
             vo.setGroupClassesSimpleRespVOS(classVOList);
         }
         //定位考勤， 封装考勤地点信息

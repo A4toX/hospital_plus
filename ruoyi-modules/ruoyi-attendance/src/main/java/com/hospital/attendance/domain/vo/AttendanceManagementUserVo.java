@@ -1,7 +1,6 @@
 package com.hospital.attendance.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
-import com.alibaba.excel.annotation.ExcelProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import com.hospital.attendance.domain.AttendanceManagementUser;

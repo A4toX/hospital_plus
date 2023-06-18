@@ -6,7 +6,7 @@ import lombok.Data;
  * 考勤组下的周次信息VO
  */
 @Data
-public class AttendanceGroupClassVO extends AttendanceClassesVo {
+public class AttendanceGroupClassVo extends AttendanceClassesVo {
 
 
     /**

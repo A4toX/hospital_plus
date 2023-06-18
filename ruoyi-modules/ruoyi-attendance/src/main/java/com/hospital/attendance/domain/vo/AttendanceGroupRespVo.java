@@ -2,7 +2,6 @@ package com.hospital.attendance.domain.vo;
 
 import lombok.Data;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -22,7 +21,7 @@ public class AttendanceGroupRespVo implements Serializable {
     /**
      * 考勤班次信息(固定班次)
      */
-    private List<AttendanceGroupClassesSimpleRespVO> groupClassesSimpleRespVOS;
+    private List<AttendanceGroupClassesSimpleRespVo> groupClassesSimpleRespVOS;
 
     /**
      * 考勤地点信息(定位考勤)

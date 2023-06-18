@@ -186,7 +186,7 @@ public class AttendanceUtils {
      * @param groupId 考勤组ID
      * @return 考勤组当日的考勤班次
      */
-    public static AttendanceGroupClassVO getGroupClass(Long groupId) {
+    public static AttendanceGroupClassVo getGroupClass(Long groupId) {
         return getGroupClass(groupId, new Date());
     }
 
@@ -197,11 +197,11 @@ public class AttendanceUtils {
      * @param date    日期
      * @return 考勤组指定日期的考勤班次
      */
-    public static AttendanceGroupClassVO getGroupClass(Long groupId, Date date) {
-        List<AttendanceGroupClassVO> groupClasses = getGroupClasses(groupId);
+    public static AttendanceGroupClassVo getGroupClass(Long groupId, Date date) {
+        List<AttendanceGroupClassVo> groupClasses = getGroupClasses(groupId);
         if (CollUtil.isNotEmpty(groupClasses)) {
             int week = DateUtils.getWeekOfDate(date);
-            for (AttendanceGroupClassVO groupClass : groupClasses) {
+            for (AttendanceGroupClassVo groupClass : groupClasses) {
                 if (groupClass.getWeekly() == week) {
                     return groupClass;
                 }
@@ -210,7 +210,7 @@ public class AttendanceUtils {
         return null;
     }
 
-    public static AttendanceGroupClassVO getGroupClass(Long groupId, String date) {
+    public static AttendanceGroupClassVo getGroupClass(Long groupId, String date) {
         return getGroupClass(groupId, DateUtils.parseDate(date));
     }
 
@@ -221,10 +221,10 @@ public class AttendanceUtils {
      * @param classId 考勤班次ID
      * @return
      */
-    public static AttendanceGroupClassVO getGroupClass(Long groupId, Long classId) {
-        List<AttendanceGroupClassVO> groupClasses = getGroupClasses(groupId);
+    public static AttendanceGroupClassVo getGroupClass(Long groupId, Long classId) {
+        List<AttendanceGroupClassVo> groupClasses = getGroupClasses(groupId);
         if (CollUtil.isNotEmpty(groupClasses) && classId != null) {
-            for (AttendanceGroupClassVO groupClass : groupClasses) {
+            for (AttendanceGroupClassVo groupClass : groupClasses) {
                 if (groupClass.getClassesId().equals(classId)) {
                     return groupClass;
                 }
@@ -239,9 +239,9 @@ public class AttendanceUtils {
      * @param groupId 考勤组ID
      * @return
      */
-    public static List<AttendanceGroupClassVO> getGroupClasses(Long groupId) {
+    public static List<AttendanceGroupClassVo> getGroupClasses(Long groupId) {
         String key = getKey(CacheTypeEnum.groupClasses, groupId);
-        List<AttendanceGroupClassVO> groupClasses = RedisUtils.getCacheObject(key);
+        List<AttendanceGroupClassVo> groupClasses = RedisUtils.getCacheObject(key);
         if (CollUtil.isEmpty(groupClasses)) {
             groupClasses = groupClassesMapper.selectByGroupId(groupId);
             if (CollUtil.isNotEmpty(groupClasses)) {
@@ -444,7 +444,7 @@ public class AttendanceUtils {
      * @return
      */
     public static boolean checkNeedAttendance(Long groupId, Date date) {
-        AttendanceGroupClassVO groupClass = getGroupClass(groupId);
+        AttendanceGroupClassVo groupClass = getGroupClass(groupId);
         AttendanceGroup group = getGroup(groupId);
         if (YesNoEnum.YES.getName().equals(groupClass.getStatus())) {
             if (YesNoEnum.YES.getValue().equals(group.getHolidayLeave())) {
@@ -487,7 +487,7 @@ public class AttendanceUtils {
      * @param flow       考勤记录数据
      * @param groupClass 考勤班次
      */
-    public static void handlerAttendStatus(AttendanceFlow flow, AttendanceGroupClassVO groupClass) {
+    public static void handlerAttendStatus(AttendanceFlow flow, AttendanceGroupClassVo groupClass) {
         Date nowDate = new DateTime();
         if (ObjectUtil.isNull(groupClass)) {
             flow.setAttendStatus(AttendanceStatusEnum.normal.getStatus());
@@ -530,8 +530,8 @@ public class AttendanceUtils {
         }
     }
 
-    public static AttendanceFlowCountDetailByDayVO getUserFlowCountForOneDay(List<AttendanceFlowVo> flows) {
-        AttendanceFlowCountDetailByDayVO data = new AttendanceFlowCountDetailByDayVO();
+    public static AttendanceFlowCountDetailByDayVo getUserFlowCountForOneDay(List<AttendanceFlowVo> flows) {
+        AttendanceFlowCountDetailByDayVo data = new AttendanceFlowCountDetailByDayVo();
         if (CollUtil.isNotEmpty(flows)) {
             AttendanceFlowVo firstFlow = flows.get(0);
             data.setUserId(flows.get(0).getUserId());
@@ -604,14 +604,14 @@ public class AttendanceUtils {
         return data;
     }
 
-    public static AttendanceFlowCountDetailByDateRangeVO getUserFlowCountForDateRange(Long groupId, String startDate, String endDate, List<AttendanceFlowVo> flows) {
-        AttendanceFlowCountDetailByDateRangeVO data = new AttendanceFlowCountDetailByDateRangeVO();
+    public static AttendanceFlowCountDetailByDateRangeVo getUserFlowCountForDateRange(Long groupId, String startDate, String endDate, List<AttendanceFlowVo> flows) {
+        AttendanceFlowCountDetailByDateRangeVo data = new AttendanceFlowCountDetailByDateRangeVo();
         data.setNeedAttendDays(getNeedAttendanceDays(groupId, startDate, endDate));
         if (CollUtil.isNotEmpty(flows)) {
             Map<String, List<AttendanceFlowVo>> flowMap = flows.stream().collect(Collectors.groupingBy(AttendanceFlowVo::getAttendDate, LinkedHashMap::new, Collectors.toList()));
             for (Map.Entry<String, List<AttendanceFlowVo>> flowEntity : flowMap.entrySet()) {
                 List<AttendanceFlowVo> oneDayFlows = flowEntity.getValue();
-                AttendanceFlowCountDetailByDayVO countOneDay = getUserFlowCountForOneDay(oneDayFlows);
+                AttendanceFlowCountDetailByDayVo countOneDay = getUserFlowCountForOneDay(oneDayFlows);
                 data.setWorkHours(data.getWorkHours() + countOneDay.getWorkHours());
                 data.setLateNum(data.getLateNum() + countOneDay.getLateNum());
                 data.setSeriousLateNum(data.getSeriousLateNum() + countOneDay.getSeriousLateNum());

@@ -80,7 +80,7 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
             qrResp.setFreshTime(freshTime);
             qrCodeInfo.setFreshTime(freshTime);
         }
-        AttendanceGroupClassVO groupClass = AttendanceUtils.getGroupClass(groupId);
+        AttendanceGroupClassVo groupClass = AttendanceUtils.getGroupClass(groupId);
         if (groupClass == null) {
             throw new ServiceException("该考勤组班次获取失败");
         }
@@ -102,7 +102,7 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
         flow.setAttendTime(DateUtil.formatTime(nowDate));
         flow.setAttendNumber(1);
 
-        AttendanceGroupClassVO groupClass = AttendanceUtils.getGroupClass(req.getAttendGroupId());
+        AttendanceGroupClassVo groupClass = AttendanceUtils.getGroupClass(req.getAttendGroupId());
         flow.setAttendClassesId(groupClass.getGroupClassesId());
         AttendanceUtils.handlerAttendStatus(flow, groupClass);
         flow.setNeedAttendFlag(YesNoEnum.getValueByBool(AttendanceUtils.checkNeedAttendance(flow.getAttendGroupId(), flow.getAttendDate())));
@@ -130,7 +130,7 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
         flow.setAttendClassesId(qrCodeInfo.getAttendClass().getClassesId());
         flow.setAttendNumber(1);
 
-        AttendanceGroupClassVO groupClass = qrCodeInfo.getAttendClass();
+        AttendanceGroupClassVo groupClass = qrCodeInfo.getAttendClass();
         AttendanceUtils.handlerAttendStatus(flow, groupClass);
         flow.setNeedAttendFlag(YesNoEnum.getValueByBool(AttendanceUtils.checkNeedAttendance(flow.getAttendGroupId(), flow.getAttendDate())));
         return mapper.insert(flow);
@@ -158,8 +158,8 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
     }
 
     @Override
-    public AttendanceFlowCountByDayVO attendCountByDay(Long groupId, String date) {
-        AttendanceFlowCountByDayVO data = new AttendanceFlowCountByDayVO();
+    public AttendanceFlowCountByDayVo attendCountByDay(Long groupId, String date) {
+        AttendanceFlowCountByDayVo data = new AttendanceFlowCountByDayVo();
         data.setGroupId(groupId);
         data.setDate(date);
         if (AttendanceUtils.checkNeedAttendance(groupId, date)) {
@@ -169,11 +169,11 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
         List<AttendanceFlowVo> flows = mapper.selectByDate(groupId, null, date);
         Map<Long, List<AttendanceFlowVo>> flowMap = flows.stream().collect(Collectors.groupingBy(AttendanceFlowVo::getUserId, LinkedHashMap::new, Collectors.toList()));
 
-        List<AttendanceFlowCountDetailByDayVO> details = new ArrayList<>();
+        List<AttendanceFlowCountDetailByDayVo> details = new ArrayList<>();
         double workHours = 0;
         for (Map.Entry<Long, List<AttendanceFlowVo>> entry : flowMap.entrySet()) {
             List<AttendanceFlowVo> userFlows = entry.getValue();
-            AttendanceFlowCountDetailByDayVO userCount = AttendanceUtils.getUserFlowCountForOneDay(userFlows);
+            AttendanceFlowCountDetailByDayVo userCount = AttendanceUtils.getUserFlowCountForOneDay(userFlows);
             details.add(userCount);
             if (YesNoEnum.YES.getValue().equals(userCount.getAttendFlag())) {
                 data.setAttendNum(data.getAttendNum() + 1);
@@ -191,18 +191,18 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
     }
 
     @Override
-    public AttendanceFlowCountByDateRangeVO attendCountByDateRange(Long groupId, String startDate, String endDate) {
-        AttendanceFlowCountByDateRangeVO data = new AttendanceFlowCountByDateRangeVO();
+    public AttendanceFlowCountByDateRangeVo attendCountByDateRange(Long groupId, String startDate, String endDate) {
+        AttendanceFlowCountByDateRangeVo data = new AttendanceFlowCountByDateRangeVo();
         data.setGroupId(groupId);
 
         List<AttendanceFlowVo> flows = mapper.selectByDateRange(groupId, null, startDate, endDate);
         Map<Long, List<AttendanceFlowVo>> flowMap = flows.stream().collect(Collectors.groupingBy(AttendanceFlowVo::getUserId, LinkedHashMap::new, Collectors.toList()));
-        List<AttendanceFlowCountDetailByDateRangeVO> details = new ArrayList<>();
+        List<AttendanceFlowCountDetailByDateRangeVo> details = new ArrayList<>();
         double workHours = 0;
         int needAttendDays = 0;
         for (Map.Entry<Long, List<AttendanceFlowVo>> entry : flowMap.entrySet()) {
             List<AttendanceFlowVo> userFlows = entry.getValue();
-            AttendanceFlowCountDetailByDateRangeVO countDateRange = AttendanceUtils.getUserFlowCountForDateRange(groupId, startDate, endDate, userFlows);
+            AttendanceFlowCountDetailByDateRangeVo countDateRange = AttendanceUtils.getUserFlowCountForDateRange(groupId, startDate, endDate, userFlows);
             details.add(countDateRange);
 
             workHours += countDateRange.getWorkHours();

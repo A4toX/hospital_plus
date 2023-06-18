@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hospital.attendance.mapper.AttendanceGroupClassesMapper">
-    <select id="selectByGroupId" resultType="com.hospital.attendance.domain.vo.AttendanceGroupClassVO">
+    <select id="selectByGroupId" resultType="com.hospital.attendance.domain.vo.AttendanceGroupClassVo">
         SELECT
             agc.id AS groupClassesId,
             agc.group_id AS groupId,
@@ -27,7 +27,7 @@
 
 
     <select id="selectByGroupIdSimple"
-            resultType="com.hospital.attendance.domain.vo.AttendanceGroupClassesSimpleRespVO">
+            resultType="com.hospital.attendance.domain.vo.AttendanceGroupClassesSimpleRespVo">
         SELECT
             agc.id AS groupClassesId,
             agc.group_id AS groupId,

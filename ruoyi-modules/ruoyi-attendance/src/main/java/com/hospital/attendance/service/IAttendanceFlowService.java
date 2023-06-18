@@ -33,7 +33,7 @@ public interface IAttendanceFlowService extends IBaseService<AttendanceFlowVo, A
 
     Map<String, List<AttendanceFlowVo>> getAttendRecordByMonth(Long userId, Long groupId, String month);
 
-    AttendanceFlowCountByDayVO attendCountByDay(Long groupId, String date);
+    AttendanceFlowCountByDayVo attendCountByDay(Long groupId, String date);
 
-    AttendanceFlowCountByDateRangeVO attendCountByDateRange(Long groupId, String startDate, String endDate);
+    AttendanceFlowCountByDateRangeVo attendCountByDateRange(Long groupId, String startDate, String endDate);
 }

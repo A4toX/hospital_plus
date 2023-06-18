@@ -139,7 +139,7 @@ public class AttendanceFlowController extends BaseController {
      * @return
      */
     @GetMapping("/attendCountByDay")
-    public R<AttendanceFlowCountByDayVO> attendCountByDay(Long groupId, String date) {
+    public R<AttendanceFlowCountByDayVo> attendCountByDay(Long groupId, String date) {
         return R.ok(attendanceFlowService.attendCountByDay(groupId, date));
     }
 
@@ -152,7 +152,7 @@ public class AttendanceFlowController extends BaseController {
      * @return
      */
     @GetMapping("/attendCountByDateRange")
-    public R<AttendanceFlowCountByDateRangeVO> attendCountByDateRange(Long groupId, String startDate, String endDate) {
+    public R<AttendanceFlowCountByDateRangeVo> attendCountByDateRange(Long groupId, String startDate, String endDate) {
         return R.ok(attendanceFlowService.attendCountByDateRange(groupId, startDate, endDate));
     }
 }

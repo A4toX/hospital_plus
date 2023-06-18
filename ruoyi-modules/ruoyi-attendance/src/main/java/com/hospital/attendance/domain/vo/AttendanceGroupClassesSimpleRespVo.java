@@ -6,7 +6,7 @@ import lombok.Data;
  * 考勤组周次关联信息返回
  */
 @Data
-public class AttendanceGroupClassesSimpleRespVO {
+public class AttendanceGroupClassesSimpleRespVo {
     /**
      * 班次id
      */

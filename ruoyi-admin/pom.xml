@@ -65,10 +65,6 @@
             <artifactId>ruoyi-demo</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-report</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.dromara</groupId>

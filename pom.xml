@@ -67,6 +67,10 @@
                 <profiles.active>local</profiles.active>
                 <logging.level>debug</logging.level>
             </properties>
+            <activation>
+                <!-- 默认环境 -->
+                <activeByDefault>true</activeByDefault>
+            </activation>
         </profile>
         <profile>
             <id>dev</id>
@@ -75,17 +79,6 @@
                 <profiles.active>dev</profiles.active>
                 <logging.level>debug</logging.level>
             </properties>
-        </profile>
-        <profile>
-            <id>local</id>
-            <properties>
-                <profiles.active>local</profiles.active>
-                <logging.level>debug</logging.level>
-            </properties>
-            <activation>
-                <!-- 默认环境 -->
-                <activeByDefault>true</activeByDefault>
-            </activation>
         </profile>
         <profile>
             <id>prod</id>
@@ -348,11 +341,6 @@
                 <version>${revision}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-report</artifactId>
-                <version>${revision}</version>
-            </dependency>
 
         </dependencies>
     </dependencyManagement>
