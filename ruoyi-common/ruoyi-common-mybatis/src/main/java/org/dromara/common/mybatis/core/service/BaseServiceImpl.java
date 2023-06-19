@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.ReflectionKit;
 import jakarta.annotation.Resource;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 
@@ -13,7 +14,7 @@ import java.util.Arrays;
  */
 public class BaseServiceImpl<M extends BaseMapperPlus<T, V>, T, V, B> implements IBaseService<V, B> {
 
-    @Resource
+    @Autowired
     protected M mapper;
 
     @Override
