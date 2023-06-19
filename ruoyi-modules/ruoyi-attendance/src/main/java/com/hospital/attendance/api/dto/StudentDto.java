@@ -1,22 +1,20 @@
-package com.hospital.attendance.domain.vo.attendUser;
+package com.hospital.attendance.api.dto;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
- * 管理考勤组下的人员查询条件
+ * @author lgx
  */
 @Data
-public class AttendanceUserReqVO {
+@Accessors(chain = true)
+public class StudentDto {
 
     /**
-     * 考勤组id
+     * 用户id
      */
-    private Integer groupId;
-
-    /**
-     * 医院id
-     */
-    private Integer hosId;
+    private Long userId;
 
     /**
      * 姓名

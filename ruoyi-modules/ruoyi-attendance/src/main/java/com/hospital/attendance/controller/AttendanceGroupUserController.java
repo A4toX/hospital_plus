@@ -1,10 +1,11 @@
 package com.hospital.attendance.controller;
 
-import com.hospital.attendance.api.StudentAPi;
 import com.hospital.attendance.domain.bo.AttendanceGroupUserBo;
 import com.hospital.attendance.domain.vo.AttendanceGroupUserVo;
-import com.hospital.attendance.domain.vo.attendUser.AttendanceUserReqVO;
-import com.hospital.attendance.domain.vo.attendUser.AttendanceUserRespVO;
+import com.hospital.attendance.domain.vo.attendUser.AddAttendanceUserVo;
+import com.hospital.attendance.domain.vo.attendUser.GroupStudentReqVo;
+import com.hospital.attendance.domain.vo.attendUser.AttendanceUserRespVo;
+import com.hospital.attendance.domain.vo.attendUser.StudentReqVo;
 import com.hospital.attendance.service.IAttendanceGroupUserService;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.domain.R;
@@ -28,7 +29,6 @@ import java.util.List;
 public class AttendanceGroupUserController extends BaseController {
 
     private final IAttendanceGroupUserService attendanceGroupUserService;
-    private final StudentAPi studentAPi;
 
     /**
      * 分页查询
@@ -37,7 +37,7 @@ public class AttendanceGroupUserController extends BaseController {
      * @return
      */
     @GetMapping("/findPage")
-    public TableDataInfo<AttendanceGroupUserVo> findPage(AttendanceGroupUserBo bo, PageQuery pageQuery) {
+    public TableDataInfo<AttendanceGroupUserVo> selectPageList(AttendanceGroupUserBo bo, PageQuery pageQuery) {
         return attendanceGroupUserService.selectPageList(bo, pageQuery);
     }
 
@@ -47,8 +47,8 @@ public class AttendanceGroupUserController extends BaseController {
      * @return
      */
     @GetMapping("/listByGroupId")
-    public R<List<AttendanceUserRespVO>> listByGroupId(AttendanceUserReqVO reqVO) {
-        List<AttendanceUserRespVO> list = attendanceGroupUserService.listByGroupId(reqVO);
+    public R<List<AttendanceUserRespVo>> listByGroupId(GroupStudentReqVo reqVO) {
+        List<AttendanceUserRespVo> list = attendanceGroupUserService.listByGroupId(reqVO);
         return R.ok(list);
     }
 
@@ -60,18 +60,19 @@ public class AttendanceGroupUserController extends BaseController {
      * @return
      */
     @PostMapping("/insert")
-    public R insert(@RequestBody AttendanceGroupUserBo entity) {
-        return toAjax(attendanceGroupUserService.insert(entity));
+    public R<Void> insert(@RequestBody AddAttendanceUserVo entity) {
+        attendanceGroupUserService.addUser(entity);
+        return R.ok();
     }
 
     /**
-     * 获取医院下所有学员
+     * 获取所有学员
      *
      * @return
      */
-    @GetMapping("/listAllStudentByhosId")
-    public R<List<AttendanceUserRespVO>> listAllStudentByhosId(AttendanceUserReqVO reqVO) {
-        List<AttendanceUserRespVO> list = studentAPi.listAllStudentByhosId(reqVO);
+    @GetMapping("/listStudent")
+    public R<List<AttendanceUserRespVo>> listStudent(StudentReqVo reqVO) {
+        List<AttendanceUserRespVo> list = attendanceGroupUserService.listStudent(reqVO);
         return R.ok(list);
     }
 }
