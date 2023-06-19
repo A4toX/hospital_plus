@@ -25,8 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceGroupClassesServiceImpl extends BaseServiceImpl<AttendanceGroupClassesMapper, AttendanceGroupClasses, AttendanceGroupClassesVo, AttendanceGroupClassesBo> implements IAttendanceGroupClassesService {
 
-    private AttendanceGroupMapper attendanceGroupMapper;
-    private AttendanceClassesMapper attendanceClassesMapper;
+    private final AttendanceGroupMapper attendanceGroupMapper;
+    private final AttendanceClassesMapper attendanceClassesMapper;
 
     @Override
     public int insert(AttendanceGroupClassesBo bo) {

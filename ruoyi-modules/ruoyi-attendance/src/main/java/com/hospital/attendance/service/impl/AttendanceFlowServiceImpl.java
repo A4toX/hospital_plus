@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMapper, AttendanceFlow, AttendanceFlowVo, AttendanceFlowBo> implements IAttendanceFlowService {
 
-    private AttendanceManagementUserMapper attendanceManagementUserMapper;
+    private final AttendanceManagementUserMapper attendanceManagementUserMapper;
 
     @Override
     public List<AttendanceGroupVo> getAttendGroup() {

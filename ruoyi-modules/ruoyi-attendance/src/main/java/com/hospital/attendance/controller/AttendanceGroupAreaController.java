@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceGroupAreaController extends BaseController {
 
-    private IAttendanceGroupAreaService attendanceGroupAreaService;
+    private final IAttendanceGroupAreaService attendanceGroupAreaService;
 
     /**
      * 新增考勤组下的考勤地点

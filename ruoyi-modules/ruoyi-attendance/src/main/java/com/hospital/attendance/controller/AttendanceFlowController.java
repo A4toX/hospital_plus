@@ -29,7 +29,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AttendanceFlowController extends BaseController {
 
-    private IAttendanceFlowService attendanceFlowService;
+    private final IAttendanceFlowService attendanceFlowService;
 
     /**
      * 获取当前登录人所在考勤组

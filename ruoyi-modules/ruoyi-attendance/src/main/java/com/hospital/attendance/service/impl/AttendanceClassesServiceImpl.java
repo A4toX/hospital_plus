@@ -30,7 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceClassesServiceImpl extends BaseServiceImpl<AttendanceClassesMapper, AttendanceClasses, AttendanceClassesVo, AttendanceClassesBo> implements IAttendanceClassesService {
 
-    private AttendanceGroupClassesMapper attendanceGroupClassesMapper;
+    private final AttendanceGroupClassesMapper attendanceGroupClassesMapper;
 
     @Override
     public TableDataInfo<AttendanceClassesVo> selectPageList(AttendanceClassesBo bo, PageQuery pageQuery) {

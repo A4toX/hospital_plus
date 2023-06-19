@@ -24,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceClassesController extends BaseController {
 
-    private IAttendanceClassesService attendanceClassesService;
+    private final IAttendanceClassesService attendanceClassesService;
 
     /**
      * 创建考勤班次

@@ -27,8 +27,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceGroupUserController extends BaseController {
 
-    private IAttendanceGroupUserService attendanceGroupUserService;
-    private StudentAPi studentAPi;
+    private final IAttendanceGroupUserService attendanceGroupUserService;
+    private final StudentAPi studentAPi;
 
     /**
      * 分页查询

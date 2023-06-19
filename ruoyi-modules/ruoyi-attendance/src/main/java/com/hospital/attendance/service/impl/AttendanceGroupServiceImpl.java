@@ -35,9 +35,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceGroupServiceImpl extends BaseServiceImpl<AttendanceGroupMapper, AttendanceGroup, AttendanceGroupVo, AttendanceGroupBo> implements IAttendanceGroupService {
 
-    private AttendanceClassesMapper attendanceClassesMapper;
-    private AttendanceGroupClassesMapper attendanceGroupClassesMapper;
-    private AttendanceGroupAreaMapper attendanceGroupAreaMapper;
+    private final AttendanceClassesMapper attendanceClassesMapper;
+    private final AttendanceGroupClassesMapper attendanceGroupClassesMapper;
+    private final AttendanceGroupAreaMapper attendanceGroupAreaMapper;
 
     @Override
     public AttendanceGroupRespVo selectAllInfoById(Long id) {
@@ -73,13 +73,13 @@ public class AttendanceGroupServiceImpl extends BaseServiceImpl<AttendanceGroupM
 
     @Override
     public int insert(AttendanceGroupBo bo) {
-        validateName(bo.getGroupName(), bo.getHosId(), null);
+        validateName(bo.getGroupName(), null);
         return super.insert(bo);
     }
 
     @Override
     public int update(AttendanceGroupBo bo) {
-        validateName(bo.getGroupName(), bo.getHosId(), bo.getId());
+        validateName(bo.getGroupName(), bo.getId());
         int result = super.update(bo);
         AttendanceUtils.removeGroupCache(bo.getId());
         return result;
@@ -96,9 +96,9 @@ public class AttendanceGroupServiceImpl extends BaseServiceImpl<AttendanceGroupM
         return result;
     }
 
-    private void validateName(String groupName, Long hosId, Long id) {
+    private void validateName(String groupName, Long id) {
         LambdaQueryWrapper<AttendanceGroup> lqw = new LambdaQueryWrapperX<>();
-        lqw.eq(AttendanceGroup::getGroupName, groupName).eq(AttendanceGroup::getHosId, hosId);
+        lqw.eq(AttendanceGroup::getGroupName, groupName);
         if (id != null) {
             lqw.ne(AttendanceGroup::getId, id);
         }
@@ -110,12 +110,11 @@ public class AttendanceGroupServiceImpl extends BaseServiceImpl<AttendanceGroupM
 
     private LambdaQueryWrapper<AttendanceGroup> buildQueryWrapper(AttendanceGroupBo bo) {
         return new LambdaQueryWrapperX<AttendanceGroup>()
-            .eq(AttendanceGroup::getHosId, bo.getHosId())
             .eqIfPresent(AttendanceGroup::getGroupType, bo.getGroupType())
             .eqIfPresent(AttendanceGroup::getGroupMethod, bo.getGroupMethod())
             .eqIfPresent(AttendanceGroup::getAreaOutside, bo.getAreaOutside())
             .eqIfPresent(AttendanceGroup::getGroupCode, bo.getGroupCode())
             .eqIfPresent(AttendanceGroup::getHolidayLeave, bo.getHolidayLeave())
-            .like(AttendanceGroup::getGroupName, bo.getGroupName());
+            .likeIfPresent(AttendanceGroup::getGroupName, bo.getGroupName());
     }
 }

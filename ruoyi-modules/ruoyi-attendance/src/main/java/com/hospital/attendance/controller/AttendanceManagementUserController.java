@@ -28,7 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceManagementUserController extends BaseController {
 
-    private IAttendanceManagementUserService attendanceManagementUserService;
+    private final IAttendanceManagementUserService attendanceManagementUserService;
 
     @GetMapping("/findPage")
     public TableDataInfo<AttendanceManagementUserVo> findPage(AttendanceManagementUserBo bo, PageQuery pageQuery) {
