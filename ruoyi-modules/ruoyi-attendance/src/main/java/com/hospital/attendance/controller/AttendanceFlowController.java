@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 考勤记录表
+ * 新考勤/考勤记录
  *
  * @author liguoxian
  */

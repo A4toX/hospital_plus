@@ -29,12 +29,6 @@ public class AttendanceGroupAreaVo implements Serializable {
     private Long id;
 
     /**
-     * 医院id
-     */
-    @ExcelProperty(value = "医院id")
-    private Long hosId;
-
-    /**
      * 考勤组id
      */
     @ExcelProperty(value = "考勤组id")

@@ -1,7 +1,8 @@
 package com.hospital.attendance.domain;
 
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -23,11 +24,6 @@ public class AttendanceClasses extends TenantEntity {
      */
     @TableId
     private Long id;
-
-    /**
-     * 医院id
-     */
-    private Long hosId;
 
     /**
      * 班次名称
@@ -52,7 +48,7 @@ public class AttendanceClasses extends TenantEntity {
     /**
      * 是否开启严重迟到
      */
-    private Integer isSeriousLate;
+    private String isSeriousLate;
 
     /**
      * 晚多少分钟为严重迟到
@@ -67,7 +63,7 @@ public class AttendanceClasses extends TenantEntity {
     /**
      * 是否开启下班自动打卡
      */
-    private Integer isAutoAfter;
+    private String isAutoAfter;
 
     /**
      * 早多少分钟为下班缺卡
@@ -82,7 +78,8 @@ public class AttendanceClasses extends TenantEntity {
     /**
      * 删除标志（0代表存在 2代表删除）
      */
-    private String delDelete;
+    @TableLogic
+    private String delFlag;
 
     /**
      * 备注

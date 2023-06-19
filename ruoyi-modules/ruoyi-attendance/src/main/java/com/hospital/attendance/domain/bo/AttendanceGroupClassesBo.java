@@ -7,7 +7,7 @@ import org.dromara.common.mybatis.core.domain.BaseEntity;
 import com.hospital.attendance.domain.AttendanceGroupClasses;
 
 /**
- * 排班班次表 视图对象
+ * 排班班次表 参数对象
  *
  * @author liguoxian
  */
@@ -17,7 +17,7 @@ import com.hospital.attendance.domain.AttendanceGroupClasses;
 public class AttendanceGroupClassesBo extends BaseEntity {
 
     /**
-     * 主键id
+     * 主键
      */
     private Long id;
 
@@ -39,7 +39,7 @@ public class AttendanceGroupClassesBo extends BaseEntity {
     /**
      * 是否需要打卡
      */
-    private Integer status;
+    private String status;
 
     /**
      * 备注

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 新考勤-考勤组负责人
+ * 新考勤/考勤组负责人
  *
  * @author makejava
  * @since 2023-05-21 19:29:23
@@ -30,6 +30,12 @@ public class AttendanceManagementUserController extends BaseController {
 
     private final IAttendanceManagementUserService attendanceManagementUserService;
 
+    /**
+     * 获取考勤组负责人列表(分页)
+     * @param bo
+     * @param pageQuery
+     * @return
+     */
     @GetMapping("/findPage")
     public TableDataInfo<AttendanceManagementUserVo> findPage(AttendanceManagementUserBo bo, PageQuery pageQuery) {
         return attendanceManagementUserService.selectPageList(bo, pageQuery);

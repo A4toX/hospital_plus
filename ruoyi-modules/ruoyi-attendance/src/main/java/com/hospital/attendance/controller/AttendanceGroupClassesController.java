@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 新考勤-考勤班次关联表
+ * 新考勤/考勤班次关联表
  *
  * @author makejava
  * @since 2023-05-21 17:56:38

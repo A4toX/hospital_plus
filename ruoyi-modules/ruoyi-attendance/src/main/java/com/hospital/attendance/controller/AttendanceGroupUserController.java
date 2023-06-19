@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 新考勤-考勤参与人员
+ * 新考勤/考勤参与人员
  *
  * @author yaoyingjie
  */

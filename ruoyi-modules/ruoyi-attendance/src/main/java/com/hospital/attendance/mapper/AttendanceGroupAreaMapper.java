@@ -17,10 +17,5 @@ public interface AttendanceGroupAreaMapper extends BaseMapperPlus<AttendanceGrou
     default List<AttendanceGroupAreaVo> selectByGroupId(Long groupId) {
         return selectVoList(new LambdaQueryWrapper<AttendanceGroupArea>().eq(AttendanceGroupArea::getGroupId, groupId));
     }
-
-    default List<AttendanceGroupAreaVo> listByHosId(Long hosId){
-        return selectVoList(new LambdaQueryWrapper<AttendanceGroupArea>().eq(AttendanceGroupArea::getHosId, hosId));
-    }
-
 }
 

@@ -51,12 +51,14 @@ public class AttendanceClassesServiceImpl extends BaseServiceImpl<AttendanceClas
     }
 
     @Override
-    public List<AttendanceClassesVo> listByHosId(Long hosId) {
-        return mapper.listByHosId(hosId);
+    public List<AttendanceClassesVo> listAll() {
+        return mapper.selectVoList();
     }
 
     private LambdaQueryWrapper<AttendanceClasses> buildQueryWrapper(AttendanceClassesBo bo) {
         return new LambdaQueryWrapperX<AttendanceClasses>()
-            .like(AttendanceClasses::getName, bo.getName());
+            .eqIfPresent(AttendanceClasses::getIsSeriousLate, bo.getIsSeriousLate())
+            .eqIfPresent(AttendanceClasses::getIsAutoAfter, bo.getIsAutoAfter())
+            .likeIfPresent(AttendanceClasses::getName, bo.getName());
     }
 }

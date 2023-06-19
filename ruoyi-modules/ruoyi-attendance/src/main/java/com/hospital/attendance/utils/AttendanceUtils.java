@@ -331,6 +331,10 @@ public class AttendanceUtils {
      * 加载所有班次缓存
      */
     public static void initClassesCache() {
+        if(CronUtil.getScheduler().isStarted()) {
+            CronUtil.stop();
+        }
+
         String key = getKey(CacheTypeEnum.classes, "");
         List<AttendanceClasses> attendanceClasses = classesMapper.selectList();
         for (Map.Entry<Long, Set<String>> entity : scheduleIds.entrySet()) {

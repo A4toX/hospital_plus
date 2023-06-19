@@ -26,11 +26,6 @@ public class AttendanceGroupArea extends TenantEntity {
     private Long id;
 
     /**
-     * 医院id
-     */
-    private Long hosId;
-
-    /**
      * 考勤组id
      */
     private Long groupId;

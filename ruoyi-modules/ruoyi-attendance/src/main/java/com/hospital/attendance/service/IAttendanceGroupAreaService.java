@@ -13,8 +13,7 @@ import java.util.List;
  *
  * @author yaoyingjie
  */
-@Service
 public interface IAttendanceGroupAreaService extends IBaseService<AttendanceGroupAreaVo, AttendanceGroupAreaBo> {
 
-    List<AttendanceGroupAreaVo> getHistoryByHosId(Long hosId);
+    List<AttendanceGroupAreaVo> getHistoryAreas();
 }

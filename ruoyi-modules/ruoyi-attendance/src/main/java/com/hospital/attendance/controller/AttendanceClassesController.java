@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 新考勤-考勤班次
+ * 新考勤/考勤班次
  *
  * @author yaoyingjie
  */
@@ -71,13 +71,12 @@ public class AttendanceClassesController extends BaseController {
 
 
     /**
-     * 根据医院id获取考勤组列表(用于下拉选择)
-     * @param hosId
+     * 获取考勤班次列表(用于下拉选择)
      * @return
      */
-    @GetMapping("/listByHosId")
-    public R<List<AttendanceClassesVo>> listByHosId(Long hosId) {
-        List<AttendanceClassesVo> list = attendanceClassesService.listByHosId(hosId);
+    @GetMapping("/listAll")
+    public R<List<AttendanceClassesVo>> listAll() {
+        List<AttendanceClassesVo> list = attendanceClassesService.listAll();
         return R.ok(list);
     }
 

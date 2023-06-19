@@ -10,5 +10,7 @@ import java.util.List;
  */
 public interface StudentAPi {
 
-    List<AttendanceUserRespVO> listAllStudentByhosId(AttendanceUserReqVO reqVO);
+    default List<AttendanceUserRespVO> listAllStudentByhosId(AttendanceUserReqVO reqVO) {
+        return null;
+    }
 }
