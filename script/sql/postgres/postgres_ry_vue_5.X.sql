@@ -160,7 +160,7 @@ create table if not exists sys_user
     tenant_id   varchar(20)  default '000000'::varchar,
     dept_id     int8,
     user_name   varchar(30)  not null,
-    nick_name   varchar(30)  not null,
+    real_name   varchar(30)  not null,
     user_type   varchar(10)  default 'sys_user'::varchar,
     email       varchar(50)  default ''::varchar,
     phonenumber varchar(11)  default ''::varchar,
@@ -185,7 +185,7 @@ comment on column sys_user.user_id      is '用户ID';
 comment on column sys_user.tenant_id    is '租户编号';
 comment on column sys_user.dept_id      is '部门ID';
 comment on column sys_user.user_name    is '用户账号';
-comment on column sys_user.nick_name    is '用户昵称';
+comment on column sys_user.real_name    is '用户昵称';
 comment on column sys_user.user_type    is '用户类型（sys_user系统用户）';
 comment on column sys_user.email        is '用户邮箱';
 comment on column sys_user.phonenumber  is '手机号码';

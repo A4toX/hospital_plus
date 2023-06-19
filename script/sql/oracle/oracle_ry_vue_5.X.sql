@@ -152,7 +152,7 @@ create table sys_user (
   tenant_id         varchar2(20)    default '000000',
   dept_id           number(20)      default null,
   user_name         varchar2(40)    not null,
-  nick_name         varchar2(40)    not null,
+  real_name         varchar2(40)    not null,
   user_type         varchar2(10)    default 'sys_user',
   email             varchar2(50)    default '',
   phonenumber       varchar2(11)    default '',
@@ -178,7 +178,7 @@ comment on column sys_user.user_id      is '用户ID';
 comment on column sys_user.tenant_id    is '租户编号';
 comment on column sys_user.dept_id      is '部门ID';
 comment on column sys_user.user_name    is '用户账号';
-comment on column sys_user.nick_name    is '用户昵称';
+comment on column sys_user.real_name    is '用户昵称';
 comment on column sys_user.user_type    is '用户类型（sys_user系统用户）';
 comment on column sys_user.email        is '用户邮箱';
 comment on column sys_user.phonenumber  is '手机号码';

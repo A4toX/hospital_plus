@@ -23,10 +23,10 @@ import org.dromara.system.service.ISysBaseService;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 
 /**
- * 专业基地
+ * 专业
  *
  * @author yaoyingjie
- * @date 2023-06-15
+ * @date 2023-06-18
  */
 @Validated
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class SysBaseController extends BaseController {
     private final ISysBaseService sysBaseService;
 
     /**
-     * 查询专业基地列表
+     * 查询专业列表
      */
     @SaCheckPermission("system:base:list")
     @GetMapping("/list")
@@ -46,33 +46,33 @@ public class SysBaseController extends BaseController {
     }
 
     /**
-     * 导出专业基地列表
+     * 导出专业列表
      */
     @SaCheckPermission("system:base:export")
-    @Log(title = "专业基地", businessType = BusinessType.EXPORT)
+    @Log(title = "专业", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(SysBaseBo bo, HttpServletResponse response) {
         List<SysBaseVo> list = sysBaseService.queryList(bo);
-        ExcelUtil.exportExcel(list, "专业基地", SysBaseVo.class, response);
+        ExcelUtil.exportExcel(list, "专业", SysBaseVo.class, response);
     }
 
     /**
-     * 获取专业基地详细信息
+     * 获取专业详细信息
      *
-     * @param id 主键
+     * @param baseId 主键
      */
     @SaCheckPermission("system:base:query")
-    @GetMapping("/{id}")
+    @GetMapping("/{baseId}")
     public R<SysBaseVo> getInfo(@NotNull(message = "主键不能为空")
-                                     @PathVariable Long id) {
-        return R.ok(sysBaseService.queryById(id));
+                                     @PathVariable Long baseId) {
+        return R.ok(sysBaseService.queryById(baseId));
     }
 
     /**
-     * 新增专业基地
+     * 新增专业
      */
     @SaCheckPermission("system:base:add")
-    @Log(title = "专业基地", businessType = BusinessType.INSERT)
+    @Log(title = "专业", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
     public R<Void> add(@Validated(AddGroup.class) @RequestBody SysBaseBo bo) {
@@ -80,10 +80,10 @@ public class SysBaseController extends BaseController {
     }
 
     /**
-     * 修改专业基地
+     * 修改专业
      */
     @SaCheckPermission("system:base:edit")
-    @Log(title = "专业基地", businessType = BusinessType.UPDATE)
+    @Log(title = "专业", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody SysBaseBo bo) {
@@ -91,15 +91,15 @@ public class SysBaseController extends BaseController {
     }
 
     /**
-     * 删除专业基地
+     * 删除专业
      *
-     * @param ids 主键串
+     * @param baseIds 主键串
      */
     @SaCheckPermission("system:base:remove")
-    @Log(title = "专业基地", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @Log(title = "专业", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{baseIds}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
-                          @PathVariable Long[] ids) {
-        return toAjax(sysBaseService.deleteWithValidByIds(List.of(ids), true));
+                          @PathVariable Long[] baseIds) {
+        return toAjax(sysBaseService.deleteWithValidByIds(List.of(baseIds), true));
     }
 }

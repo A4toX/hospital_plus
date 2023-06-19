@@ -43,8 +43,7 @@ public class SysBaseVo implements Serializable {
     /**
      * 专业代码
      */
-    @ExcelProperty(value = "专业代码", converter = ExcelDictConvert.class)
-    @ExcelDictFormat(dictType = "sys_base")
+    @ExcelProperty(value = "专业代码")
     private String baseCode;
 
 

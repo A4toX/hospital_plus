@@ -2326,7 +2326,7 @@ CREATE TABLE sys_user
     tenant_id   nvarchar(20)  DEFAULT ('000000')   NULL,
     dept_id     bigint                             NULL,
     user_name   nvarchar(30)                       NOT NULL,
-    nick_name   nvarchar(30)                       NOT NULL,
+    real_name   nvarchar(30)                       NOT NULL,
     user_type   nvarchar(10)  DEFAULT ('sys_user') NULL,
     email       nvarchar(50)  DEFAULT ''           NULL,
     phonenumber nvarchar(11)  DEFAULT ''           NULL,
@@ -2378,7 +2378,7 @@ EXEC sys.sp_addextendedproperty
     'MS_Description', N'用户昵称' ,
     'SCHEMA', N'dbo',
     'TABLE', N'sys_user',
-    'COLUMN', N'nick_name'
+    'COLUMN', N'real_name'
 GO
 EXEC sys.sp_addextendedproperty
     'MS_Description', N'用户类型（sys_user系统用户）' ,
