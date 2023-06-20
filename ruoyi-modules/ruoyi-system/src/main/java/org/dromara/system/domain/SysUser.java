@@ -38,7 +38,7 @@ public class SysUser extends TenantEntity {
     private String userName;
 
     /**
-     * 用户昵称
+     * 用户姓名
      */
     private String realName;
 

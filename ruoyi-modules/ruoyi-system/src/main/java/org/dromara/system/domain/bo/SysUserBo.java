@@ -47,10 +47,10 @@ public class SysUserBo extends BaseEntity {
     private String userName;
 
     /**
-     * 用户昵称
+     * 用户姓名
      */
-    @Xss(message = "用户昵称不能包含脚本字符")
-    @Size(min = 0, max = 30, message = "用户昵称长度不能超过{max}个字符")
+    @Xss(message = "用户姓名不能包含脚本字符")
+    @Size(min = 0, max = 30, message = "用户姓名长度不能超过{max}个字符")
     private String realName;
 
     /**
