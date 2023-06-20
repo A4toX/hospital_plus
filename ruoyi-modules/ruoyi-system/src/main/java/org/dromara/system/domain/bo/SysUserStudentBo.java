@@ -25,6 +25,10 @@ public class SysUserStudentBo extends BaseEntity {
      */
     private SysUserBo sysUserBo;
 
+    /**
+     * 人员类型
+     */
+    private Long userId;
 
     /**
      * 人员类型

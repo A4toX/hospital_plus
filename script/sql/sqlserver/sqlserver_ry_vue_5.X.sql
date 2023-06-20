@@ -2375,7 +2375,7 @@ EXEC sys.sp_addextendedproperty
     'COLUMN', N'user_name'
 GO
 EXEC sys.sp_addextendedproperty
-    'MS_Description', N'用户昵称' ,
+    'MS_Description', N'用户姓名' ,
     'SCHEMA', N'dbo',
     'TABLE', N'sys_user',
     'COLUMN', N'real_name'

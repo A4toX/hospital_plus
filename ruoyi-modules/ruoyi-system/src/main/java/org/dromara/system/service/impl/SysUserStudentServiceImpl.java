@@ -1,6 +1,9 @@
 package org.dromara.system.service.impl;
 
 import cn.dev33.satoken.secure.BCrypt;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.dromara.common.core.constant.UserConstants;
 import org.dromara.common.core.domain.R;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
@@ -53,8 +56,7 @@ public class SysUserStudentServiceImpl implements ISysUserStudentService {
      */
     @Override
     public TableDataInfo<SysUserStudentVo> queryPageList(SysUserStudentBo bo, PageQuery pageQuery) {
-        LambdaQueryWrapper<SysUserStudent> lqw = buildQueryWrapper(bo);
-        Page<SysUserStudentVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        Page<SysUserStudentVo> result = baseMapper.pageStudentList(pageQuery.build(), this.buildQueryWrapper(bo));
         return TableDataInfo.build(result);
     }
 
@@ -63,18 +65,20 @@ public class SysUserStudentServiceImpl implements ISysUserStudentService {
      */
     @Override
     public List<SysUserStudentVo> queryList(SysUserStudentBo bo) {
-        LambdaQueryWrapper<SysUserStudent> lqw = buildQueryWrapper(bo);
-        return baseMapper.selectVoList(lqw);
+        return baseMapper.selectStudentList(this.buildQueryWrapper(bo));
     }
 
-    private LambdaQueryWrapper<SysUserStudent> buildQueryWrapper(SysUserStudentBo bo) {
+
+    private Wrapper<SysUserStudent> buildQueryWrapper(SysUserStudentBo bo) {
         Map<String, Object> params = bo.getParams();
-        LambdaQueryWrapper<SysUserStudent> lqw = Wrappers.lambdaQuery();
-        lqw.eq(StringUtils.isNotBlank(bo.getPersonType()), SysUserStudent::getPersonType, bo.getPersonType());
-        lqw.eq(StringUtils.isNotBlank(bo.getStudentType()), SysUserStudent::getStudentType, bo.getStudentType());
-        lqw.eq(StringUtils.isNotBlank(bo.getResidentYear()), SysUserStudent::getResidentYear, bo.getResidentYear());
-        lqw.eq(bo.getBaseId() != null, SysUserStudent::getBaseId, bo.getBaseId());
-        return lqw;
+        QueryWrapper<SysUserStudent> wrapper = new QueryWrapper<>();
+        wrapper.eq(StringUtils.isNotBlank(bo.getPersonType()),"us.person_type", bo.getPersonType())
+            .eq(StringUtils.isNotBlank(bo.getStudentType()),"us.student_type", bo.getStudentType())
+            .eq(StringUtils.isNotBlank(bo.getResidentYear()),"us.resident_year", bo.getResidentYear())
+            .like(params.get("realName") != null, "u.real_name", params.get("realName"))
+            .like(params.get("phonenumber") != null, "u.phonenumber", params.get("phonenumber"))
+            .like("u.del_flag", UserConstants.USER_NORMAL);
+        return wrapper;
     }
 
     /**
@@ -84,7 +88,6 @@ public class SysUserStudentServiceImpl implements ISysUserStudentService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean insertByBo(SysUserStudentBo bo) {
         SysUserStudent add = MapstructUtils.convert(bo, SysUserStudent.class);
-        add.setUserId(bo.getSysUserBo().getUserId());
         validEntityBeforeSave(add);
         boolean flag = baseMapper.insert(add) > 0;
         return flag;

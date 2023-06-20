@@ -455,4 +455,8 @@ public class SysRoleServiceImpl implements ISysRoleService {
             }
         });
     }
+    @Override
+    public SysRole selectRoleByRoleKey(String student){
+        return baseMapper.selectOne(new LambdaQueryWrapper<SysRole>().eq(SysRole::getRoleKey,student));
+    }
 }

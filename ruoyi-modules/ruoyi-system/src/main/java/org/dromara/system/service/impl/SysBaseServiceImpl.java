@@ -121,4 +121,9 @@ public class SysBaseServiceImpl implements ISysBaseService {
         }
         return baseMapper.deleteBatchIds(ids) > 0;
     }
+
+    @Override
+    public SysBase selectBaseByCode(String baseCode){
+        return baseMapper.selectOne(Wrappers.<SysBase>lambdaQuery().eq(SysBase::getBaseCode,baseCode));
+    }
 }

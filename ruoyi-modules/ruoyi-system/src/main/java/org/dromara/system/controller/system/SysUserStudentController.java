@@ -8,9 +8,15 @@ import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.excel.core.ExcelResult;
 import org.dromara.system.domain.SysUser;
 import org.dromara.system.domain.bo.SysUserBo;
+import org.dromara.system.domain.vo.SysUserImportVo;
+import org.dromara.system.domain.vo.SysuserStudentImportVo;
+import org.dromara.system.listener.SysUserImportListener;
+import org.dromara.system.listener.SysUserStudentImportListener;
 import org.dromara.system.service.ISysUserService;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import org.dromara.common.idempotent.annotation.RepeatSubmit;
@@ -26,6 +32,7 @@ import org.dromara.system.domain.vo.SysUserStudentVo;
 import org.dromara.system.domain.bo.SysUserStudentBo;
 import org.dromara.system.service.ISysUserStudentService;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 学员
@@ -91,6 +98,7 @@ public class SysUserStudentController extends BaseController {
             return R.fail("新增用户'" + user.getUserName() + "'失败，邮箱账号已存在");
         }
         userService.insertUser(user);
+        bo.setUserId(user.getUserId());
         return toAjax(sysUserStudentService.insertByBo(bo));
     }
 
@@ -116,5 +124,21 @@ public class SysUserStudentController extends BaseController {
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] userIds) {
         return toAjax(sysUserStudentService.deleteWithValidByIds(List.of(userIds), true));
+    }
+
+
+
+    /**
+     * 导入学员
+     *
+     * @param file          导入文件
+     * @param updateSupport 是否更新已存在数据
+     */
+    @Log(title = "学员管理", businessType = BusinessType.IMPORT)
+    @SaCheckPermission("system:userStudent:import")
+    @PostMapping(value = "/importData", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public R<Void> importData(@RequestPart("file") MultipartFile file, boolean updateSupport) throws Exception {
+        ExcelResult<SysuserStudentImportVo> result = ExcelUtil.importExcel(file.getInputStream(), SysuserStudentImportVo.class, new SysUserStudentImportListener(updateSupport));
+        return R.ok(result.getAnalysis());
     }
 }

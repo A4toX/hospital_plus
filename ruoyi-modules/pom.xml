@@ -16,6 +16,7 @@
         <module>ruoyi-job</module>
         <module>ruoyi-system</module>
         <module>ruoyi-attendance</module>
+        <module>ruoyi-cycle</module>
     </modules>
 
     <artifactId>ruoyi-modules</artifactId>

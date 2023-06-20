@@ -49,7 +49,7 @@ public class SysUserVo implements Serializable {
     private String userName;
 
     /**
-     * 用户昵称
+     * 用户姓名
      */
     private String realName;
 

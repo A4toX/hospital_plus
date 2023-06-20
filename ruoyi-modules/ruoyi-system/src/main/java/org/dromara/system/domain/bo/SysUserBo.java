@@ -70,6 +70,8 @@ public class SysUserBo extends BaseEntity {
      */
     private String phonenumber;
 
+
+
     /**
      * 用户性别（0男 1女 2未知）
      */
@@ -105,6 +107,22 @@ public class SysUserBo extends BaseEntity {
      * 数据权限 当前角色ID
      */
     private Long roleId;
+
+
+    /**
+     * 身份证件类型
+     */
+    private String idcardType;
+
+    /**
+     * 身份证件号码
+     */
+    private String idcardNumb;
+
+    /**
+     * 用户身份(1员工2学员)
+     */
+    private String identity;
 
     public SysUserBo(Long userId) {
         this.userId = userId;
