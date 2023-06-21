@@ -342,6 +342,18 @@
             </dependency>
 
 
+            <dependency>
+                <groupId>org.dromara</groupId>
+                <artifactId>ruoyi-cycle</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.dromara</groupId>
+                <artifactId>ruoyi-activity</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

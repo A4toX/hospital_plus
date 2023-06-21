@@ -185,7 +185,7 @@ comment on column sys_user.user_id      is '用户ID';
 comment on column sys_user.tenant_id    is '租户编号';
 comment on column sys_user.dept_id      is '部门ID';
 comment on column sys_user.user_name    is '用户账号';
-comment on column sys_user.real_name    is '用户昵称';
+comment on column sys_user.real_name    is '用户姓名';
 comment on column sys_user.user_type    is '用户类型（sys_user系统用户）';
 comment on column sys_user.email        is '用户邮箱';
 comment on column sys_user.phonenumber  is '手机号码';

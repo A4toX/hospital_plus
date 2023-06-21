@@ -42,7 +42,7 @@ public class SysUserImportVo implements Serializable {
     private String userName;
 
     /**
-     * 用户昵称
+     * 用户姓名
      */
     @ExcelProperty(value = "用户名称")
     private String realName;

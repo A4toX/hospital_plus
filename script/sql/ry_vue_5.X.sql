@@ -106,7 +106,7 @@ create table sys_user (
   tenant_id         varchar(20)     default '000000'           comment '租户编号',
   dept_id           bigint(20)      default null               comment '部门ID',
   user_name         varchar(30)     not null                   comment '用户账号',
-  real_name         varchar(30)     not null                   comment '用户昵称',
+  real_name         varchar(30)     not null                   comment '用户姓名',
   user_type         varchar(10)     default 'sys_user'         comment '用户类型（sys_user系统用户）',
   email             varchar(50)     default ''                 comment '用户邮箱',
   phonenumber       varchar(11)     default ''                 comment '手机号码',

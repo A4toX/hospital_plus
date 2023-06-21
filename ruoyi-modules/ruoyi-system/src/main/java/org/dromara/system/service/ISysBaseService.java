@@ -46,4 +46,6 @@ public interface ISysBaseService {
      * 校验并批量删除专业信息
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+
+    SysBase selectBaseByCode(String baseCode);
 }

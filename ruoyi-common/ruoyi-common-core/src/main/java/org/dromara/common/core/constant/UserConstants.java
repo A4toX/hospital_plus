@@ -129,4 +129,7 @@ public interface UserConstants {
      */
     Long SUPER_ADMIN_ID = 1L;
 
+    String IDENTITY_STUDENT = "student";
+    String IDENTITY_STAFF = "staff";
+
 }
