@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 /**
- * 教学活动主表(ActivitySetting) Controller
+ * 教学活动
  *
  * @author makejava
  * @since 2023-06-21 14:17:47
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/activity/activitySetting")
 public class ActivitySettingController extends BaseController {
 
-    private ActivitySettingService activitySettingService;
+    private final ActivitySettingService activitySettingService;
 
     @SaCheckPermission("activity:activitySetting:list")
     @GetMapping("/list")
