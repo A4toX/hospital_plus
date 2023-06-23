@@ -1,16 +1,19 @@
 package com.hospital.activity.domain.bo;
 
+import com.hospital.activity.domain.ActivitySetting;
+import org.dromara.common.mybatis.core.domain.BaseEntity;
+import org.dromara.common.core.validate.AddGroup;
+import org.dromara.common.core.validate.EditGroup;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.dromara.common.mybatis.core.domain.BaseEntity;
-import com.hospital.activity.domain.ActivitySetting;
+import jakarta.validation.constraints.*;
 
 /**
- * 教学活动主表(ActivitySetting) 参数对象
+ * 教学活动业务对象 activity_setting
  *
- * @author makejava
- * @since 2023-06-21 14:17:47
+ * @author Lion Li
+ * @date 2023-06-21
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -20,12 +23,26 @@ public class ActivitySettingBo extends BaseEntity {
     /**
      * 主键
      */
+    @NotNull(message = "主键不能为空", groups = { EditGroup.class })
     private Long id;
+
+    /**
+     * 活动名称
+     */
+    @NotBlank(message = "活动名称不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String activityName;
 
     /**
      * 类型
      */
-    private String type;
+    @NotBlank(message = "类型不能为空", groups = { AddGroup.class})
+    private String activityType;
+
+    /**
+     * 活动级别
+     */
+    @NotBlank(message = "活动级别不能为空", groups = { AddGroup.class})
+    private String activityLevel;
 
     /**
      * 活动科室id
@@ -35,11 +52,13 @@ public class ActivitySettingBo extends BaseEntity {
     /**
      * 活动开始时间
      */
+    @NotBlank(message = "活动开始时间不能为空", groups = { AddGroup.class, EditGroup.class })
     private String startTime;
 
     /**
      * 活动结束时间
      */
+    @NotBlank(message = "活动结束时间不能为空", groups = { AddGroup.class, EditGroup.class })
     private String endTime;
 
     /**
@@ -65,7 +84,10 @@ public class ActivitySettingBo extends BaseEntity {
     /**
      * 是否开启签到
      */
-    private String isSign;
+    @NotBlank(message = "是否开启签到不能为空", groups = { AddGroup.class})
+    private String sign;
+
+
+
 
 }
-

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.activity.mapper.ActivityUserMapper">
+    <resultMap type="com.hospital.activity.domain.vo.ActivityUserVo" id="activityUserResult">
+        <id property="id" column="id"/>
+        <association property="userInfo" column="user_id" resultMap="simpleUserResult"/>
+    </resultMap>
+
+    <resultMap type="org.dromara.system.domain.vo.SysUserSimpleVo" id="simpleUserResult">
+        <id property="userId" column="user_id"/>
+
+    </resultMap>
+    <select id="selectUserSign" resultType="com.hospital.activity.domain.vo.ActivityUserVo">
+        SELECT
+            au.id,
+            au.activity_id,
+            au.user_id,
+            au.sign_flag,
+            au.sign_time,
+            su.user_id,
+            su.real_name,
+            su.sex,
+            su.phonenumber,
+            su.idcard_numb
+        FROM
+            activity_user au
+                INNER JOIN sys_user su ON au.user_id = su.user_id
+            ${ew.getCustomSqlSegment}
+    </select>
+</mapper>
