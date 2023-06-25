@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.cycle.mapper.CycleGroupMapper">
+    <resultMap type="com.hospital.cycle.domain.vo.CycleGroupVo" id="cycleGroupResult">
+        <id property="groupId" column="group_id"/>
+        <collection property="cycleGroupDeptList" javaType="java.util.List" resultMap="cycleGroupDeptResult" />
+    </resultMap>
+
+    <resultMap type="com.hospital.cycle.domain.vo.CycleGroupDeptVo" id="cycleGroupDeptResult">
+        <id property="groupDeptId" column="group_dept_id"/>
+    </resultMap>
+
+
+    <select id="selectListWithDept" resultMap="cycleGroupResult">
+        SELECT
+            cg.group_id,
+            cg.rule_id,
+            cg.group_name,
+            cg.base_id,
+            cg.group_type,
+            cg.group_method,
+            cg.group_unit_num,
+            cg.method_number,
+            cgd.group_dept_id,
+            cgd.group_id,
+            cgd.rule_id,
+            cgd.dept_id,
+            cgd.dept_unit_num,
+            sd.dept_name
+        FROM cycle_group cg
+            left join cycle_group_dept cgd on cg.group_id = cgd.group_id
+            left join sys_dept sd on cgd.dept_id = sd.dept_id
+            ${ew.getCustomSqlSegment}
+    </select>
+</mapper>
