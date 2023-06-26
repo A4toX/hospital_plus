@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class CycleRecordImport implements Serializable {
+public class CycleRecordImportVo implements Serializable {
 
     /**
      * 科室名称

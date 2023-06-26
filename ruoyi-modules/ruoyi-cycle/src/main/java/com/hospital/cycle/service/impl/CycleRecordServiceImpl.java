@@ -1,5 +1,8 @@
 package com.hospital.cycle.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.event.AnalysisEventListener;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
@@ -15,9 +18,9 @@ import com.hospital.cycle.domain.CycleRecord;
 import com.hospital.cycle.mapper.CycleRecordMapper;
 import com.hospital.cycle.service.ICycleRecordService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Collection;
+import java.io.InputStream;
+import java.util.*;
+
 
 /**
  * 用户轮转记录Service业务层处理
@@ -112,5 +115,43 @@ public class CycleRecordServiceImpl implements ICycleRecordService {
             //TODO 做一些业务上的校验,判断是否需要校验
         }
         return baseMapper.deleteBatchIds(ids) > 0;
+    }
+
+
+    public void importData(InputStream inputStream){
+        EasyExcel.read(inputStream,new AnalysisEventListener<Map<String, Object>>() {
+            private Map<Integer, String> headMap;
+            private final StringBuilder successMsg = new StringBuilder();
+            private final StringBuilder failureMsg = new StringBuilder();
+
+
+            @Override
+            public void invokeHeadMap(Map<Integer, String> headMap, AnalysisContext context) {
+                this.headMap = headMap;
+                System.out.println("表头信息：" + headMap);
+
+            }
+            @Override
+            public void invoke(Map<String, Object> valueData, AnalysisContext context) {
+                List<Map<String,Object>> dataList = new ArrayList<>();
+                //把表头和值放入Map
+                HashMap<String, Object> paramsMap = new HashMap<>();
+                for(int i=0;i<valueData.size();i++){
+                    if (i==0){
+                        System.out.println(valueData.get(i));
+                    }
+                    String key=headMap.get(i);
+                    Object  value=valueData.get(i);
+                    //将表头作为map的key，每行每个单元格的数据作为map的value
+                    paramsMap.put(key,value);
+                }
+                dataList.add(paramsMap);
+            }
+
+
+            @Override
+            public void doAfterAllAnalysed(AnalysisContext context) {
+            }
+        }).sheet().doRead();
     }
 }

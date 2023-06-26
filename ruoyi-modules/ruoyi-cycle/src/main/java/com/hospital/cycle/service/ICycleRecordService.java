@@ -6,6 +6,7 @@ import com.hospital.cycle.domain.bo.CycleRecordBo;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
@@ -46,4 +47,6 @@ public interface ICycleRecordService {
      * 校验并批量删除用户轮转记录信息
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+
+    void importData(InputStream inputStream);
 }
