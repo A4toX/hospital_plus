@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.toolkit.SimpleQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.constant.CacheNames;
@@ -529,5 +530,17 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
         SysUser sysUser = baseMapper.selectOne(new LambdaQueryWrapper<SysUser>()
             .select(SysUser::getRealName).eq(SysUser::getUserId, userId));
         return ObjectUtil.isNull(sysUser) ? null : sysUser.getRealName();
+    }
+
+    @Override
+    public List<Long> selectUserIdsByRoleIds(List<Long> roleIds) {
+        return SimpleQuery.list(Wrappers.lambdaQuery(SysUserRole.class)
+            .select(SysUserRole::getUserId).in(SysUserRole::getRoleId, roleIds), SysUserRole::getUserId);
+    }
+
+    @Override
+    public List<Long> selectUserIdsByDeptIds(List<Long> deptIds) {
+        return SimpleQuery.list(Wrappers.lambdaQuery(SysUser.class)
+            .select(SysUser::getUserId).in(SysUser::getDeptId, deptIds), SysUser::getUserId);
     }
 }

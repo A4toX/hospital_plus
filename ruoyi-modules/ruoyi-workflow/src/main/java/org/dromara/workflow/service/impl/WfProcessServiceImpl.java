@@ -294,9 +294,9 @@ public class WfProcessServiceImpl implements IWfProcessService {
                 .processInstanceId(task.getProcessInstanceId())
                 .singleResult();
             Long userId = Long.parseLong(historicProcessInstance.getStartUserId());
-            String nickName = userService.selectNickNameById(userId);
+            String realName = userService.selectRealNameById(userId);
             flowTask.setStartUserId(userId);
-            flowTask.setStartUserName(nickName);
+            flowTask.setStartUserName(realName);
 
             // 流程变量
             flowTask.setProcVars(task.getProcessVariables());
@@ -341,9 +341,9 @@ public class WfProcessServiceImpl implements IWfProcessService {
                     .processInstanceId(task.getProcessInstanceId())
                     .singleResult();
             Long userId = Long.parseLong(historicProcessInstance.getStartUserId());
-            String nickName = userService.selectNickNameById(userId);
+            String realName = userService.selectRealNameById(userId);
             taskVo.setStartUserId(userId);
-            taskVo.setStartUserName(nickName);
+            taskVo.setStartUserName(realName);
             // 流程变量
             taskVo.setProcVars(task.getProcessVariables());
 
@@ -389,9 +389,9 @@ public class WfProcessServiceImpl implements IWfProcessService {
                 .processInstanceId(task.getProcessInstanceId())
                 .singleResult();
             Long userId = Long.parseLong(historicProcessInstance.getStartUserId());
-            String nickName = userService.selectNickNameById(userId);
+            String realName = userService.selectRealNameById(userId);
             flowTask.setStartUserId(userId);
-            flowTask.setStartUserName(nickName);
+            flowTask.setStartUserName(realName);
 
             flowList.add(flowTask);
         }
@@ -433,9 +433,9 @@ public class WfProcessServiceImpl implements IWfProcessService {
                     .processInstanceId(task.getProcessInstanceId())
                     .singleResult();
             Long userId = Long.parseLong(historicProcessInstance.getStartUserId());
-            String nickName = userService.selectNickNameById(userId);
+            String realName = userService.selectRealNameById(userId);
             flowTask.setStartUserId(userId);
-            flowTask.setStartUserName(nickName);
+            flowTask.setStartUserName(realName);
 
             flowList.add(flowTask);
         }
@@ -483,9 +483,9 @@ public class WfProcessServiceImpl implements IWfProcessService {
                 .processInstanceId(histTask.getProcessInstanceId())
                 .singleResult();
             Long userId = Long.parseLong(historicProcessInstance.getStartUserId());
-            String nickName = userService.selectNickNameById(userId);
+            String realName = userService.selectRealNameById(userId);
             flowTask.setStartUserId(userId);
-            flowTask.setStartUserName(nickName);
+            flowTask.setStartUserName(realName);
 
             // 流程变量
             flowTask.setProcVars(histTask.getProcessVariables());
@@ -539,9 +539,9 @@ public class WfProcessServiceImpl implements IWfProcessService {
                     .processInstanceId(histTask.getProcessInstanceId())
                     .singleResult();
             Long userId = Long.parseLong(historicProcessInstance.getStartUserId());
-            String nickName = userService.selectNickNameById(userId);
+            String realName = userService.selectRealNameById(userId);
             flowTask.setStartUserId(userId);
-            flowTask.setStartUserName(nickName);
+            flowTask.setStartUserName(realName);
 
             // 流程变量
             flowTask.setProcVars(histTask.getProcessVariables());
@@ -838,18 +838,17 @@ public class WfProcessServiceImpl implements IWfProcessService {
             if (BpmnXMLConstants.ELEMENT_EVENT_START.equals(activityInstance.getActivityType())) {
                 if (ObjectUtil.isNotNull(historicProcIns)) {
                     Long userId = Long.parseLong(historicProcIns.getStartUserId());
-                    String nickName = userService.selectNickNameById(userId);
-                    if (nickName != null) {
+                    String realName = userService.selectRealNameById(userId);
+                    if (realName != null) {
                         elementVo.setAssigneeId(userId);
-                        elementVo.setAssigneeName(nickName);
+                        elementVo.setAssigneeName(realName);
                     }
                 }
             } else if (BpmnXMLConstants.ELEMENT_TASK_USER.equals(activityInstance.getActivityType())) {
                 if (StringUtils.isNotBlank(activityInstance.getAssignee())) {
                     Long userId = Long.parseLong(activityInstance.getAssignee());
-                    String nickName = userService.selectNickNameById(userId);
                     elementVo.setAssigneeId(userId);
-                    elementVo.setAssigneeName(nickName);
+                    elementVo.setAssigneeName(userService.selectRealNameById(userId));
                 }
                 // 展示审批人员
                 List<HistoricIdentityLink> linksForTask = historyService.getHistoricIdentityLinksForTask(activityInstance.getTaskId());
@@ -858,8 +857,8 @@ public class WfProcessServiceImpl implements IWfProcessService {
                     if ("candidate".equals(identityLink.getType())) {
                         if (StringUtils.isNotBlank(identityLink.getUserId())) {
                             Long userId = Long.parseLong(identityLink.getUserId());
-                            String nickName = userService.selectNickNameById(userId);
-                            stringBuilder.append(nickName).append(",");
+                            String realName = userService.selectRealNameById(userId);
+                            stringBuilder.append(realName).append(",");
                         }
                         if (StringUtils.isNotBlank(identityLink.getGroupId())) {
                             if (identityLink.getGroupId().startsWith(TaskConstants.ROLE_GROUP_PREFIX)) {

@@ -12,10 +12,12 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.constant.TenantConstants;
 import org.dromara.common.core.constant.UserConstants;
 import org.dromara.common.core.domain.model.LoginUser;
 import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.service.RoleService;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.core.utils.StringUtils;
@@ -33,6 +35,7 @@ import org.dromara.system.mapper.SysRoleMapper;
 import org.dromara.system.mapper.SysRoleMenuMapper;
 import org.dromara.system.mapper.SysUserRoleMapper;
 import org.dromara.system.service.ISysRoleService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +48,7 @@ import java.util.*;
  */
 @RequiredArgsConstructor
 @Service
-public class SysRoleServiceImpl implements ISysRoleService {
+public class SysRoleServiceImpl implements ISysRoleService, RoleService {
 
     private final SysRoleMapper baseMapper;
     private final SysRoleMenuMapper roleMenuMapper;
@@ -476,5 +479,13 @@ public class SysRoleServiceImpl implements ISysRoleService {
     @Override
     public SysRole selectRoleByRoleKey(String student){
         return baseMapper.selectOne(new LambdaQueryWrapper<SysRole>().eq(SysRole::getRoleKey,student));
+    }
+
+    @Cacheable(cacheNames = CacheNames.SYS_ROLE_NAME, key = "#roleId")
+    @Override
+    public String selectRoleNameById(Long roleId) {
+        SysRole sysRole = baseMapper.selectOne(new LambdaQueryWrapper<SysRole>()
+            .select(SysRole::getRoleName).eq(SysRole::getRoleId, roleId));
+        return ObjectUtil.isNull(sysRole) ? null : sysRole.getRoleName();
     }
 }

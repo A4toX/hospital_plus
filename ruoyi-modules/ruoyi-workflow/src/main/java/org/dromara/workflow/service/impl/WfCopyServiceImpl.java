@@ -93,7 +93,7 @@ public class WfCopyServiceImpl implements IWfCopyService {
         String[] ids = taskBo.getCopyUserIds().split(",");
         List<WfCopy> copyList = new ArrayList<>(ids.length);
         Long originatorId = LoginHelper.getUserId();
-        String originatorName = LoginHelper.getNickName();
+        String originatorName = LoginHelper.getRealName();
         String title = historicProcessInstance.getProcessDefinitionName() + "-" + taskBo.getTaskName();
         for (String id : ids) {
             Long userId = Long.valueOf(id);

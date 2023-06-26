@@ -65,4 +65,13 @@ public interface CacheNames {
      */
     String ONLINE_TOKEN = "online_tokens";
 
+    /**
+     * 角色名称
+     */
+    String SYS_ROLE_NAME = "sys_role_name#30d";
+
+    /**
+     * 部门名称
+     */
+    String SYS_DEPT_NAME = "sys_dept_name#30d";
 }
