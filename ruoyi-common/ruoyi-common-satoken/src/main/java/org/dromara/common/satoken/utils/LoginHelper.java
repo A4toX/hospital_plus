@@ -134,6 +134,13 @@ public class LoginHelper {
     }
 
     /**
+     * 获取真实姓名
+     * @return
+     */
+    public static String getRealName() {
+        return getLoginUser().getRealName();
+    }
+    /**
      * 获取用户类型
      */
     public static UserType getUserType() {

@@ -98,6 +98,11 @@ public class LoginUser implements Serializable {
     private String username;
 
     /**
+     * 真实名称
+     */
+    private String realName;
+
+    /**
      * 角色对象
      */
     private List<RoleDTO> roles;

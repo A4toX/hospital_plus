@@ -144,6 +144,7 @@ public class SysLoginService {
         loginUser.setTenantId(user.getTenantId());
         loginUser.setUserId(user.getUserId());
         loginUser.setUsername(user.getUserName());
+        loginUser.setRealName(user.getRealName());
         loginUser.setUserType(user.getUserType());
         loginUser.setOpenid(openid);
         // 生成token
@@ -310,6 +311,7 @@ public class SysLoginService {
         loginUser.setUserId(user.getUserId());
         loginUser.setDeptId(user.getDeptId());
         loginUser.setUsername(user.getUserName());
+        loginUser.setRealName(user.getRealName());
         loginUser.setUserType(user.getUserType());
         loginUser.setMenuPermission(permissionService.getMenuPermission(user.getUserId()));
         loginUser.setRolePermission(permissionService.getRolePermission(user.getUserId()));
