@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserApiImpl implements UserApi {
 
-    private SysUserMapper userMapper;
+    private final SysUserMapper userMapper;
 
     @Override
     public User getUser(Long userId) {

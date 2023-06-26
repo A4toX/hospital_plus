@@ -1,14 +1,18 @@
 package com.hospital.attendance.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hospital.attendance.api.StudentApi;
+import com.hospital.attendance.api.dto.StudentDto;
 import com.hospital.attendance.domain.AttendanceGroupUser;
 import com.hospital.attendance.domain.bo.AttendanceGroupUserBo;
 import com.hospital.attendance.domain.vo.AttendanceGroupUserVo;
 import com.hospital.attendance.domain.vo.attendUser.AddAttendanceUserVo;
-import com.hospital.attendance.domain.vo.attendUser.AttendanceUserReqVO;
-import com.hospital.attendance.domain.vo.attendUser.AttendanceUserRespVO;
+import com.hospital.attendance.domain.vo.attendUser.GroupStudentReqVo;
+import com.hospital.attendance.domain.vo.attendUser.AttendanceUserRespVo;
+import com.hospital.attendance.domain.vo.attendUser.StudentReqVo;
 import com.hospital.attendance.mapper.AttendanceGroupUserMapper;
 import com.hospital.attendance.service.IAttendanceGroupUserService;
 import com.hospital.attendance.utils.AttendanceUtils;
@@ -21,6 +25,7 @@ import org.dromara.common.mybatis.core.service.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,6 +38,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AttendanceGroupUserServiceImpl extends BaseServiceImpl<AttendanceGroupUserMapper, AttendanceGroupUser, AttendanceGroupUserVo, AttendanceGroupUserBo> implements IAttendanceGroupUserService {
+
+    private final StudentApi studentApi;
 
     @Override
     public TableDataInfo<AttendanceGroupUserVo> selectPageList(AttendanceGroupUserBo bo, PageQuery pageQuery) {
@@ -50,9 +57,8 @@ public class AttendanceGroupUserServiceImpl extends BaseServiceImpl<AttendanceGr
         List<AttendanceGroupUser> users = mapper.selectList(new LambdaQueryWrapper<AttendanceGroupUser>().eq(AttendanceGroupUser::getGroupId, entity.getGroupId()));
         Set<Long> nowUserIds = Set.of(entity.getAddUserIds().toArray(Long[]::new));
         Set<Long> oldUserIds = users.stream().map(AttendanceGroupUser::getUserId).collect(Collectors.toSet());
-        //使用steam比对distinctUserIds和userIdList，获取需要添加的人员
+
         Set<Long> addUserIds = nowUserIds.stream().filter(item -> !oldUserIds.contains(item)).collect(Collectors.toSet());
-        //使用steam比对distinctUserIds和userIdList，获取需要删除的人员
         Set<Long> delUserIds = oldUserIds.stream().filter(item -> !nowUserIds.contains(item)).collect(Collectors.toSet());
         //删除
         if (delUserIds != null && delUserIds.size() > 0) {
@@ -74,12 +80,24 @@ public class AttendanceGroupUserServiceImpl extends BaseServiceImpl<AttendanceGr
     }
 
     @Override
-    public List<AttendanceUserRespVO> listByGroupId(AttendanceUserReqVO reqVO) {
-        return mapper.listByGroupId(reqVO);
+    public List<AttendanceUserRespVo> listByGroupId(GroupStudentReqVo reqVO) {
+        List<Long> userIds = AttendanceUtils.getUsersByGroupId(reqVO.getGroupId());
+        if(CollUtil.isEmpty(userIds)) {
+            return new ArrayList<>();
+        }
+        List<StudentDto> dtos = studentApi.selectStudent(reqVO, userIds);
+        return BeanUtil.copyToList(dtos, AttendanceUserRespVo.class);
+    }
+
+    @Override
+    public List<AttendanceUserRespVo> listStudent(StudentReqVo reqVO) {
+        List<StudentDto> dtos = studentApi.selectStudent(reqVO, null);
+        return BeanUtil.copyToList(dtos, AttendanceUserRespVo.class);
     }
 
     private LambdaQueryWrapper<AttendanceGroupUser> buildQueryWrapper(AttendanceGroupUserBo bo) {
         return new LambdaQueryWrapperX<AttendanceGroupUser>()
-            .like(AttendanceGroupUser::getUserId, bo.getUserId());
+            .eq(AttendanceGroupUser::getGroupId, bo.getGroupId())
+            .eqIfPresent(AttendanceGroupUser::getUserId, bo.getUserId());
     }
 }

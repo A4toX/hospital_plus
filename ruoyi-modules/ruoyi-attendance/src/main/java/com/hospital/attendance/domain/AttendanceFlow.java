@@ -26,11 +26,6 @@ public class AttendanceFlow extends TenantEntity {
     private Long id;
 
     /**
-     * 医院id
-     */
-    private Long hosId;
-
-    /**
      * 用户id
      */
     private Long userId;
@@ -46,9 +41,9 @@ public class AttendanceFlow extends TenantEntity {
     private Long attendClassesId;
 
     /**
-     * 签到类型
+     * 签到方式
      */
-    private Integer attendType;
+    private Integer attendMethod;
 
     /**
      * 签到状态

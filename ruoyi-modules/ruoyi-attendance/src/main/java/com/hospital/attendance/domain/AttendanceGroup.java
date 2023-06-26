@@ -26,11 +26,6 @@ public class AttendanceGroup extends TenantEntity {
     private Long id;
 
     /**
-     * 医院id
-     */
-    private Long hosId;
-
-    /**
      * 考勤组名称
      */
     private String groupName;

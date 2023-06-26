@@ -13,6 +13,7 @@ import org.dromara.system.domain.vo.SysConfigVo;
 import org.dromara.system.service.ISysConfigService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,12 +25,12 @@ import java.util.List;
  * @author Lion Li
  */
 @Validated
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/system/config")
 public class SysConfigController extends BaseController {
 
-    private final ISysConfigService configService;
+    @Autowired
+    private ISysConfigService configService;
 
     /**
      * 获取参数配置列表

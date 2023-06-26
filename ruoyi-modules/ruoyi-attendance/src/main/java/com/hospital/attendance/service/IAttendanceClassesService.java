@@ -12,8 +12,7 @@ import java.util.List;
  *
  * @author yaoyingjie
  */
-@Service
 public interface IAttendanceClassesService extends IBaseService<AttendanceClassesVo, AttendanceClassesBo> {
 
-    List<AttendanceClassesVo> listByHosId(Long hosId);
+    List<AttendanceClassesVo> listAll();
 }

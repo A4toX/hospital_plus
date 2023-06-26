@@ -68,12 +68,12 @@ public class AttendanceUtils {
      */
     public static List<Long> getMyGroupId(Long userId) {
         String userKey = getKey(CacheTypeEnum.users, "users");
-        Map<Long, List<Long>> userMap = RedisUtils.getCacheObject(userKey);
+        Map<String, List<Long>> userMap = RedisUtils.getCacheObject(userKey);
         if (userMap == null) {
             initUserGroupCache();
             userMap = RedisUtils.getCacheObject(userKey);
         }
-        return userMap.get(userId);
+        return userMap.get(userId.toString());
     }
 
     /**
@@ -84,12 +84,12 @@ public class AttendanceUtils {
      */
     public static List<Long> getUsersByGroupId(Long groupId) {
         String groupKey = getKey(CacheTypeEnum.users, "groups");
-        Map<Long, List<Long>> groupMap = RedisUtils.getCacheObject(groupKey);
+        Map<String, List<Long>> groupMap = RedisUtils.getCacheObject(groupKey);
         if (groupMap == null) {
             initUserGroupCache();
             groupMap = RedisUtils.getCacheObject(groupKey);
         }
-        return groupMap.get(groupId);
+        return groupMap.get(groupId.toString());
     }
 
     /**
@@ -110,11 +110,11 @@ public class AttendanceUtils {
         String userKey = getKey(CacheTypeEnum.users, "users");
         String groupKey = getKey(CacheTypeEnum.users, "groups");
         List<AttendanceGroupUser> groupUsers = groupUserMapper.selectList();
-        Map<Long, List<Long>> userMap = groupUsers.stream()
-                .collect(Collectors.groupingBy(AttendanceGroupUser::getUserId, Collectors.mapping(AttendanceGroupUser::getGroupId, Collectors.toList())));
+        Map<String, List<Long>> userMap = groupUsers.stream()
+                .collect(Collectors.groupingBy(obj -> obj.getUserId().toString(), Collectors.mapping(AttendanceGroupUser::getGroupId, Collectors.toList())));
 
-        Map<Long, List<Long>> groupMap = groupUsers.stream()
-                .collect(Collectors.groupingBy(AttendanceGroupUser::getGroupId, Collectors.mapping(AttendanceGroupUser::getGroupId, Collectors.toList())));
+        Map<String, List<Long>> groupMap = groupUsers.stream()
+                .collect(Collectors.groupingBy(obj -> obj.getGroupId().toString(), Collectors.mapping(AttendanceGroupUser::getUserId, Collectors.toList())));
         removeGroupUserCache();
         RedisUtils.setCacheObject(userKey, userMap);
         RedisUtils.setCacheObject(groupKey, groupMap);
@@ -331,6 +331,10 @@ public class AttendanceUtils {
      * 加载所有班次缓存
      */
     public static void initClassesCache() {
+        if(CronUtil.getScheduler().isStarted()) {
+            CronUtil.stop();
+        }
+
         String key = getKey(CacheTypeEnum.classes, "");
         List<AttendanceClasses> attendanceClasses = classesMapper.selectList();
         for (Map.Entry<Long, Set<String>> entity : scheduleIds.entrySet()) {

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 考勤记录表
+ * 新考勤/考勤记录
  *
  * @author liguoxian
  */
@@ -29,7 +29,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AttendanceFlowController extends BaseController {
 
-    private IAttendanceFlowService attendanceFlowService;
+    private final IAttendanceFlowService attendanceFlowService;
 
     /**
      * 获取当前登录人所在考勤组

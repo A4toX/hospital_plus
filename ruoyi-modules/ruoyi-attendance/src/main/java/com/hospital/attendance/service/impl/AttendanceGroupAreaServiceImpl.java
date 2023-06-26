@@ -47,8 +47,8 @@ public class AttendanceGroupAreaServiceImpl extends BaseServiceImpl<AttendanceGr
     }
 
     @Override
-    public List<AttendanceGroupAreaVo> getHistoryByHosId(Long hosId) {
-        List<AttendanceGroupAreaVo> areaList = mapper.listByHosId(hosId);
+    public List<AttendanceGroupAreaVo> getHistoryAreas() {
+        List<AttendanceGroupAreaVo> areaList = mapper.selectVoList();
         //根据地点中的经纬度去重
         List<AttendanceGroupAreaVo> distinctList = areaList.stream()
                 .distinct()

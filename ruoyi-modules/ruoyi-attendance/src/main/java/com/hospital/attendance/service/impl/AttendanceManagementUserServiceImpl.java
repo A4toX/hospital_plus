@@ -1,14 +1,18 @@
 package com.hospital.attendance.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hospital.attendance.api.TeacherApi;
+import com.hospital.attendance.api.dto.TeacherDto;
 import com.hospital.attendance.domain.AttendanceManagementUser;
 import com.hospital.attendance.domain.bo.AttendanceManagementUserBo;
 import com.hospital.attendance.domain.vo.AttendanceManagementUserVo;
 import com.hospital.attendance.domain.vo.attendUser.AddAttendanceUserVo;
-import com.hospital.attendance.domain.vo.attendUser.AttendanceMUserReqVO;
+import com.hospital.attendance.domain.vo.attendUser.GroupManagerReqVo;
 import com.hospital.attendance.domain.vo.attendUser.AttendanceMUserRespVo;
+import com.hospital.attendance.domain.vo.attendUser.TeacherReqVo;
 import com.hospital.attendance.mapper.AttendanceManagementUserMapper;
 import com.hospital.attendance.service.IAttendanceManagementUserService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +24,7 @@ import org.dromara.common.mybatis.core.service.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,6 +38,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AttendanceManagementUserServiceImpl extends BaseServiceImpl<AttendanceManagementUserMapper, AttendanceManagementUser, AttendanceManagementUserVo, AttendanceManagementUserBo> implements IAttendanceManagementUserService {
+
+    private final TeacherApi teacherApi;
 
     @Override
     public TableDataInfo<AttendanceManagementUserVo> selectPageList(AttendanceManagementUserBo bo, PageQuery pageQuery) {
@@ -73,17 +80,25 @@ public class AttendanceManagementUserServiceImpl extends BaseServiceImpl<Attenda
     }
 
     @Override
-    public List<AttendanceMUserRespVo> listByGroupId(AttendanceMUserReqVO reqVO) {
-        return mapper.listByGroupId(reqVO);
+    public List<AttendanceMUserRespVo> listByGroupId(GroupManagerReqVo reqVO) {
+        List<AttendanceManagementUser> users = mapper.selectByGroupId(reqVO.getGroupId());
+        if(CollUtil.isEmpty(users)) {
+            return new ArrayList<>();
+        }
+        List<Long> userIds = users.stream().map(AttendanceManagementUser::getUserId).collect(Collectors.toList());
+        List<TeacherDto> dtos = teacherApi.selectTeacher(reqVO, userIds);
+        return BeanUtil.copyToList(dtos, AttendanceMUserRespVo.class);
     }
 
     @Override
-    public List<AttendanceMUserRespVo> listAllStaffByHosId(AttendanceMUserReqVO reqVO) {
-        return mapper.listAllStaffByHosId(reqVO);
+    public List<AttendanceMUserRespVo> listAllStaff(TeacherReqVo reqVO) {
+        List<TeacherDto> dtos = teacherApi.selectTeacher(reqVO, null);
+        return BeanUtil.copyToList(dtos, AttendanceMUserRespVo.class);
     }
 
     private LambdaQueryWrapper<AttendanceManagementUser> buildQueryWrapper(AttendanceManagementUserBo bo) {
         return new LambdaQueryWrapperX<AttendanceManagementUser>()
-            .like(AttendanceManagementUser::getUserId, bo.getUserId());
+            .eq(AttendanceManagementUser::getGroupId, bo.getGroupId())
+            .eqIfPresent(AttendanceManagementUser::getUserId, bo.getUserId());
     }
 }

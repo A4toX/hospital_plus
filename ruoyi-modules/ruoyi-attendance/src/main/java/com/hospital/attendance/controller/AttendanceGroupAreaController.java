@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 新考勤-考勤组地点
+ * 新考勤/考勤组地点
  *
  * @author yaoyingjie
  */
@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceGroupAreaController extends BaseController {
 
-    private IAttendanceGroupAreaService attendanceGroupAreaService;
+    private final IAttendanceGroupAreaService attendanceGroupAreaService;
 
     /**
      * 新增考勤组下的考勤地点
@@ -74,13 +74,11 @@ public class AttendanceGroupAreaController extends BaseController {
 
     /**
      * 获取历史考勤地点
-     *
-     * @param hosId
      * @return
      */
-    @GetMapping("/getHistoryByHosId")
-    public R<List<AttendanceGroupAreaVo>> getHistoryByHosId(Long hosId) {
-        List<AttendanceGroupAreaVo> list = attendanceGroupAreaService.getHistoryByHosId(hosId);
+    @GetMapping("/getHistoryAreas")
+    public R<List<AttendanceGroupAreaVo>> getHistoryAreas() {
+        List<AttendanceGroupAreaVo> list = attendanceGroupAreaService.getHistoryAreas();
         return R.ok(list);
     }
 }

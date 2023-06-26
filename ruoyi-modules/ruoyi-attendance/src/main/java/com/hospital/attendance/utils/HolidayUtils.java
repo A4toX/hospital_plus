@@ -63,7 +63,7 @@ public class HolidayUtils {
         if(StrUtil.isBlank(holiday) && !lock.isLocked()) {
             lock.lock();
             try {
-                updateByApi();
+//                updateByApi();
                 RedisUtils.setCacheObject(key, "Y");
             } catch (Exception e) {
                 throw new ServiceException("同步处理假日数据失败");

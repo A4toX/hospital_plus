@@ -14,7 +14,6 @@ import java.util.Map;
  *
  * @author yaoyingjie
  */
-@Service
 public interface IAttendanceFlowService extends IBaseService<AttendanceFlowVo, AttendanceFlowBo> {
 
     List<AttendanceGroupVo> getAttendGroup();

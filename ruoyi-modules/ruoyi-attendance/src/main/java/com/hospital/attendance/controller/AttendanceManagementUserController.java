@@ -3,8 +3,9 @@ package com.hospital.attendance.controller;
 import com.hospital.attendance.domain.bo.AttendanceManagementUserBo;
 import com.hospital.attendance.domain.vo.AttendanceManagementUserVo;
 import com.hospital.attendance.domain.vo.attendUser.AddAttendanceUserVo;
-import com.hospital.attendance.domain.vo.attendUser.AttendanceMUserReqVO;
+import com.hospital.attendance.domain.vo.attendUser.GroupManagerReqVo;
 import com.hospital.attendance.domain.vo.attendUser.AttendanceMUserRespVo;
+import com.hospital.attendance.domain.vo.attendUser.TeacherReqVo;
 import com.hospital.attendance.service.IAttendanceManagementUserService;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.domain.R;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 新考勤-考勤组负责人
+ * 新考勤/考勤组负责人
  *
  * @author makejava
  * @since 2023-05-21 19:29:23
@@ -28,8 +29,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceManagementUserController extends BaseController {
 
-    private IAttendanceManagementUserService attendanceManagementUserService;
+    private final IAttendanceManagementUserService attendanceManagementUserService;
 
+    /**
+     * 获取考勤组负责人列表(分页)
+     * @param bo
+     * @param pageQuery
+     * @return
+     */
     @GetMapping("/findPage")
     public TableDataInfo<AttendanceManagementUserVo> findPage(AttendanceManagementUserBo bo, PageQuery pageQuery) {
         return attendanceManagementUserService.selectPageList(bo, pageQuery);
@@ -52,20 +59,20 @@ public class AttendanceManagementUserController extends BaseController {
      * @return
      */
     @GetMapping("/listByGroupId")
-    public R<List<AttendanceMUserRespVo>> listByGroupId(AttendanceMUserReqVO reqVO) {
+    public R<List<AttendanceMUserRespVo>> listByGroupId(GroupManagerReqVo reqVO) {
         List<AttendanceMUserRespVo> list = attendanceManagementUserService.listByGroupId(reqVO);
         return R.ok(list);
     }
 
 
     /**
-     * 获取医院下所有员工
+     * 获取所有员工
      * @param reqVO
      * @return
      */
-    @GetMapping("/listAllStaffByHosId")
-    public R<List<AttendanceMUserRespVo>> listAllStaffByHosId(AttendanceMUserReqVO reqVO) {
-        List<AttendanceMUserRespVo> list = attendanceManagementUserService.listAllStaffByHosId(reqVO);
+    @GetMapping("/listAllStaff")
+    public R<List<AttendanceMUserRespVo>> listAllStaffByHosId(TeacherReqVo reqVO) {
+        List<AttendanceMUserRespVo> list = attendanceManagementUserService.listAllStaff(reqVO);
         return R.ok(list);
     }
 }

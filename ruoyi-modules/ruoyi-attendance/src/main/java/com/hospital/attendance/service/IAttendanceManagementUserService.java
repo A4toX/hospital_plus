@@ -1,8 +1,9 @@
 package com.hospital.attendance.service;
 
 import com.hospital.attendance.domain.vo.attendUser.AddAttendanceUserVo;
-import com.hospital.attendance.domain.vo.attendUser.AttendanceMUserReqVO;
+import com.hospital.attendance.domain.vo.attendUser.GroupManagerReqVo;
 import com.hospital.attendance.domain.vo.attendUser.AttendanceMUserRespVo;
+import com.hospital.attendance.domain.vo.attendUser.TeacherReqVo;
 import org.dromara.common.mybatis.core.service.IBaseService;
 import com.hospital.attendance.domain.bo.AttendanceManagementUserBo;
 import com.hospital.attendance.domain.vo.AttendanceManagementUserVo;
@@ -18,7 +19,7 @@ public interface IAttendanceManagementUserService extends IBaseService<Attendanc
 
     void addUser(AddAttendanceUserVo entity);
 
-    List<AttendanceMUserRespVo> listByGroupId(AttendanceMUserReqVO reqVO);
+    List<AttendanceMUserRespVo> listByGroupId(GroupManagerReqVo reqVO);
 
-    List<AttendanceMUserRespVo> listAllStaffByHosId(AttendanceMUserReqVO reqVO);
+    List<AttendanceMUserRespVo> listAllStaff(TeacherReqVo reqVO);
 }

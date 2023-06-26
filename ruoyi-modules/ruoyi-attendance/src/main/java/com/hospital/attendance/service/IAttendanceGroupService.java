@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
  *
  * @author yaoyingjie
  */
-@Service
 public interface IAttendanceGroupService extends IBaseService<AttendanceGroupVo, AttendanceGroupBo> {
 
     AttendanceGroupRespVo selectAllInfoById(Long id);

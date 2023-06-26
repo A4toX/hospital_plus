@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AttendanceGroupController extends BaseController {
 
-    private IAttendanceGroupService attendanceGroupService;
+    private final IAttendanceGroupService attendanceGroupService;
 
     /**
      * 创建考勤组

@@ -11,7 +11,7 @@ import org.springframework.boot.context.metrics.buffering.BufferingApplicationSt
  * @author Lion Li
  */
 
-@SpringBootApplication(scanBasePackages = {"org.dromara","com.hospital"})
+@SpringBootApplication(scanBasePackages = {"org.dromara", "com.hospital"})
 public class DromaraApplication {
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(DromaraApplication.class);

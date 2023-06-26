@@ -25,13 +25,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceGroupClassesServiceImpl extends BaseServiceImpl<AttendanceGroupClassesMapper, AttendanceGroupClasses, AttendanceGroupClassesVo, AttendanceGroupClassesBo> implements IAttendanceGroupClassesService {
 
-    private AttendanceGroupMapper attendanceGroupMapper;
-    private AttendanceClassesMapper attendanceClassesMapper;
+    private final AttendanceGroupMapper attendanceGroupMapper;
+    private final AttendanceClassesMapper attendanceClassesMapper;
 
     @Override
     public int insert(AttendanceGroupClassesBo bo) {
         validateExist(bo.getGroupId(), bo.getClassesId());
-
         List<AttendanceGroupClasses> groupClassesList = mapper.exsitGroupByWeek(bo.getGroupId(), bo.getWeekly());
         if (!groupClassesList.isEmpty()) {
             throw new ServiceException("周次已经有关联关系，不能添加");
@@ -43,6 +42,9 @@ public class AttendanceGroupClassesServiceImpl extends BaseServiceImpl<Attendanc
 
     @Override
     public int update(AttendanceGroupClassesBo bo) {
+        // 周次和考勤组不能修改
+        bo.setWeekly(null);
+        bo.setGroupId(null);
         int result = super.update(bo);
         AttendanceUtils.removeGroupClassesCache(bo.getGroupId());
         return result;

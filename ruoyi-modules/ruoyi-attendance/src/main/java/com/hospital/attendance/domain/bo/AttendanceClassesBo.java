@@ -7,7 +7,7 @@ import org.dromara.common.mybatis.core.domain.BaseEntity;
 import com.hospital.attendance.domain.AttendanceClasses;
 
 /**
- * 班次设置表 视图对象
+ * 班次设置表 参数对象
  *
  * @author liguoxian
  */
@@ -20,11 +20,6 @@ public class AttendanceClassesBo extends BaseEntity {
      * 主键
      */
     private Long id;
-
-    /**
-     * 医院id
-     */
-    private Long hosId;
 
     /**
      * 班次名称
@@ -49,7 +44,7 @@ public class AttendanceClassesBo extends BaseEntity {
     /**
      * 是否开启严重迟到
      */
-    private Integer isSeriousLate;
+    private String isSeriousLate;
 
     /**
      * 晚多少分钟为严重迟到
@@ -64,7 +59,7 @@ public class AttendanceClassesBo extends BaseEntity {
     /**
      * 是否开启下班自动打卡
      */
-    private Integer isAutoAfter;
+    private String isAutoAfter;
 
     /**
      * 早多少分钟为下班缺卡
@@ -75,11 +70,6 @@ public class AttendanceClassesBo extends BaseEntity {
      * 早多少分钟为早退
      */
     private Integer afterLeaveEarly;
-
-    /**
-     * 删除标志（0代表存在 2代表删除）
-     */
-    private String delDelete;
 
     /**
      * 备注

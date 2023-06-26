@@ -3,8 +3,6 @@ package com.hospital.attendance.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hospital.attendance.domain.AttendanceGroupUser;
 import com.hospital.attendance.domain.vo.AttendanceGroupUserVo;
-import com.hospital.attendance.domain.vo.attendUser.AttendanceUserReqVO;
-import com.hospital.attendance.domain.vo.attendUser.AttendanceUserRespVO;
 import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
 
 import java.util.List;
@@ -20,6 +18,8 @@ public interface AttendanceGroupUserMapper extends BaseMapperPlus<AttendanceGrou
         return selectList(new LambdaQueryWrapper<AttendanceGroupUser>().eq(AttendanceGroupUser::getUserId, userId));
     }
 
-    List<AttendanceUserRespVO> listByGroupId(AttendanceUserReqVO reqVO);
+    default List<AttendanceGroupUser> listByGroupId(Long groupId) {
+        return selectList(new LambdaQueryWrapper<AttendanceGroupUser>().eq(AttendanceGroupUser::getGroupId, groupId));
+    };
 }
 
