@@ -1,5 +1,6 @@
 package org.dromara;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
@@ -12,7 +13,6 @@ import org.springframework.boot.context.metrics.buffering.BufferingApplicationSt
 
 @SpringBootApplication(scanBasePackages = {"org.dromara", "com.hospital"})
 public class DromaraApplication {
-
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(DromaraApplication.class);
         application.setApplicationStartup(new BufferingApplicationStartup(2048));

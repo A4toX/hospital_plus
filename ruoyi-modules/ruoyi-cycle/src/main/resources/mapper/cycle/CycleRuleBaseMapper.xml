@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.cycle.mapper.CycleRuleBaseMapper">
+    <resultMap type="com.hospital.cycle.domain.vo.CycleRuleBaseVo" id="cycleBaseResult">
+        <id property="ruleBaseId" column="rule_base_id"/>
+        <result property="baseName" column="base_name"/>
+    </resultMap>
+
+    <select id="selectWithBaseName" resultMap="cycleBaseResult">
+        select crb.rule_base_id,
+               crb.rule_id,
+               crb.base_id,
+                sb.base_name
+        from cycle_rule_base crb
+                 left join sys_base sb on crb.base_id = sb.base_id
+            ${ew.getCustomSqlSegment}
+
+    </select>
+</mapper>

@@ -68,6 +68,9 @@ public class SysUserStudentVo implements Serializable {
      */
     private Long baseId;
 
+    /**
+     * 专业代码
+     */
     @ExcelProperty(value = "专业代码")
     private String baseCode;
 

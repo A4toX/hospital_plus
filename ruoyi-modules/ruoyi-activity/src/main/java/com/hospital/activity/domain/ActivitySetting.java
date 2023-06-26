@@ -1,35 +1,46 @@
 package com.hospital.activity.domain;
 
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.TableId;
+import org.dromara.common.tenant.core.TenantEntity;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import org.dromara.common.tenant.core.TenantEntity;
+
+import java.io.Serial;
 
 /**
- * 教学活动主表(ActivitySetting)
+ * 教学活动对象 activity_setting
  *
- * @author makejava
- * @since 2023-06-21 14:17:47
+ * @author Lion Li
+ * @date 2023-06-21
  */
 @Data
-@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @TableName("activity_setting")
 public class ActivitySetting extends TenantEntity {
 
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     /**
      * 主键
      */
-    @TableId
+    @TableId(value = "id")
     private Long id;
+
+    /**
+     * 活动名称
+     */
+    private String activityName;
 
     /**
      * 类型
      */
-    private String type;
+    private String activityType;
+
+    /**
+     * 级别1院级2科室
+     */
+    private String ActivityLevel;
 
     /**
      * 活动科室id
@@ -69,7 +80,7 @@ public class ActivitySetting extends TenantEntity {
     /**
      * 是否开启签到
      */
-    private String isSign;
+    private String sign;
 
     /**
      * 删除标志（0代表存在 2代表删除）
@@ -77,5 +88,5 @@ public class ActivitySetting extends TenantEntity {
     @TableLogic
     private String delFlag;
 
-}
 
+}

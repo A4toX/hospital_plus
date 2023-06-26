@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.activity.mapper.ActivityPicMapper">
+    <resultMap type="com.hospital.activity.domain.vo.ActivityPicVo" id="activityPicResult">
+        <id property="id" column="id"/>
+        <result property="uploadUserName" column="real_name"/>
+    </resultMap>
+
+
+    <select id="selectWithUserInfo" resultMap="activityPicResult">
+        select ap.id,
+               ap.activity_id,
+               ap.pic,
+               ap.upload_user,
+               ap.upload_time,
+               u.real_name
+        from activity_pic ap
+            left join sys_user u on ap.upload_user = u.user_id
+        ${ew.getCustomSqlSegment}
+    </select>
+</mapper>
