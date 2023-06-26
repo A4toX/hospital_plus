@@ -9,6 +9,7 @@ import com.hospital.attendance.domain.*;
 import com.hospital.attendance.domain.bo.AttendanceFlowBo;
 import com.hospital.attendance.domain.vo.*;
 import com.hospital.attendance.enums.AttendanceMethodEnum;
+import com.hospital.attendance.enums.AttendanceTypeEnum;
 import com.hospital.attendance.mapper.AttendanceFlowMapper;
 import com.hospital.attendance.mapper.AttendanceManagementUserMapper;
 import com.hospital.attendance.service.IAttendanceFlowService;
@@ -58,6 +59,7 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
         resp.setFlows(attendanceFlows);
         resp.setClasses(AttendanceUtils.getGroupClass(groupId));
         resp.setAreas(AttendanceUtils.getGroupAreas(groupId));
+        resp.setNeedAttendFlag(YesNoEnum.getValueByBool(AttendanceUtils.checkNeedAttendance(groupId, new Date())));
         return resp;
     }
 
@@ -95,6 +97,7 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
     public int attend(AttendReq req) {
         LoginUser user = LoginHelper.getLoginUser();
         AttendanceFlow flow = BeanUtil.copyProperties(req, AttendanceFlow.class);
+        flow.setAttendMethod(AttendanceMethodEnum.position.getType());
         flow.setUserId(user.getUserId());
         flow.setAutomaticFlag(YesNoEnum.NO.getValue());
         Date nowDate = new DateTime();
@@ -106,6 +109,7 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
         flow.setAttendClassesId(groupClass.getGroupClassesId());
         AttendanceUtils.handlerAttendStatus(flow, groupClass);
         flow.setNeedAttendFlag(YesNoEnum.getValueByBool(AttendanceUtils.checkNeedAttendance(flow.getAttendGroupId(), flow.getAttendDate())));
+
         return mapper.insert(flow);
     }
 
@@ -121,7 +125,7 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
         flow.setUserId(user.getUserId());
         flow.setAttendGroupId(qrCodeInfo.getAttendGroup().getId());
         flow.setAttendClassesId(qrCodeInfo.getAttendClass().getId());
-        flow.setAttendType(qrCodeInfo.getAttendType());
+        flow.setAttendMethod(qrCodeInfo.getAttendType());
         flow.setAreaOutside(YesNoEnum.NO.getValue());
         flow.setAutomaticFlag(YesNoEnum.NO.getValue());
         flow.setAttendKind(req.getAttendKind());
@@ -139,20 +143,20 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
     @Override
     public List<AttendanceFlowVo> getAttendRecord(Long userId, Long groupId, String date) {
         List<AttendanceFlowVo> flows = mapper.selectByDate(groupId, userId, date);
-        flows.forEach(flow -> {
-            flow.setAttendanceGroup(MapstructUtils.convert(AttendanceUtils.getGroup(flow.getAttendGroupId()), AttendanceGroupVo.class));
-            flow.setAttendanceClasses(AttendanceUtils.getGroupClass(flow.getAttendGroupId(), flow.getAttendClassesId()));
-        });
+//        flows.forEach(flow -> {
+//            flow.setAttendanceGroup(MapstructUtils.convert(AttendanceUtils.getGroup(flow.getAttendGroupId()), AttendanceGroupVo.class));
+//            flow.setAttendanceClasses(AttendanceUtils.getGroupClass(flow.getAttendGroupId(), flow.getAttendClassesId()));
+//        });
         return flows;
     }
 
     @Override
     public Map<String, List<AttendanceFlowVo>> getAttendRecordByMonth(Long userId, Long groupId, String month) {
         List<AttendanceFlowVo> flows = mapper.selectByUserIdAndMonth(groupId, userId, month);
-        flows.forEach(flow -> {
-            flow.setAttendanceGroup(MapstructUtils.convert(AttendanceUtils.getGroup(flow.getAttendGroupId()), AttendanceGroupVo.class));
-            flow.setAttendanceClasses(AttendanceUtils.getGroupClass(flow.getAttendGroupId(), flow.getAttendClassesId()));
-        });
+//        flows.forEach(flow -> {
+//            flow.setAttendanceGroup(MapstructUtils.convert(AttendanceUtils.getGroup(flow.getAttendGroupId()), AttendanceGroupVo.class));
+//            flow.setAttendanceClasses(AttendanceUtils.getGroupClass(flow.getAttendGroupId(), flow.getAttendClassesId()));
+//        });
         return flows.stream()
             .collect(Collectors.groupingBy(flow -> flow.getAttendDate()));
     }

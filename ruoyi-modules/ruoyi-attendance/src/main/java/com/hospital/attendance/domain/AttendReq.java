@@ -16,14 +16,9 @@ public class AttendReq {
     private Long attendGroupId;
 
     /**
-     * 是否外勤打卡 1是 2否
+     * 是否外勤打卡
      */
-    private Integer areaOutside;
-
-    /**
-     * 签到类型 1是定位 2是扫描
-     */
-    private Integer attendType;
+    private String areaOutside;
 
     /**
      * 签到经度
