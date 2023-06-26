@@ -18,11 +18,14 @@ import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.core.utils.file.FileUtils;
 import org.dromara.common.excel.convert.ExcelBigNumberConvert;
 import org.dromara.common.excel.core.*;
+import org.dromara.common.excel.utils.strategy.HeadMergeStrategy;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -204,6 +207,48 @@ public class ExcelUtil {
     }
 
     /**
+     * 写入多表头Excel
+     * @param response 响应
+     * @param filename 文件名称
+     * @param sheetName Excel sheet 名
+     * @param headers 树形表头，
+     * @param data 数据列表
+     * @throws IOException
+     */
+    public static <T> void writeForHeaderGroup(HttpServletResponse response, String filename, String sheetName, List<ExcelHeader> headers, List<T> data) throws IOException {
+        List<List<String>> headerList = handlerHeader(headers);
+        int headerRowNum = 0;
+        for (List<String> columnHeaders : headerList) {
+            if(CollUtil.size(columnHeaders) > headerRowNum) {
+                headerRowNum = CollUtil.size(columnHeaders);
+            }
+        }
+        writeForHeaderGroup(response, filename, sheetName, headers, headerRowNum, data);
+    }
+
+    /**
+     * 写入多表头Excel
+     * @param response 响应
+     * @param filename 文件名称
+     * @param sheetName Excel sheet 名
+     * @param headers 树形表头，
+     * @param headerRowNum 表头占用行数，
+     * @param data 数据列表
+     * @throws IOException
+     */
+    public static <T> void writeForHeaderGroup(HttpServletResponse response, String filename, String sheetName, List<ExcelHeader> headers, int headerRowNum, List<T> data) throws IOException {
+        EasyExcel.write(response.getOutputStream())
+            .head(handlerHeader(headers))
+            .automaticMergeHead(false)
+            .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
+            .registerWriteHandler(new HeadMergeStrategy(headerRowNum))
+            .sheet(sheetName)
+            .doWrite(data);
+        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, "UTF-8"));
+        response.setContentType("application/vnd.ms-excel;charset=UTF-8");
+    }
+
+    /**
      * 单表多数据模板导出 模板格式为 {.属性}
      *
      * @param filename     文件名
@@ -379,4 +424,28 @@ public class ExcelUtil {
         return IdUtil.fastSimpleUUID() + "_" + filename + ".xlsx";
     }
 
+    /**
+     * 处理多级表头数据
+     * @param headers
+     * @return
+     */
+    private static List<List<String>> handlerHeader(List<ExcelHeader> headers) {
+        List<List<String>> result = new ArrayList<>();
+        if(CollUtil.isNotEmpty(headers)) {
+            for (ExcelHeader header : headers) {
+                if(CollUtil.isEmpty(header.getSubHeaders())) {
+                    List<String> columnHeaders = new ArrayList<>();
+                    columnHeaders.add(header.getHeaderName());
+                    result.add(columnHeaders);
+                } else {
+                    List<List<String>> columnHeaders = handlerHeader(header.getSubHeaders());
+                    for (List<String> columnHeader : columnHeaders) {
+                        columnHeader.add(0, header.getHeaderName());
+                    }
+                    result.addAll(columnHeaders);
+                }
+            }
+        }
+        return result;
+    }
 }
