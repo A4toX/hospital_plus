@@ -153,6 +153,14 @@ public class SysDeptServiceImpl implements ISysDeptService, DeptService {
         return String.join(StringUtils.SEPARATOR, list);
     }
 
+    @Cacheable(cacheNames = CacheNames.SYS_DEPT_NAME, key = "#deptId")
+    @Override
+    public String selectDeptNameById(Long deptId) {
+        SysDept sysDept = baseMapper.selectOne(new LambdaQueryWrapper<SysDept>()
+            .select(SysDept::getDeptName).eq(SysDept::getDeptId, deptId));
+        return ObjectUtil.isNull(sysDept) ? null : sysDept.getDeptName();
+    }
+
     /**
      * 根据ID查询所有子部门数（正常状态）
      *

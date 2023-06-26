@@ -4,6 +4,7 @@
 mybatis-plus:
   # 启动时是否检查 MyBatis XML 文件的存在，默认不检查
   checkConfigLocation: false
+  mapperPackage: org.dromara.**.mapper, com.hospital.**.mapper
   configuration:
     # 自动驼峰命名规则（camel case）映射
     mapUnderscoreToCamelCase: true
