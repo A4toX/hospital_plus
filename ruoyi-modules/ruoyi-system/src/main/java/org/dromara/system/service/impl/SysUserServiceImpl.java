@@ -522,4 +522,12 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
             .select(SysUser::getUserName).eq(SysUser::getUserId, userId));
         return ObjectUtil.isNull(sysUser) ? null : sysUser.getUserName();
     }
+
+    @Cacheable(cacheNames = CacheNames.SYS_REAL_NAME, key = "#userId")
+    @Override
+    public String selectRealNameById(Long userId) {
+        SysUser sysUser = baseMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+            .select(SysUser::getRealName).eq(SysUser::getUserId, userId));
+        return ObjectUtil.isNull(sysUser) ? null : sysUser.getRealName();
+    }
 }

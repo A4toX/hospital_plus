@@ -171,6 +171,12 @@
                 <artifactId>ruoyi-common-websocket</artifactId>
                 <version>${revision}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.dromara</groupId>
+                <artifactId>ruoyi-common-flowable</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
