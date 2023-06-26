@@ -139,6 +139,12 @@ tenant:
     - sys_role_menu
     - sys_user_post
     - sys_user_role
+    - activity_user
+    - activity_teacher
+    - activity_pic
+    - cycle_student
+    - cycle_group_dept
+    - cycle_rule_base
 
 # MyBatisPlus配置
 # https://baomidou.com/config/
