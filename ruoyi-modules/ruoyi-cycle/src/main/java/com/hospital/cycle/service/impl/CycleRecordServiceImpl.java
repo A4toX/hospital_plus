@@ -1,16 +1,25 @@
 package com.hospital.cycle.service.impl;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.hospital.cycle.domain.CycleGroupDept;
+import com.hospital.cycle.domain.vo.CycleRecordImportVo;
+import com.hospital.cycle.mapper.CycleGroupDeptMapper;
+import org.dromara.common.core.system.domain.Dept;
+import org.dromara.common.core.utils.DateUtils;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.core.utils.system.DeptUtils;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
+import org.dromara.system.mapper.SysDeptMapper;
 import org.springframework.stereotype.Service;
 import com.hospital.cycle.domain.bo.CycleRecordBo;
 import com.hospital.cycle.domain.vo.CycleRecordVo;
@@ -20,6 +29,7 @@ import com.hospital.cycle.service.ICycleRecordService;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -33,6 +43,7 @@ import java.util.*;
 public class CycleRecordServiceImpl implements ICycleRecordService {
 
     private final CycleRecordMapper baseMapper;
+    private final CycleGroupDeptMapper groupDeptMapper;
 
     /**
      * 查询用户轮转记录
@@ -118,34 +129,107 @@ public class CycleRecordServiceImpl implements ICycleRecordService {
     }
 
 
-    public void importData(InputStream inputStream){
+    public void importData(InputStream inputStream,Long ruleId){
         EasyExcel.read(inputStream,new AnalysisEventListener<Map<String, Object>>() {
             private Map<Integer, String> headMap;
-            private final StringBuilder successMsg = new StringBuilder();
+            private int failureNum = 0;
             private final StringBuilder failureMsg = new StringBuilder();
+
+
 
 
             @Override
             public void invokeHeadMap(Map<Integer, String> headMap, AnalysisContext context) {
                 this.headMap = headMap;
                 System.out.println("表头信息：" + headMap);
-
             }
             @Override
             public void invoke(Map<String, Object> valueData, AnalysisContext context) {
-                List<Map<String,Object>> dataList = new ArrayList<>();
-                //把表头和值放入Map
-                HashMap<String, Object> paramsMap = new HashMap<>();
-                for(int i=0;i<valueData.size();i++){
-                    if (i==0){
-                        System.out.println(valueData.get(i));
+                List<CycleRecordImportVo> voList = new ArrayList<>();
+                //获取科室信息
+                    if (valueData.get(0)==null){
+                        String msg = "第"+context.readRowHolder().getRowIndex()+"行科室不能为空";
+                        failureMsg.append("<br/>").append(failureNum).append("、").append(msg);
+                        failureNum++;
+                        System.out.println(msg);
                     }
-                    String key=headMap.get(i);
-                    Object  value=valueData.get(i);
-                    //将表头作为map的key，每行每个单元格的数据作为map的value
-                    paramsMap.put(key,value);
+                    /*else {
+                        importVo.setDeptName(valueData.get(0).toString().replaceAll("\\s*", ""));
+                        Dept dept = DeptUtils.getDeptByDeptName(valueData.get(i).toString());
+
+                        if (dept==null){
+                            String msg = "第"+context.readRowHolder().getRowIndex()+"列科室不存在";
+                            failureMsg.append("<br/>").append(failureNum).append("、").append(msg);
+                            failureNum++;
+//                            System.out.println(msg);
+                        }else {
+                            //校验科室是否在轮转规则中，不在的话返回错误信息
+                            CycleGroupDept cycleGroupDept = groupDeptMapper.selectOne(Wrappers.<CycleGroupDept>lambdaQuery().eq(CycleGroupDept::getDeptId, dept.getDeptId()).eq(CycleGroupDept::getRuleId, ruleId));
+                            if (cycleGroupDept==null){
+                                String msg = "第"+(i+1)+"列科室不在轮转规则中";
+                                failureMsg.append("<br/>").append(failureNum).append("、").append(msg);
+                                failureNum++;
+                            }else {
+                                importVo.setDeptId(dept.getDeptId());
+                            }
+
+                        }
+                    }*/
+                //获取开始时间和结束时间
+                for(int i=1;i<valueData.size();i++){
+                    CycleRecordImportVo importVo = new CycleRecordImportVo();
+                    importVo.setDeptName(valueData.get(0).toString().replaceAll("\\s*", ""));
+                    //获取时间去除所有的空格
+                    String time = headMap.get(i).replaceAll("\\s*", "");
+                    System.out.println("时间："+time);
+                    //截取前10位开始时间
+                    String startTime = time.substring(0, 10);
+                    //从结尾开始截取10位结束时间
+                    String endTime = time.substring(time.length() - 10);
+                  /*  startTime = DateUtil.format(DateUtil.parse(startTime), "yyyy-MM-dd");
+                    endTime = DateUtil.format(DateUtil.parse(endTime), "yyyy-MM-dd");*/
+                    //使用正则校验时间格式是否为yyyy-MM-dd
+                    String reg = "\\d{4}-\\d{2}-\\d{2}";
+                    if (startTime.matches(reg) && endTime.matches(reg)) {
+                        importVo.setStartTime(startTime);
+                        importVo.setEndTime(endTime);
+                    } else {
+                        String msg = "第" + (i + 1) + "列时间格式不正确";
+                        failureMsg.append("<br/>").append(failureNum).append("、").append(msg);
+                        failureNum++;
+                        System.out.println(msg);
+                    }
+                    importVo.setStartTime(startTime);
+                    importVo.setEndTime(endTime);
+
+                    if (valueData.get(i)!=null){
+                        //去除空格和尾部多余逗号
+                        String data = valueData.get(i).toString()
+                            .replaceAll("\\s*", "");
+                        //判断是否有中文逗号，有的话替换成英文逗号
+                        if (data.contains("，")){
+                            data = data.replaceAll("，",",");
+                        }
+                        //判断是否有逗号，有的话分割成list
+                        if (data.contains(",")){
+                            //判断尾部是否有逗号，有的话去除
+                            if (data.endsWith(",")){
+                                data = data.substring(0,data.length()-1);
+                            }
+                            String[] split = data.split(",");
+                            List<String> students = Arrays.asList(split);
+                            importVo.setStudentList(students);
+                        }else {
+                            List<String> students = new ArrayList<>();
+                            students.add(data);
+                            importVo.setStudentList(students);
+                        }
+                    }
+                    voList.add(importVo);
                 }
-                dataList.add(paramsMap);
+                voList.forEach(vo -> {
+                    System.out.println("科室名称: "+vo.getDeptName()+"开始时间: "+vo.getStartTime()+"结束时间: "+vo.getEndTime()+"学生: "+vo.getStudentList());
+                });
             }
 
 

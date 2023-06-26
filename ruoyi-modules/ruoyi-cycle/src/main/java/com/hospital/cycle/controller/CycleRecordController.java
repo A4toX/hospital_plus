@@ -114,16 +114,18 @@ public class CycleRecordController extends BaseController {
     }
 
     /**
-     * 导入数据
-     *
-     * @param file          导入文件
-     * @param updateSupport 是否更新已存在数据
+     * 导入轮转表
+     * @param file
+     * @param ruleId
+     * @param updateSupport
+     * @return
+     * @throws Exception
      */
     @Log(title = "用户管理", businessType = BusinessType.IMPORT)
     @SaCheckPermission("system:user:import")
-    @PostMapping(value = "/importData", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public R<Void> importData(@RequestPart("file") MultipartFile file, boolean updateSupport) throws Exception {
-        cycleRecordService.importData(file.getInputStream());
+    @PostMapping(value = "/importData/{ruleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public R<Void> importData(@RequestPart("file") MultipartFile file,@PathVariable Long ruleId, boolean updateSupport) throws Exception {
+        cycleRecordService.importData(file.getInputStream(),ruleId);
         return R.ok();
     }
 }

@@ -48,5 +48,5 @@ public interface ICycleRecordService {
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 
-    void importData(InputStream inputStream);
+    void importData(InputStream inputStream,Long ruleId);
 }

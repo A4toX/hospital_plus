@@ -8,17 +8,31 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 public class CycleRecordImportVo implements Serializable {
+
+    /**
+     * 科室id
+     */
+    private Long deptId;
 
     /**
      * 科室名称
      */
-    @ExcelProperty(index = 0)
     private String deptName;
 
     /**
-     * 时间和学生
+     * 开始时间
      */
-    private List<String> userNameList;
+    private String startTime;
+
+    /**
+     * 结束时间
+     */
+    private String endTime;
+
+    /**
+     * 学生列表
+     */
+    private List<String> studentList;
+
 }
