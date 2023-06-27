@@ -539,7 +539,7 @@ public class AttendanceUtils {
         if (CollUtil.isNotEmpty(flows)) {
             AttendanceFlowVo firstFlow = flows.get(0);
             data.setUserId(flows.get(0).getUserId());
-            data.setUsername(UserUtils.getUser(flows.get(0).getUserId()).getUserName());
+            data.setUsername(UserUtils.getRealName(flows.get(0).getUserId()));
 
             Set<Integer> statusList = new HashSet<>();
 

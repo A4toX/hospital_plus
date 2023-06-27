@@ -1,4 +1,4 @@
-package org.dromara.common.core.system.domain;
+package org.dromara.common.core.service.domain;
 
 import lombok.Data;
 
@@ -10,7 +10,7 @@ public class User {
 
     private Long userId;
 
-    private String userName;
+    private String realName;
 
     private String phone;
 

@@ -1,7 +1,7 @@
 package org.dromara.common.core.utils.system;
 
-import org.dromara.common.core.system.api.UserApi;
-import org.dromara.common.core.system.domain.User;
+import org.dromara.common.core.service.UserService;
+import org.dromara.common.core.service.domain.User;
 import org.dromara.common.core.utils.SpringUtils;
 
 /**
@@ -10,14 +10,17 @@ import org.dromara.common.core.utils.SpringUtils;
  */
 public class UserUtils {
 
-    private static UserApi userApi = SpringUtils.getBean(UserApi.class);
+    private static UserService userService = SpringUtils.getBean(UserService.class);
 
     public static User getUser(Long userId) {
-        return userApi.getUser(userId);
+        return userService.getUserById(userId);
     }
 
     public static String getUserName(Long userId) {
-        User user = getUser(userId);
-        return user != null ? user.getUserName() : "";
+        return userService.selectUserNameById(userId);
+    }
+
+    public static String getRealName(Long userId) {
+        return userService.selectRealNameById(userId);
     }
 }
