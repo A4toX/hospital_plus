@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.dromara.common.core.constant.UserConstants;
 import org.dromara.common.core.domain.R;
+import org.dromara.common.core.service.StudentService;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
@@ -38,7 +39,7 @@ import java.util.Collection;
  */
 @RequiredArgsConstructor
 @Service
-public class SysUserStudentServiceImpl implements ISysUserStudentService {
+public class SysUserStudentServiceImpl implements ISysUserStudentService, StudentService {
 
     private final SysUserStudentMapper baseMapper;
 
@@ -120,4 +121,11 @@ public class SysUserStudentServiceImpl implements ISysUserStudentService {
         }
         return baseMapper.deleteBatchIds(ids) > 0;
     }
+
+    @Override
+    public Long selectStudentBaseIdByUserId(Long userId) {
+        return baseMapper.selectById(userId).getBaseId();
+    }
+
+
 }

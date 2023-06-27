@@ -10,6 +10,7 @@ import com.hospital.cycle.mapper.CycleRuleBaseMapper;
 import com.hospital.cycle.service.ICycleGroupService;
 import com.hospital.cycle.service.ICycleRuleBaseService;
 import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.service.StudentService;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.core.utils.system.UserUtils;
@@ -47,6 +48,7 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
     private final CycleRuleMapper baseMapper;
     private final ICycleRuleBaseService cycleRuleBaseService;
     private final ICycleGroupService cycleGroupService;
+    private final StudentService studentService;
     /**
      * 查询轮转规则
      */
@@ -254,10 +256,7 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
             cycleGroupBo.setRuleId(stage.getRuleId());//规则id
             cycleGroupBo.setGroupType(CYCLE_GROUP_ELECTIVE);//选修
             if (YES.equals(stage.getBaseFlag())){//如果开启了专业，只查对应专业下的科室
-              /*  Student student = UserUtils.getStudentByUserId(LoginHelper.getUserId());
-                if (student!=null){
-                    cycleGroupBo.setBaseId(student.getBaseId());
-                }*/
+                cycleGroupBo.setBaseId(studentService.selectStudentBaseIdByUserId(LoginHelper.getUserId()));
                 List<CycleGroupVo> cycleGroupVoList = cycleGroupService.queryList(cycleGroupBo);
                 if (!cycleGroupVoList.isEmpty()){
                     stage.setCycleGroupList(cycleGroupVoList);
