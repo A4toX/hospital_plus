@@ -2,6 +2,8 @@ package com.hospital.cycle.controller;
 
 import java.util.List;
 
+import com.hospital.cycle.domain.bo.CycleUserDeptBo;
+import com.hospital.cycle.domain.vo.CycleUserDeptVo;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.*;

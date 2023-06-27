@@ -21,11 +21,11 @@ public interface CycleConstant {
     String CYCLE_STATUS_COMPLETE= "2";
 
     /**
-     * 是否已签到(是)
+     * 是
      */
     String YES = "Y";
     /**
-     * 是否已签到（否）
+     * 否
      */
     String NO = "N";
 

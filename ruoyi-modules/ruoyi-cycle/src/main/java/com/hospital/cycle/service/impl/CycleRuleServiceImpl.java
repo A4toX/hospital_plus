@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hospital.cycle.domain.CycleRuleBase;
 import com.hospital.cycle.domain.bo.CycleGroupBo;
 import com.hospital.cycle.domain.bo.CycleRuleBaseBo;
+import com.hospital.cycle.domain.vo.CycleGroupVo;
 import com.hospital.cycle.mapper.CycleGroupMapper;
 import com.hospital.cycle.mapper.CycleRuleBaseMapper;
 import com.hospital.cycle.service.ICycleGroupService;
@@ -11,12 +12,15 @@ import com.hospital.cycle.service.ICycleRuleBaseService;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.core.utils.system.UserUtils;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
+import org.dromara.common.mybatis.helper.DataBaseHelper;
+import org.dromara.common.satoken.utils.LoginHelper;
 import org.springframework.stereotype.Service;
 import com.hospital.cycle.domain.bo.CycleRuleBo;
 import com.hospital.cycle.domain.vo.CycleRuleVo;
@@ -28,8 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Collection;
 
-import static com.hospital.cycle.constant.CycleConstant.CYCLE_STATUS_COMPLETE;
-import static com.hospital.cycle.constant.CycleConstant.YES;
+import static com.hospital.cycle.constant.CycleConstant.*;
 
 /**
  * 轮转规则Service业务层处理
@@ -231,5 +234,36 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
         add.setStageIndex(info.getStageIndex() + 1);
         add.setRuleYear(info.getRuleYear());
         baseMapper.insert(add);
+    }
+
+
+    @Override
+    public List<CycleRuleVo> queryStudentSelectDept(){
+        //获取学生所在的轮转规则以及其阶段规则
+        CycleRuleVo cycleRuleVo = baseMapper.queryUserRuleWithStage(LoginHelper.getUserId());
+       if (cycleRuleVo==null){
+           return null;
+       }
+        //获取其下的阶段规则
+        List<CycleRuleVo> stageList = baseMapper.selectVoList(Wrappers.<CycleRule>lambdaQuery().apply(DataBaseHelper.findInSet(cycleRuleVo.getRuleId(), "ancestors")));
+        stageList.add(0,cycleRuleVo);
+        //遍历获取其下所有的科室
+        stageList.forEach(stage ->{
+            //组装查询对象
+            CycleGroupBo cycleGroupBo = new CycleGroupBo();
+            cycleGroupBo.setRuleId(stage.getRuleId());//规则id
+            cycleGroupBo.setGroupType(CYCLE_GROUP_ELECTIVE);//选修
+            if (YES.equals(stage.getBaseFlag())){//如果开启了专业，只查对应专业下的科室
+              /*  Student student = UserUtils.getStudentByUserId(LoginHelper.getUserId());
+                if (student!=null){
+                    cycleGroupBo.setBaseId(student.getBaseId());
+                }*/
+                List<CycleGroupVo> cycleGroupVoList = cycleGroupService.queryList(cycleGroupBo);
+                if (!cycleGroupVoList.isEmpty()){
+                    stage.setCycleGroupList(cycleGroupVoList);
+                }
+            }
+        });
+        return stageList;
     }
 }

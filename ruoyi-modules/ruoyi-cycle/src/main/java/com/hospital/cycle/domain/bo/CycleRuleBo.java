@@ -1,7 +1,10 @@
 package com.hospital.cycle.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.hospital.cycle.domain.CycleRule;
 import com.hospital.cycle.validate.CycleStageGroup;
+import org.dromara.common.excel.annotation.ExcelDictFormat;
+import org.dromara.common.excel.convert.ExcelDictConvert;
 import org.dromara.common.mybatis.core.domain.BaseEntity;
 import org.dromara.common.core.validate.AddGroup;
 import org.dromara.common.core.validate.EditGroup;
@@ -88,6 +91,11 @@ public class CycleRuleBo extends BaseEntity {
      * 规则状态1未排2完成
      */
     private String ruleStatus;
+
+    /**
+     * 是否开启选课
+     */
+    private String deptSelectFlag;
 
 
 }

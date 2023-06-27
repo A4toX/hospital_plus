@@ -6,7 +6,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="com.hospital.cycle.domain.vo.CycleRuleVo" id="cycleRuleResult">
         <id property="ruleId" column="rule_id"/>
     </resultMap>
-
+    <select id="queryUserRuleWithStage" resultMap="cycleRuleResult">
+        select *
+        from cycle_rule cr
+                 left join cycle_student cys on cr.rule_id = cys.rule_id
+        where user_id = #{userId}
+    </select>
 
 
 </mapper>

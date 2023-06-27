@@ -93,5 +93,10 @@ public class CycleRule extends TenantEntity {
      */
     private String ancestors;
 
+    /**
+     * 是否开启科室选择
+     */
+    private String deptSelectFlag;
+
 
 }

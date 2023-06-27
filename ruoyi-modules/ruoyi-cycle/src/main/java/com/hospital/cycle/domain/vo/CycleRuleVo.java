@@ -123,5 +123,12 @@ public class CycleRuleVo implements Serializable {
     @ExcelProperty(value = "规则状态1未排2完成")
     private String ruleStatus;
 
+    /**
+     * 是否开启科室选择
+     */
+    @ExcelProperty(value = "是否开启选课", converter = ExcelDictConvert.class)
+    @ExcelDictFormat(dictType = "sys_yes_no")
+    private String deptSelectFlag;
+
 
 }

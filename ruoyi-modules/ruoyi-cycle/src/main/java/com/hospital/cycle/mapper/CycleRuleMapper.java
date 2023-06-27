@@ -9,6 +9,8 @@ import com.hospital.cycle.domain.vo.CycleRuleVo;
 import org.apache.ibatis.annotations.Param;
 import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
 
+import java.util.List;
+
 /**
  * 轮转规则Mapper接口
  *
@@ -16,6 +18,7 @@ import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
  * @date 2023-06-24
  */
 public interface CycleRuleMapper extends BaseMapperPlus<CycleRule, CycleRuleVo> {
+    CycleRuleVo queryUserRuleWithStage(@Param("userId") Long userId);
 
 //    Page<CycleRuleVo> selectVoWithChild(@Param("page") Page<Object> page, @Param(Constants.WRAPPER) QueryWrapper<CycleRule> cycleRuleQueryWrapper);
 }

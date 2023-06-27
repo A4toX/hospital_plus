@@ -40,6 +40,14 @@ public class CycleRuleController extends BaseController {
 
     private final ICycleRuleService cycleRuleService;
 
+    /**
+     * 获取用户的选课列表
+     */
+    @SaCheckPermission("cycle:rule:list")
+    @GetMapping("/listByStudent")
+    public List<CycleRuleVo> list() {
+        return cycleRuleService.queryStudentSelectDept();
+    }
 
     /**
      * 查询轮转规则列表(分页)

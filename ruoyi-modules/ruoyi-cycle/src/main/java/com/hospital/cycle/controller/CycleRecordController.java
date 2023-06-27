@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.alibaba.excel.EasyExcel;
 import com.hospital.cycle.domain.vo.CycleRecordImportVo;
+import com.hospital.cycle.listener.CycleRecordImportListener;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.*;
@@ -45,6 +46,7 @@ import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 public class CycleRecordController extends BaseController {
 
     private final ICycleRecordService cycleRecordService;
+
 
     /**
      * 查询用户轮转记录列表
@@ -124,8 +126,13 @@ public class CycleRecordController extends BaseController {
     @Log(title = "用户管理", businessType = BusinessType.IMPORT)
     @SaCheckPermission("system:user:import")
     @PostMapping(value = "/importData/{ruleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public R<Void> importData(@RequestPart("file") MultipartFile file,@PathVariable Long ruleId, boolean updateSupport) throws Exception {
-        cycleRecordService.importData(file.getInputStream(),ruleId);
-        return R.ok();
+    public R<List<String>> importData(@RequestPart("file") MultipartFile file,@PathVariable Long ruleId, boolean updateSupport) throws Exception {
+        ExcelResult<Map<String,Object>> result = ExcelUtil.importExcel(file.getInputStream(), null, new CycleRecordImportListener(updateSupport,ruleId));
+        if (result.getErrorList().size() > 0) {
+            return R.fail("导入失败，原因为:",result.getErrorList());
+        }else {
+            return R.ok();
+        }
+
     }
 }

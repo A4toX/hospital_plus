@@ -1,6 +1,7 @@
 package com.hospital.cycle.service;
 
 import com.hospital.cycle.domain.CycleRecord;
+import com.hospital.cycle.domain.vo.CycleRecordImportVo;
 import com.hospital.cycle.domain.vo.CycleRecordVo;
 import com.hospital.cycle.domain.bo.CycleRecordBo;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
@@ -48,5 +49,6 @@ public interface ICycleRecordService {
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 
-    void importData(InputStream inputStream,Long ruleId);
+
+    void importRecord(List<CycleRecordImportVo> voList);
 }

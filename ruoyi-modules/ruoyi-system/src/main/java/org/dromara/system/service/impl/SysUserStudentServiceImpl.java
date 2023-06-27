@@ -73,6 +73,7 @@ public class SysUserStudentServiceImpl implements ISysUserStudentService {
         Map<String, Object> params = bo.getParams();
         QueryWrapper<SysUserStudent> wrapper = new QueryWrapper<>();
         wrapper.eq(StringUtils.isNotBlank(bo.getPersonType()),"us.person_type", bo.getPersonType())
+            .eq(bo.getUserId()!=null,"us.user_id", bo.getUserId())
             .eq(StringUtils.isNotBlank(bo.getStudentType()),"us.student_type", bo.getStudentType())
             .eq(StringUtils.isNotBlank(bo.getResidentYear()),"us.resident_year", bo.getResidentYear())
             .like(params.get("realName") != null, "u.real_name", params.get("realName"))
@@ -89,8 +90,7 @@ public class SysUserStudentServiceImpl implements ISysUserStudentService {
     public Boolean insertByBo(SysUserStudentBo bo) {
         SysUserStudent add = MapstructUtils.convert(bo, SysUserStudent.class);
         validEntityBeforeSave(add);
-        boolean flag = baseMapper.insert(add) > 0;
-        return flag;
+        return baseMapper.insert(add) > 0;
     }
 
     /**

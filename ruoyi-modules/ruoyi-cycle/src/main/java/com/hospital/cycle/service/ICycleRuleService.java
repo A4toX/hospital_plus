@@ -48,4 +48,6 @@ public interface ICycleRuleService {
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 
     void addStage(CycleRuleBo bo);
+
+    List<CycleRuleVo> queryStudentSelectDept();
 }
