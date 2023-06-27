@@ -8,8 +8,6 @@ import org.dromara.common.excel.annotation.ExcelDictFormat;
 import org.dromara.common.excel.convert.ExcelDictConvert;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
-import org.dromara.system.domain.SysBase;
-import org.dromara.system.domain.vo.SysBaseVo;
 
 import java.io.Serial;
 import java.io.Serializable;

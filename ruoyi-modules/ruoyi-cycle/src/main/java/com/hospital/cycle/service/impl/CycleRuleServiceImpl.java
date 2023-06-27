@@ -247,8 +247,12 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
            return null;
        }
         //获取其下的阶段规则
-        List<CycleRuleVo> stageList = baseMapper.selectVoList(Wrappers.<CycleRule>lambdaQuery().apply(DataBaseHelper.findInSet(cycleRuleVo.getRuleId(), "ancestors")));
-        stageList.add(0,cycleRuleVo);
+        List<CycleRuleVo> stageList = baseMapper.selectVoList(Wrappers.<CycleRule>lambdaQuery()
+            .apply(DataBaseHelper.findInSet(cycleRuleVo.getRuleId(), "ancestors"))
+            .eq(CycleRule::getDeptSelectFlag, YES));
+       if (YES.equals(cycleRuleVo.getDeptSelectFlag())){
+           stageList.add(0,cycleRuleVo);
+       }
         //遍历获取其下所有的科室
         stageList.forEach(stage ->{
             //组装查询对象

@@ -89,7 +89,7 @@ public class SysUserStudentController extends BaseController {
     @RepeatSubmit()
     @PostMapping()
     public R<Void> add(@Validated(AddGroup.class) @RequestBody SysUserStudentBo bo) {
-        SysUserBo user = bo.getSysUserBo();
+        SysUserBo user = bo.getSysUser();
         if (!userService.checkUserNameUnique(user)) {
             return R.fail("新增用户'" + user.getUserName() + "'失败，登录账号已存在");
         } else if (StringUtils.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(user)) {

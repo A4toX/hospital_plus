@@ -1,5 +1,6 @@
 package org.dromara.system.service.impl;
 
+import org.dromara.common.core.service.BaseService;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
@@ -30,7 +31,7 @@ import java.util.Collection;
  */
 @RequiredArgsConstructor
 @Service
-public class SysBaseServiceImpl implements ISysBaseService {
+public class SysBaseServiceImpl implements ISysBaseService, BaseService {
 
     private final SysBaseMapper baseMapper;
     private final SysDictDataMapper dictDataMapper;
@@ -125,5 +126,10 @@ public class SysBaseServiceImpl implements ISysBaseService {
     @Override
     public SysBase selectBaseByCode(String baseCode){
         return baseMapper.selectOne(Wrappers.<SysBase>lambdaQuery().eq(SysBase::getBaseCode,baseCode));
+    }
+
+    @Override
+    public String selectBaseNameById(Long baseId) {
+        return baseMapper.selectVoById(baseId).getBaseName();
     }
 }

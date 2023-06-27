@@ -33,7 +33,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             inner join sys_user u on us.user_id = u.user_id
             ${ew.getCustomSqlSegment}
     </select>
-    <select id="selectStudentList" resultType="org.dromara.system.domain.vo.SysUserStudentVo">
+    <select id="selectStudentList" resultMap="SysUserStudentResult">
         SELECT
             us.user_id,
             us.tenant_id,

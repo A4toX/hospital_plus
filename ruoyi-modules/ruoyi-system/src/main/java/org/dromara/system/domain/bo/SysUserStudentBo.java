@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
 
+import java.util.Set;
+
 /**
  * 学员业务对象 sys_user_student
  *
@@ -21,14 +23,18 @@ import jakarta.validation.constraints.*;
 public class SysUserStudentBo extends BaseEntity {
 
     /**
-     * 用户表信息
+     * 用户信息
      */
-    private SysUserBo sysUserBo;
-
+    private SysUserBo sysUser;
     /**
      * 用户id
      */
     private Long userId;
+
+    /**
+     * 用户ids
+     */
+    private Set<Long> userIds;
 
     /**
      * 人员类型

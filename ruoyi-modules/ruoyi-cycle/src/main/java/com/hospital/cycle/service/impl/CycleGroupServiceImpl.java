@@ -7,6 +7,7 @@ import com.hospital.cycle.domain.CycleGroupDept;
 import com.hospital.cycle.domain.CycleRule;
 import com.hospital.cycle.mapper.CycleGroupDeptMapper;
 import com.hospital.cycle.mapper.CycleRuleMapper;
+import com.hospital.cycle.utils.CycleValidUtils;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
@@ -124,57 +125,7 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
      * 保存前的数据校验
      */
     private void validEntityBeforeSave(CycleGroup entity){
-        //校验规则
-        CycleRule cycleRule = ruleMapper.selectById(entity.getRuleId());
-        if (cycleRule == null) {
-            throw new ServiceException("规则不存在");
-        }
-        if (CYCLE_STATUS_COMPLETE.equals(cycleRule.getRuleStatus())) {
-            throw new ServiceException("规则已经排班，不能修改");
-        }
-        //如果规则开启了专业,则组必须选择专业
-        if(YES.equalsIgnoreCase(cycleRule.getBaseFlag())){
-            if(entity.getBaseId() == null){
-                throw new ServiceException("请选择专业");
-            }
-        }else {
-            if (entity.getBaseId()!=null){
-                throw new ServiceException("规则不允许选择专业");
-            }
-        }
-        //如果是必修，则不能选择方法3
-        if(CYCLE_GROUP_MUST.equals(entity.getGroupType())){
-            if(CYCLE_GROUP_METHOD_TIME.equals(entity.getGroupMethod())){
-                throw new ServiceException("必修科室不能使用时间满足方法");
-            }
-        }
-        //如果是任选其几，则任选数不能为空
-        if(CYCLE_GROUP_METHOD_ELECTIVE.equals(entity.getGroupMethod())){
-            if(entity.getMethodNumber() == null){
-                throw new ServiceException("任选数不能为空");
-            }
-        }else {
-            if(entity.getMethodNumber() != null){
-                throw new ServiceException("非任选其几方法不能选择任选数");
-            }
-        }
-        //校验同名
-        Long count = baseMapper.selectCount(new QueryWrapper<CycleGroup>()
-            .eq("rule_id", entity.getRuleId())
-            .eq("group_name", entity.getGroupName())
-            .ne(entity.getGroupId()!=null,"group_id",entity.getGroupId()));
-        if (count>0){
-            throw new ServiceException("同规则下的规则组名称请勿重复");
-        }
-
-        if (entity.getGroupId()!=null){//修改校验
-            //校验是否有关联数据
-            List<CycleGroupDept> groupDepts = groupDeptMapper.selectList(new QueryWrapper<CycleGroupDept>().eq("group_id", entity.getGroupId()));
-            if (CollectionUtil.isNotEmpty(groupDepts)){
-                throw new ServiceException("请删除其下科室在进行修改");
-            }
-        }
-
+        CycleValidUtils.validGroup(entity);
     }
 
     /**
