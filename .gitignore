@@ -49,4 +49,5 @@ nbdist/
 .flattened-pom.xml
 
 /ruoyi-admin/src/main/resources/
+/ruoyi-extend/ruoyi-powerjob-server/src/main/resources/application-local.properties
 application-local.*

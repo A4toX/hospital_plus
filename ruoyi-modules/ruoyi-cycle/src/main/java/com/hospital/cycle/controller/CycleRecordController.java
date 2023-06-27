@@ -1,11 +1,18 @@
 package com.hospital.cycle.controller;
 
 import java.util.List;
+import java.util.Map;
 
+import com.alibaba.excel.EasyExcel;
+import com.hospital.cycle.domain.vo.CycleRecordImportVo;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import org.dromara.common.excel.core.ExcelResult;
+import org.dromara.system.domain.vo.SysUserImportVo;
+import org.dromara.system.listener.SysUserImportListener;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import org.dromara.common.idempotent.annotation.RepeatSubmit;
@@ -21,6 +28,9 @@ import com.hospital.cycle.domain.vo.CycleRecordVo;
 import com.hospital.cycle.domain.bo.CycleRecordBo;
 import com.hospital.cycle.service.ICycleRecordService;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.springframework.web.multipart.MultipartFile;
+
+import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 
 /**
  * 用户轮转记录
@@ -101,5 +111,21 @@ public class CycleRecordController extends BaseController {
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ids) {
         return toAjax(cycleRecordService.deleteWithValidByIds(List.of(ids), true));
+    }
+
+    /**
+     * 导入轮转表
+     * @param file
+     * @param ruleId
+     * @param updateSupport
+     * @return
+     * @throws Exception
+     */
+    @Log(title = "用户管理", businessType = BusinessType.IMPORT)
+    @SaCheckPermission("system:user:import")
+    @PostMapping(value = "/importData/{ruleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public R<Void> importData(@RequestPart("file") MultipartFile file,@PathVariable Long ruleId, boolean updateSupport) throws Exception {
+        cycleRecordService.importData(file.getInputStream(),ruleId);
+        return R.ok();
     }
 }
