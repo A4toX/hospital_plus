@@ -225,6 +225,10 @@ public class CycleValidUtils {
                 if (CYCLE_GROUP_METHOD_MUST.equals(cycleGroup.getGroupMethod())) {
                     throw new ServiceException("选修规则组不能使用必修方法");
                 }
+                //如果选修规则已经开启，则不能新增选修方法
+                if (YES.equals(cycleRule.getDeptSelectFlag())){
+                    throw new ServiceException("选修已经开启，不能新增选修规则组");
+                }
             }
             default -> throw new ServiceException("错误的规则组类型");
         }
@@ -314,7 +318,6 @@ public class CycleValidUtils {
                 throw new ServiceException("学员专业与规则专业不符，请重新选择");
             }
         }
-
         //校验学员是否已经存在
         List<CycleStudent> cycleStudents = studentMapper.selectList(Wrappers.<CycleStudent>lambdaQuery().ne(CycleStudent::getRuleId, ruleId).in(CycleStudent::getUserId, userIds));
         if (!cycleStudents.isEmpty()){
