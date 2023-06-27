@@ -1,5 +1,7 @@
 package org.dromara.common.core.service;
 
+import org.dromara.common.core.service.domain.User;
+
 import java.util.List;
 
 /**
@@ -40,4 +42,6 @@ public interface UserService {
      * @return 用户ID集合
      */
     List<Long> selectUserIdsByDeptIds(List<Long> deptIds);
+
+    User getUserById(Long userId);
 }

@@ -16,6 +16,7 @@ import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.constant.UserConstants;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.service.UserService;
+import org.dromara.common.core.service.domain.User;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.core.utils.StringUtils;
@@ -542,5 +543,16 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
     public List<Long> selectUserIdsByDeptIds(List<Long> deptIds) {
         return SimpleQuery.list(Wrappers.lambdaQuery(SysUser.class)
             .select(SysUser::getUserId).in(SysUser::getDeptId, deptIds), SysUser::getUserId);
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        SysUserVo sysUserVo = selectUserById(userId);
+        User user = new User();
+        user.setUserId(sysUserVo.getUserId());
+        user.setRealName(sysUserVo.getRealName());
+        user.setPhone(sysUserVo.getPhonenumber());
+        user.setDeptId(sysUserVo.getDeptId());
+        return user;
     }
 }
