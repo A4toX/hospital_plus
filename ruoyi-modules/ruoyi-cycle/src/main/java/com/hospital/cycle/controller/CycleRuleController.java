@@ -44,9 +44,10 @@ public class CycleRuleController extends BaseController {
      * 获取用户的选课列表
      */
     @SaCheckPermission("cycle:rule:list")
-    @GetMapping("/listByStudent")
-    public List<CycleRuleVo> list() {
-        return cycleRuleService.queryStudentSelectDept();
+    @GetMapping("/listByStudent/{userId}")
+    public R<List<CycleRuleVo>> list(@PathVariable("userId") Long userId) {
+        List<CycleRuleVo> list = cycleRuleService.queryStudentSelectDept(userId);
+        return R.ok(list);
     }
 
     /**

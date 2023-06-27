@@ -240,9 +240,10 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
 
 
     @Override
-    public List<CycleRuleVo> queryStudentSelectDept(){
+    public List<CycleRuleVo> queryStudentSelectDept(Long userId){
         //获取学生所在的轮转规则以及其阶段规则
-        CycleRuleVo cycleRuleVo = baseMapper.queryUserRuleWithStage(LoginHelper.getUserId());
+//        CycleRuleVo cycleRuleVo = baseMapper.queryUserRuleWithStage(LoginHelper.getUserId());
+        CycleRuleVo cycleRuleVo = baseMapper.queryUserRuleWithStage(userId);
        if (cycleRuleVo==null){
            return null;
        }
@@ -255,12 +256,17 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
        }
         //遍历获取其下所有的科室
         stageList.forEach(stage ->{
+            //如果不需要选科室则直接返回
+            if (NO.equals(stage.getDeptSelectFlag())){
+                return;
+            }
             //组装查询对象
             CycleGroupBo cycleGroupBo = new CycleGroupBo();
             cycleGroupBo.setRuleId(stage.getRuleId());//规则id
             cycleGroupBo.setGroupType(CYCLE_GROUP_ELECTIVE);//选修
             if (YES.equals(stage.getBaseFlag())){//如果开启了专业，只查对应专业下的科室
-                cycleGroupBo.setBaseId(studentService.selectStudentBaseIdByUserId(LoginHelper.getUserId()));
+//                cycleGroupBo.setBaseId(studentService.selectStudentBaseIdByUserId(LoginHelper.getUserId()));
+                cycleGroupBo.setBaseId(studentService.selectStudentBaseIdByUserId(userId));
                 List<CycleGroupVo> cycleGroupVoList = cycleGroupService.queryList(cycleGroupBo);
                 if (!cycleGroupVoList.isEmpty()){
                     stage.setCycleGroupList(cycleGroupVoList);

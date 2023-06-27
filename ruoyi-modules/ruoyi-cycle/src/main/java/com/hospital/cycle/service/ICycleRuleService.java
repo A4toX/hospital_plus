@@ -49,5 +49,5 @@ public interface ICycleRuleService {
 
     void addStage(CycleRuleBo bo);
 
-    List<CycleRuleVo> queryStudentSelectDept();
+    List<CycleRuleVo> queryStudentSelectDept(Long userId);
 }

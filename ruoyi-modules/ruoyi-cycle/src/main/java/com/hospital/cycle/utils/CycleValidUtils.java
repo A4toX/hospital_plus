@@ -4,12 +4,16 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.hospital.cycle.domain.*;
+import com.hospital.cycle.domain.bo.CycleStudentBo;
 import com.hospital.cycle.mapper.*;
 import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.service.StudentService;
+import org.dromara.common.core.service.domain.Student;
 import org.dromara.common.core.utils.SpringUtils;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.hospital.cycle.constant.CycleConstant.*;
@@ -24,6 +28,8 @@ public class CycleValidUtils {
     public static CycleStudentMapper cycleGroupMapper = SpringUtils.getBean(CycleStudentMapper.class);
     public static CycleRuleBaseMapper ruleBaseMapper = SpringUtils.getBean(CycleRuleBaseMapper.class);
     public static CycleUserDeptMapper userDeptMapper = SpringUtils.getBean(CycleUserDeptMapper.class);
+    public static CycleStudentMapper studentMapper = SpringUtils.getBean(CycleStudentMapper.class);
+    public static StudentService studentService = SpringUtils.getBean(StudentService.class);
 
 
     /**
@@ -269,6 +275,52 @@ public class CycleValidUtils {
     }
 
 
+    public static void validCycleStudent(List<CycleStudent> list){
+        //校验轮转状态
+        if (list.isEmpty()){
+            throw new ServiceException("请选择学员");
+        }
+        Long ruleId = list.get(0).getRuleId();
+        CycleRule cycleRule = ruleMapper.selectById(ruleId);
+        if (cycleRule == null){
+            throw new ServiceException("轮转规则不存在");
+        }
+        if (CYCLE_STATUS_COMPLETE.equals(cycleRule.getRuleStatus())){
+            throw new ServiceException("轮转规则已排，不能再添加学员");
+        }
+        //判断规则是否为主规则
+        if (cycleRule.getParentId()!=0){
+            throw new ServiceException("子规则不能添加学员");
+        }
 
+        //获取list中所有的userId
+        Set<Long> userIds = list.stream().map(CycleStudent::getUserId).collect(java.util.stream.Collectors.toSet());
+        List<Student> students = studentService.selectStudentByUserIds(userIds);
+        if (students==null||students.isEmpty()||students.size()!=userIds.size()){
+            throw new ServiceException("选择人员有误，请重新选择");
+        }
+        //如果规则开启了专业，判断学员是否有专业，并且专业是否符合
+        if(YES.equals(cycleRule.getBaseFlag())){
+            List<Long> userBaseId = students.stream().map(Student::getBaseId).distinct().toList();
+            //获取规则的专业
+            List<CycleRuleBase> ruleBases = ruleBaseMapper.selectList(Wrappers.<CycleRuleBase>lambdaQuery().eq(CycleRuleBase::getRuleId, ruleId));
+            if (ruleBases.isEmpty()){
+                throw new ServiceException("轮转规则开启了专业，请先配置专业后再关联学员");
+            }
+            List<Long> ruleBaseIds = ruleBases.stream().map(CycleRuleBase::getBaseId).toList();
+            //判断学员的所有专业是否都包含在规则的专业中
+            List<Long> collect = userBaseId.stream().filter(ruleBaseIds::contains).toList();
+            if (collect.isEmpty()||collect.size()!=userBaseId.size()){
+                throw new ServiceException("学员专业与规则专业不符，请重新选择");
+            }
+        }
+
+        //校验学员是否已经存在
+        List<CycleStudent> cycleStudents = studentMapper.selectList(Wrappers.<CycleStudent>lambdaQuery().ne(CycleStudent::getRuleId, ruleId).in(CycleStudent::getUserId, userIds));
+        if (!cycleStudents.isEmpty()){
+            throw new ServiceException("学员已存在于其他轮转规则中，请重新选择");
+        }
+
+    }
 
 }
