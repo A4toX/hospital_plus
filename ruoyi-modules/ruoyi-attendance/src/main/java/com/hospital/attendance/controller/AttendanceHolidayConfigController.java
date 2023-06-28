@@ -31,6 +31,7 @@ public class AttendanceHolidayConfigController extends BaseController {
      * 分页查询节假日配置
      * @return
      */
+    @SaCheckPermission("attendanceHolidayConfig:list")
     @GetMapping("/list")
     public TableDataInfo<AttendanceHolidayConfigVo> list(AttendanceHolidayConfigBo bo, PageQuery pageQuery) {
         return attendanceHolidayConfigService.selectPageList(bo, pageQuery);
