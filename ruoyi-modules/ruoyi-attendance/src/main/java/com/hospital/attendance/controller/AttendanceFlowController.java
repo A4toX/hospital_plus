@@ -1,5 +1,6 @@
 package com.hospital.attendance.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.hospital.attendance.domain.AttendReq;
 import com.hospital.attendance.domain.AttendanceQrResp;
 import com.hospital.attendance.domain.ScanAttendReq;
@@ -7,6 +8,7 @@ import com.hospital.attendance.domain.vo.*;
 import com.hospital.attendance.service.IAttendanceFlowService;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.domain.R;
+import org.dromara.common.idempotent.annotation.RepeatSubmit;
 import org.dromara.common.satoken.utils.LoginHelper;
 import org.dromara.common.web.core.BaseController;
 import org.springframework.validation.annotation.Validated;
@@ -82,6 +84,7 @@ public class AttendanceFlowController extends BaseController {
      * @return
      */
     @PostMapping("/attend")
+    @RepeatSubmit
     public R<Void> attend(AttendReq req) {
         return toAjax(attendanceFlowService.attend(req));
     }
@@ -93,24 +96,49 @@ public class AttendanceFlowController extends BaseController {
      * @return
      */
     @PostMapping("scanAttend")
+    @RepeatSubmit
     public R<Void> scanAttend(ScanAttendReq req) {
         return toAjax(attendanceFlowService.scanAttend(req));
     }
 
     /**
-     * 获取考勤记录
+     * 获取当前登录人考勤记录
      *
-     * @param userId  用户ID，默认当前登录人
      * @param groupId 考勤组ID
      * @param date    日期
      * @return
      */
     @GetMapping("/getAttendRecord")
-    public R<List<AttendanceFlowVo>> getAttendRecord(Long userId, Long groupId, String date) {
-        if (userId == null) {
-            userId = LoginHelper.getUserId();
-        }
+    public R<List<AttendanceFlowVo>> getAttendRecord(Long groupId, String date) {
+        List<AttendanceFlowVo> list = attendanceFlowService.getAttendRecord(LoginHelper.getUserId(), groupId, date);
+        return R.ok(list);
+    }
+
+    /**
+     * 获取考勤记录
+     *
+     * @param userId  用户ID
+     * @param groupId 考勤组ID
+     * @param date    日期
+     * @return
+     */
+    @GetMapping("/getUserAttendRecord")
+    @SaCheckPermission("attendanceFlow:query")
+    public R<List<AttendanceFlowVo>> getUserAttendRecord(Long userId, Long groupId, String date) {
         List<AttendanceFlowVo> list = attendanceFlowService.getAttendRecord(userId, groupId, date);
+        return R.ok(list);
+    }
+
+    /**
+     * 获取指定月份考勤记录
+     *
+     * @param groupId 考勤组ID
+     * @param month   月份
+     * @return
+     */
+    @GetMapping("/getAttendRecordByMonth")
+    public R<Map<String, List<AttendanceFlowVo>>> getAttendRecordByMonth(Long groupId, String month) {
+        Map<String, List<AttendanceFlowVo>> list = attendanceFlowService.getAttendRecordByMonth(LoginHelper.getUserId(), groupId, month);
         return R.ok(list);
     }
 
@@ -122,11 +150,9 @@ public class AttendanceFlowController extends BaseController {
      * @param month   月份
      * @return
      */
-    @GetMapping("/getAttendRecordByMonth")
-    public R<Map<String, List<AttendanceFlowVo>>> getAttendRecordByMonth(Long userId, Long groupId, String month) {
-        if (userId == null) {
-            userId = LoginHelper.getUserId();
-        }
+    @GetMapping("/getUserAttendRecordByMonth")
+    @SaCheckPermission("attendanceFlow:query")
+    public R<Map<String, List<AttendanceFlowVo>>> getUserAttendRecordByMonth(Long userId, Long groupId, String month) {
         Map<String, List<AttendanceFlowVo>> list = attendanceFlowService.getAttendRecordByMonth(userId, groupId, month);
         return R.ok(list);
     }
@@ -139,6 +165,7 @@ public class AttendanceFlowController extends BaseController {
      * @return
      */
     @GetMapping("/attendCountByDay")
+    @SaCheckPermission("attendanceFlow:count")
     public R<AttendanceFlowCountByDayVo> attendCountByDay(Long groupId, String date) {
         return R.ok(attendanceFlowService.attendCountByDay(groupId, date));
     }
@@ -152,6 +179,7 @@ public class AttendanceFlowController extends BaseController {
      * @return
      */
     @GetMapping("/attendCountByDateRange")
+    @SaCheckPermission("attendanceFlow:count")
     public R<AttendanceFlowCountByDateRangeVo> attendCountByDateRange(Long groupId, String startDate, String endDate) {
         return R.ok(attendanceFlowService.attendCountByDateRange(groupId, startDate, endDate));
     }

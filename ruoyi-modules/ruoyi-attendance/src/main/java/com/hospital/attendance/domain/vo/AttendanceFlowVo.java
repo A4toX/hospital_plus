@@ -130,10 +130,10 @@ public class AttendanceFlowVo implements Serializable {
     /**
      * 考勤组信息
      */
-//    private AttendanceGroupVo attendanceGroup;
-//    /**
-//     * 考勤班次
-//     */
-//    private AttendanceClassesVo attendanceClasses;
+    private AttendanceGroupVo attendanceGroup;
+    /**
+     * 考勤班次
+     */
+    private AttendanceClassesVo attendanceClasses;
 }
 

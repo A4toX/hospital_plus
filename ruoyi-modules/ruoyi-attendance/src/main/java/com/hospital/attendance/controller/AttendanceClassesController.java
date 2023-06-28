@@ -1,10 +1,13 @@
 package com.hospital.attendance.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.hospital.attendance.domain.bo.AttendanceClassesBo;
 import com.hospital.attendance.domain.vo.AttendanceClassesVo;
 import com.hospital.attendance.service.IAttendanceClassesService;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.domain.R;
+import org.dromara.common.log.annotation.Log;
+import org.dromara.common.log.enums.BusinessType;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.web.core.BaseController;
@@ -32,6 +35,8 @@ public class AttendanceClassesController extends BaseController {
      * @return
      */
     @PostMapping("/insert")
+    @SaCheckPermission("attendanceClasses:add")
+    @Log(title = "考勤班次管理", businessType = BusinessType.INSERT)
     public R<Void> insert(@RequestBody AttendanceClassesBo entity) {
         return toAjax(attendanceClassesService.insert(entity));
     }
@@ -43,6 +48,8 @@ public class AttendanceClassesController extends BaseController {
      * @return
      */
     @PostMapping("/update")
+    @SaCheckPermission("attendanceClasses:edit")
+    @Log(title = "考勤班次管理", businessType = BusinessType.UPDATE)
     public R<Void> update(@RequestBody AttendanceClassesBo entity) {
         return toAjax(attendanceClassesService.update(entity));
     }
@@ -54,6 +61,7 @@ public class AttendanceClassesController extends BaseController {
      * @return
      */
     @GetMapping("/findPage")
+    @SaCheckPermission("attendanceClasses:list")
     public TableDataInfo<AttendanceClassesVo> findPage(AttendanceClassesBo bo, PageQuery pageQuery) {
         return attendanceClassesService.selectPageList(bo, pageQuery);
     }
@@ -65,6 +73,7 @@ public class AttendanceClassesController extends BaseController {
      * @return
      */
     @GetMapping("/get")
+    @SaCheckPermission("attendanceClasses:query")
     public R<AttendanceClassesVo> get(Long id) {
         return R.ok(attendanceClassesService.selectById(id));
     }
@@ -87,6 +96,8 @@ public class AttendanceClassesController extends BaseController {
      * @return
      */
     @DeleteMapping("/delete")
+    @SaCheckPermission("attendanceClasses:delete")
+    @Log(title = "考勤班次管理", businessType = BusinessType.DELETE)
     public R<Void> delete(@RequestParam("id") Long id) {
         return toAjax(attendanceClassesService.deleteById(id));
     }

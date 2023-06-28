@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hospital.attendance.domain.*;
 import com.hospital.attendance.domain.bo.AttendanceFlowBo;
 import com.hospital.attendance.domain.vo.*;
@@ -65,6 +66,8 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
 
     @Override
     public AttendanceQrResp getQrCodeInfo(Long groupId) {
+        checkManageGroup(groupId);
+
         AttendanceGroup group = AttendanceUtils.getGroup(groupId);
         if (group.getGroupMethod() != AttendanceMethodEnum.scan.getType()) {
             throw new ServiceException("该考勤组未启用扫码打卡");
@@ -143,20 +146,20 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
     @Override
     public List<AttendanceFlowVo> getAttendRecord(Long userId, Long groupId, String date) {
         List<AttendanceFlowVo> flows = mapper.selectByDate(groupId, userId, date);
-//        flows.forEach(flow -> {
-//            flow.setAttendanceGroup(MapstructUtils.convert(AttendanceUtils.getGroup(flow.getAttendGroupId()), AttendanceGroupVo.class));
-//            flow.setAttendanceClasses(AttendanceUtils.getGroupClass(flow.getAttendGroupId(), flow.getAttendClassesId()));
-//        });
+        flows.forEach(flow -> {
+            flow.setAttendanceGroup(MapstructUtils.convert(AttendanceUtils.getGroup(flow.getAttendGroupId()), AttendanceGroupVo.class));
+            flow.setAttendanceClasses(AttendanceUtils.getGroupClass(flow.getAttendGroupId(), flow.getAttendClassesId()));
+        });
         return flows;
     }
 
     @Override
     public Map<String, List<AttendanceFlowVo>> getAttendRecordByMonth(Long userId, Long groupId, String month) {
         List<AttendanceFlowVo> flows = mapper.selectByUserIdAndMonth(groupId, userId, month);
-//        flows.forEach(flow -> {
-//            flow.setAttendanceGroup(MapstructUtils.convert(AttendanceUtils.getGroup(flow.getAttendGroupId()), AttendanceGroupVo.class));
-//            flow.setAttendanceClasses(AttendanceUtils.getGroupClass(flow.getAttendGroupId(), flow.getAttendClassesId()));
-//        });
+        flows.forEach(flow -> {
+            flow.setAttendanceGroup(MapstructUtils.convert(AttendanceUtils.getGroup(flow.getAttendGroupId()), AttendanceGroupVo.class));
+            flow.setAttendanceClasses(AttendanceUtils.getGroupClass(flow.getAttendGroupId(), flow.getAttendClassesId()));
+        });
         return flows.stream()
             .collect(Collectors.groupingBy(flow -> flow.getAttendDate()));
     }
@@ -222,5 +225,14 @@ public class AttendanceFlowServiceImpl extends BaseServiceImpl<AttendanceFlowMap
         data.setDetails(details);
 
         return data;
+    }
+
+    private void checkManageGroup(Long groupId) {
+        List<AttendanceManagementUser> users = attendanceManagementUserMapper.selectList(new LambdaQueryWrapper<AttendanceManagementUser>()
+            .eq(AttendanceManagementUser::getUserId, LoginHelper.getUserId())
+            .eq(AttendanceManagementUser::getGroupId, groupId));
+        if(users.isEmpty()) {
+            throw new ServiceException("获取考勤二维码信息失败，您没有该考勤组权限");
+        }
     }
 }
