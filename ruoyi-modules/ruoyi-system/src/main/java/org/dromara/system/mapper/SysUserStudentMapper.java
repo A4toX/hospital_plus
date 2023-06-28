@@ -10,6 +10,7 @@ import org.dromara.system.domain.vo.SysUserStudentVo;
 import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 学员Mapper接口
@@ -22,4 +23,5 @@ public interface SysUserStudentMapper extends BaseMapperPlus<SysUserStudent, Sys
     Page<SysUserStudentVo> pageStudentList(Page<SysUserStudent> page, @Param(Constants.WRAPPER) Wrapper<SysUserStudent> queryWrapper);
 
     List<SysUserStudentVo> selectStudentList(@Param(Constants.WRAPPER) Wrapper<SysUserStudent> queryWrapper);
+
 }

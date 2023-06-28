@@ -6,7 +6,10 @@ import com.hospital.cycle.domain.CycleRule;
 import com.hospital.cycle.domain.CycleRuleBase;
 import com.hospital.cycle.mapper.CycleRuleBaseMapper;
 import com.hospital.cycle.mapper.CycleRuleMapper;
+import com.hospital.cycle.utils.CycleValidUtils;
 import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.service.StudentService;
+import org.dromara.common.core.service.domain.Student;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
@@ -15,9 +18,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
-import org.dromara.system.domain.SysUserStudent;
-import org.dromara.system.domain.vo.SysUserStudentVo;
-import org.dromara.system.mapper.SysUserStudentMapper;
 import org.springframework.stereotype.Service;
 import com.hospital.cycle.domain.bo.CycleStudentBo;
 import com.hospital.cycle.domain.vo.CycleStudentVo;
@@ -46,8 +46,8 @@ public class CycleStudentServiceImpl implements ICycleStudentService {
 
     private final CycleStudentMapper baseMapper;
     private final CycleRuleMapper ruleMapper;
-    private final SysUserStudentMapper studentMapper;
     private final CycleRuleBaseMapper ruleBaseMapper;
+    private final StudentService studentService;
 
     /**
      * 查询学员规则关联
@@ -117,7 +117,7 @@ public class CycleStudentServiceImpl implements ICycleStudentService {
                     && ObjectUtil.equals(b.getRuleId(), a.getRuleId())
                 )
             )
-            .collect(Collectors.toList());
+            .toList();
         //新增
         if (!add.isEmpty()){
             baseMapper.insertBatch(add);
@@ -139,47 +139,7 @@ public class CycleStudentServiceImpl implements ICycleStudentService {
      * 保存前的数据校验
      */
     private void validEntityBeforeSave(List<CycleStudent> list){
-        //校验轮转状态
-        if (list.isEmpty()){
-            return;
-        }
-        Long ruleId = list.get(0).getRuleId();
-        CycleRule cycleRule = ruleMapper.selectById(ruleId);
-        if (cycleRule == null){
-            throw new ServiceException("轮转规则不存在");
-        }
-        if (CYCLE_STATUS_COMPLETE.equals(cycleRule.getRuleStatus())){
-            throw new ServiceException("轮转规则已排，不能再添加学员");
-        }
-        //获取list中所有的userId
-        Set<Long> userIds = list.stream().map(CycleStudent::getUserId).collect(java.util.stream.Collectors.toSet());
-        List<SysUserStudent> students = studentMapper.selectList(Wrappers.<SysUserStudent>lambdaQuery().in(SysUserStudent::getUserId, userIds));
-        if (students.isEmpty()||students.size()!=userIds.size()){
-            throw new ServiceException("选择人员有误，请重新选择");
-        }
-        //如果规则开启了专业，判断学员是否有专业，并且专业是否符合
-        if(YES.equals(cycleRule.getBaseFlag())){
-            Set<Long> userBaseId = students.stream().map(SysUserStudent::getBaseId).collect(java.util.stream.Collectors.toSet());
-            //获取规则的专业
-            List<CycleRuleBase> ruleBases = ruleBaseMapper.selectList(Wrappers.<CycleRuleBase>lambdaQuery().eq(CycleRuleBase::getRuleId, ruleId));
-            if (ruleBases.isEmpty()){
-                throw new ServiceException("轮转规则开启了专业，请先配置专业后再关联学员");
-            }
-            Set<Long> ruleBaseIds = ruleBases.stream().map(CycleRuleBase::getBaseId).collect(java.util.stream.Collectors.toSet());
-            //比对学员的专业和规则的专业，如果有不符合的，抛出异常
-            if (!userBaseId.containsAll(ruleBaseIds)){
-                throw new ServiceException("选中学员的专业未包含在规则的专业中，请新增专业或者重新选择学员");
-            }
-        }
-
-
-
-        //校验学员是否已经存在
-      /*  List<CycleStudent> cycleStudents = baseMapper.selectList(Wrappers.<CycleStudent>lambdaQuery().ne(CycleStudent::getRuleId, ruleId).in(CycleStudent::getUserId, userIds));
-        if (!cycleStudents.isEmpty()){
-            throw new ServiceException("学员已存在于其他轮转规则中，请重新选择");
-        }*/
-
+        CycleValidUtils.validCycleStudent(list);
     }
 
     /**

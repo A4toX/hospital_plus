@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hospital.cycle.domain.CycleRule;
 import com.hospital.cycle.mapper.CycleRuleMapper;
 import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.service.BaseService;
 import org.dromara.common.core.utils.MapstructUtils;
-import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -19,6 +19,7 @@ import com.hospital.cycle.domain.CycleRuleBase;
 import com.hospital.cycle.mapper.CycleRuleBaseMapper;
 import com.hospital.cycle.service.ICycleRuleBaseService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
@@ -38,6 +39,7 @@ public class CycleRuleBaseServiceImpl implements ICycleRuleBaseService {
 
     private final CycleRuleBaseMapper baseMapper;
     private final CycleRuleMapper ruleMapper;
+    private final BaseService baseService;
 
     /**
      * 查询规则专业关联
@@ -62,7 +64,15 @@ public class CycleRuleBaseServiceImpl implements ICycleRuleBaseService {
      */
     @Override
     public List<CycleRuleBaseVo> queryList(CycleRuleBaseBo bo) {
-        return baseMapper.selectWithBaseName(this.buildQueryWrapper(bo));
+        LambdaQueryWrapper<CycleRuleBase> lqw = this.LambdabuildQueryWrapper(bo);
+        List<CycleRuleBaseVo> voList = baseMapper.selectVoList(lqw);
+        if (voList.isEmpty()){
+            return new ArrayList<>();
+        }
+        voList.forEach(vo->{
+            vo.setBaseName(baseService.selectBaseNameById(vo.getBaseId()));
+        });
+        return voList;
     }
 
     private LambdaQueryWrapper<CycleRuleBase> LambdabuildQueryWrapper(CycleRuleBaseBo bo) {
@@ -117,6 +127,13 @@ public class CycleRuleBaseServiceImpl implements ICycleRuleBaseService {
         }
         if (NO.equals(cycleRule.getBaseFlag())) {
             throw new ServiceException("该规则未开启专业关联功能");
+        }
+        //校验规则专业关联是否已经存在
+        CycleRuleBase cycleRuleBase = baseMapper.selectOne(Wrappers.<CycleRuleBase>lambdaQuery()
+                .eq(CycleRuleBase::getRuleId, entity.getRuleId())
+                .eq(CycleRuleBase::getBaseId, entity.getBaseId()));
+        if (cycleRuleBase!=null){
+            throw new ServiceException("请重新选择专业，该专业已经存在");
         }
     }
 

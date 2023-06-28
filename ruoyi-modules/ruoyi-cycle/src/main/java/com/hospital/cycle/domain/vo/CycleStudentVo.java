@@ -7,7 +7,6 @@ import org.dromara.common.excel.annotation.ExcelDictFormat;
 import org.dromara.common.excel.convert.ExcelDictConvert;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
-import org.dromara.system.domain.vo.SysUserStudentVo;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -39,7 +38,7 @@ public class CycleStudentVo implements Serializable {
     /**
      * 学员信息
      */
-    private SysUserStudentVo sysUserStudentVo;
+//    private SysUserStudentVo sysUserStudentVo;
 
     /**
      * 学员id

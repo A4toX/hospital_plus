@@ -1,10 +1,13 @@
 package org.dromara.system.service.impl;
 
 import cn.dev33.satoken.secure.BCrypt;
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.dromara.common.core.constant.UserConstants;
 import org.dromara.common.core.domain.R;
+import org.dromara.common.core.service.StudentService;
+import org.dromara.common.core.service.domain.Student;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
@@ -29,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * 学员Service业务层处理
@@ -38,7 +42,7 @@ import java.util.Collection;
  */
 @RequiredArgsConstructor
 @Service
-public class SysUserStudentServiceImpl implements ISysUserStudentService {
+public class SysUserStudentServiceImpl implements ISysUserStudentService, StudentService {
 
     private final SysUserStudentMapper baseMapper;
 
@@ -73,6 +77,7 @@ public class SysUserStudentServiceImpl implements ISysUserStudentService {
         Map<String, Object> params = bo.getParams();
         QueryWrapper<SysUserStudent> wrapper = new QueryWrapper<>();
         wrapper.eq(StringUtils.isNotBlank(bo.getPersonType()),"us.person_type", bo.getPersonType())
+            .in(bo.getUserIds()!=null,"us.user_id", bo.getUserIds())
             .eq(bo.getUserId()!=null,"us.user_id", bo.getUserId())
             .eq(StringUtils.isNotBlank(bo.getStudentType()),"us.student_type", bo.getStudentType())
             .eq(StringUtils.isNotBlank(bo.getResidentYear()),"us.resident_year", bo.getResidentYear())
@@ -120,4 +125,22 @@ public class SysUserStudentServiceImpl implements ISysUserStudentService {
         }
         return baseMapper.deleteBatchIds(ids) > 0;
     }
+
+    @Override
+    public Long selectStudentBaseIdByUserId(Long userId) {
+        return baseMapper.selectById(userId).getBaseId();
+    }
+
+    @Override
+    public List<Student> selectStudentByUserIds(Set<Long> userIds) {
+        SysUserStudentBo bo = new SysUserStudentBo();
+        bo.setUserIds(userIds);
+        List<SysUserStudentVo> voList = baseMapper.selectStudentList(this.buildQueryWrapper(bo));
+        if (voList == null || voList.isEmpty()) {
+            return null;
+        }
+        return BeanUtil.copyToList(voList, Student.class);
+    }
+
+
 }
