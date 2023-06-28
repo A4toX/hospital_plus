@@ -15,7 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 请假记录
+ * 新考勤/请假记录
  *
  * @author liguoxian
  */

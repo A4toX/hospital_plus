@@ -15,7 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 节假日配置
+ * 新考勤/节假日配置
  *
  * @author liguoxian
  */
