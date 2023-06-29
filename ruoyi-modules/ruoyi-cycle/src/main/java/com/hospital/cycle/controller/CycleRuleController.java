@@ -131,4 +131,14 @@ public class CycleRuleController extends BaseController {
                           @PathVariable Long[] ids) {
         return toAjax(cycleRuleService.deleteWithValidByIds(List.of(ids), true));
     }
+
+    @SaCheckPermission("cycle:rule:edit")
+    @Log(title = "轮转规则", businessType = BusinessType.UPDATE)
+    @RepeatSubmit()
+    @GetMapping("/start/{ruleId}")
+    public R<Void> edit(@NotNull(message = "主键不能为空")
+                        @PathVariable Long ruleId) {
+        cycleRuleService.startCycle(ruleId);
+        return R.ok();
+    }
 }

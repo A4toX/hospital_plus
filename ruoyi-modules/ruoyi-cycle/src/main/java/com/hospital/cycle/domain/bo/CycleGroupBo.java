@@ -58,7 +58,7 @@ public class CycleGroupBo extends BaseEntity {
     /**
      * 组轮转时长(月或周)
      */
-    @NotNull(message = "组轮转时长(月或周)不能为空", groups = { AddGroup.class, EditGroup.class })
+//    @NotNull(message = "组轮转时长(月或周)不能为空", groups = { AddGroup.class, EditGroup.class })
     private Integer groupUnitNum;
 
     /**

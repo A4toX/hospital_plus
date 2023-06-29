@@ -74,5 +74,9 @@ public class CycleRecordBo extends BaseEntity {
     @NotNull(message = "科室排序不能为空", groups = { AddGroup.class, EditGroup.class })
     private Long cycleRecordIndex;
 
+    /**
+     * 科室轮转单位
+     */
+    private Integer deptNum;
 
 }
