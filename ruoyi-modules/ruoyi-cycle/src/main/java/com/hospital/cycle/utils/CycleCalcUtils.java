@@ -165,8 +165,8 @@ public class CycleCalcUtils {
                 return;
             }
             //开始排序
-            for (int i = 1;i<=unDeptList.size();){
-                int dateIndex = i;//目前排序的编号
+            for (int i = 0;i<=unDeptList.size();){
+                int dateIndex = i+1;//目前排序的编号
                 //计算出学生要排的科室
                 Integer thisNum = calcDeptMinByDateIndex(student,allDeptList,dateIndex);
                 i+=thisNum;

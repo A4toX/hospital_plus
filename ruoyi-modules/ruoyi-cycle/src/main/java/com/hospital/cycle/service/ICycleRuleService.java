@@ -52,4 +52,6 @@ public interface ICycleRuleService {
     List<CycleRuleVo> queryStudentSelectDept(Long userId);
 
     void startCycle(Long ruleId);
+
+    void initStudent(Long ruleId);
 }

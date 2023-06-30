@@ -8,6 +8,7 @@ import com.hospital.cycle.domain.vo.calc.CycleStudentCalcVo;
 import com.hospital.cycle.service.ICycleGroupService;
 import com.hospital.cycle.service.ICycleRuleBaseService;
 import com.hospital.cycle.utils.CycleCalcUtils;
+import com.hospital.cycle.utils.CycleUtils;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.service.StudentService;
 import org.dromara.common.core.utils.MapstructUtils;
@@ -302,5 +303,9 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
         CycleCalcUtils.calc(allStudentList,allDeptList,ruleId,ruleTotalTimeUnit);
     }
 
+    @Override
+    public void initStudent(Long ruleId){
+        CycleUtils.initStudentDept(ruleId);
+    }
 
 }

@@ -148,9 +148,9 @@ public class CycleValidUtils {
         Integer sum = deptUnitNums.stream().reduce(0, Integer::sum);
 
         switch (cyclegroup.getGroupMethod()) {
-            case CYCLE_GROUP_METHOD_MUST://必选只需要校验时间是否满足
-                if (!sum.equals(cyclegroup.getGroupUnitNum())) {
-                    throw new ServiceException("必修规则中，所有科室轮转时间必须等于规则组的轮转时间");
+            case CYCLE_GROUP_METHOD_MUST:
+                if (cyclegroup.getGroupUnitNum()!=null) {
+                    throw new ServiceException("必修规则中，无需填写规则组轮转时间");
                 }
                 break;
             case CYCLE_GROUP_METHOD_ELECTIVE://任选其几

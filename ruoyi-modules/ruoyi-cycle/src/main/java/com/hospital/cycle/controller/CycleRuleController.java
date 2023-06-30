@@ -132,6 +132,11 @@ public class CycleRuleController extends BaseController {
         return toAjax(cycleRuleService.deleteWithValidByIds(List.of(ids), true));
     }
 
+    /**
+     * 开始轮转
+     * @param ruleId
+     * @return
+     */
     @SaCheckPermission("cycle:rule:edit")
     @Log(title = "轮转规则", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
@@ -141,4 +146,19 @@ public class CycleRuleController extends BaseController {
         cycleRuleService.startCycle(ruleId);
         return R.ok();
     }
+
+    /**
+     * 初始化学生轮转记录
+     * @param ruleId
+     * @return
+     */
+    @SaCheckPermission("cycle:rule:edit")
+    @Log(title = "轮转规则", businessType = BusinessType.UPDATE)
+    @RepeatSubmit()
+    @GetMapping("/initStudent/{ruleId}")
+    public R<Void> initStudent(@PathVariable Long ruleId) {
+        cycleRuleService.initStudent(ruleId);
+        return R.ok();
+    }
+
 }
