@@ -1,11 +1,5 @@
 package org.dromara.system.domain.bo;
 
-import org.dromara.common.core.constant.UserConstants;
-import org.dromara.common.core.xss.Xss;
-import org.dromara.common.mybatis.core.domain.BaseEntity;
-import org.dromara.common.sensitive.annotation.Sensitive;
-import org.dromara.common.sensitive.core.SensitiveStrategy;
-import org.dromara.system.domain.SysUser;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -13,8 +7,10 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
+import org.dromara.common.core.constant.UserConstants;
+import org.dromara.common.core.xss.Xss;
+import org.dromara.common.mybatis.core.domain.BaseEntity;
+import org.dromara.system.domain.SysUser;
 
 /**
  * 用户信息业务对象 sys_user
@@ -47,11 +43,13 @@ public class SysUserBo extends BaseEntity {
     private String userName;
 
     /**
-     * 用户姓名
+     * 用户昵称
      */
     @Xss(message = "用户姓名不能包含脚本字符")
+    @NotBlank(message = "用户名称不能为空")
     @Size(min = 0, max = 30, message = "用户姓名长度不能超过{max}个字符")
     private String realName;
+
 
     /**
      * 用户类型（sys_user系统用户）
@@ -69,8 +67,6 @@ public class SysUserBo extends BaseEntity {
      * 手机号码
      */
     private String phonenumber;
-
-
 
     /**
      * 用户性别（0男 1女 2未知）
