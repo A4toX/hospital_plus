@@ -1,5 +1,6 @@
 package com.hospital.flow.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -22,7 +23,7 @@ public class FlowNode extends TenantEntity {
     /**
      * 主键
      */
-    @TableId
+    @TableId(type = IdType.INPUT)
     private Long id;
 
     /**

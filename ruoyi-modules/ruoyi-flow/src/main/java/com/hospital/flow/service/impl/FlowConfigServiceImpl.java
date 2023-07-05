@@ -1,22 +1,22 @@
 package com.hospital.flow.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import org.dromara.common.core.enums.YesNoEnum;
-import org.dromara.common.core.exception.ServiceException;
-import org.dromara.common.mybatis.core.mapper.LambdaQueryWrapperX;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import lombok.RequiredArgsConstructor;
-import org.dromara.common.mybatis.core.page.PageQuery;
-import org.dromara.common.mybatis.core.page.TableDataInfo;
-import org.dromara.common.mybatis.core.service.BaseServiceImpl;
 import com.hospital.flow.domain.FlowConfig;
 import com.hospital.flow.domain.bo.FlowConfigBo;
 import com.hospital.flow.domain.vo.FlowConfigVo;
 import com.hospital.flow.mapper.FlowConfigMapper;
 import com.hospital.flow.service.IFlowConfigService;
+import com.hospital.flow.utils.FlowUtils;
+import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.enums.YesNoEnum;
+import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.mybatis.core.mapper.LambdaQueryWrapperX;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.mybatis.core.service.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,6 +84,7 @@ public class FlowConfigServiceImpl extends BaseServiceImpl<FlowConfigMapper, Flo
             flowConfig.setVersion(1);
             flowConfig.setVersionFlag(YesNoEnum.YES.getValue());
             flowConfig.setPublishTime(DateUtil.now());
+            FlowUtils.handleNodeAndEdge(flowConfig);
             return mapper.updateById(flowConfig);
         }
 
@@ -94,7 +95,9 @@ public class FlowConfigServiceImpl extends BaseServiceImpl<FlowConfigMapper, Flo
         flowConfig.setPublishTime(DateUtil.now());
         flowConfig.setVersionFlag(YesNoEnum.YES.getValue());
         flowConfig.setVersion(flowConfig.getVersion() + 1);
-        return mapper.insert(flowConfig);
+        int result = mapper.insert(flowConfig);
+        FlowUtils.handleNodeAndEdge(flowConfig);
+        return result;
     }
 
     private LambdaQueryWrapper<FlowConfig> buildQueryWrapper(FlowConfigBo bo) {
