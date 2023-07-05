@@ -17,8 +17,6 @@ import java.util.List;
  */
 public interface AttendanceManagementUserMapper extends BaseMapperPlus<AttendanceManagementUser, AttendanceManagementUserVo> {
 
-    List<AttendanceMUserRespVo> listByGroupId(GroupManagerReqVo reqVO);
-
     default List<AttendanceManagementUser> selectByUserId(Long userId) {
         return selectList(new LambdaQueryWrapper<AttendanceManagementUser>().eq(AttendanceManagementUser::getUserId, userId));
     }
@@ -26,7 +24,5 @@ public interface AttendanceManagementUserMapper extends BaseMapperPlus<Attendanc
     default List<AttendanceManagementUser> selectByGroupId(Long groupId) {
         return selectList(new LambdaQueryWrapper<AttendanceManagementUser>().eq(AttendanceManagementUser::getGroupId, groupId));
     }
-
-    List<AttendanceMUserRespVo> listAllStaffByHosId(GroupManagerReqVo reqVO);
 }
 

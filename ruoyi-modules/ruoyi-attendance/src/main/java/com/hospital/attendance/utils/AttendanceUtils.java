@@ -12,6 +12,7 @@ import cn.hutool.cron.task.Task;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import com.hospital.attendance.constant.AttendanceCacheNames;
 import com.hospital.attendance.domain.*;
 import com.hospital.attendance.domain.vo.*;
 import com.hospital.attendance.enums.AttendanceKindEnum;
@@ -35,7 +36,6 @@ import java.util.stream.Collectors;
 public class AttendanceUtils {
 
     private static final Map<Long, Set<String>> scheduleIds = new HashMap<>();
-    private static final String ATTEND_CONFIG_PREFIX = "attendance:config:";
     private static final AttendanceClassesMapper classesMapper = SpringUtils.getBean(AttendanceClassesMapper.class);
     private static final AttendanceGroupMapper groupMapper = SpringUtils.getBean(AttendanceGroupMapper.class);
     private static final AttendanceGroupClassesMapper groupClassesMapper = SpringUtils.getBean(AttendanceGroupClassesMapper.class);
@@ -241,7 +241,7 @@ public class AttendanceUtils {
      */
     public static List<AttendanceGroupClassVo> getGroupClasses(Long groupId) {
         String key = getKey(CacheTypeEnum.groupClasses, groupId);
-        List<AttendanceGroupClassVo> groupClasses = RedisUtils.getCacheObject(key);
+        List<AttendanceGroupClassVo> groupClasses = null;
         if (CollUtil.isEmpty(groupClasses)) {
             groupClasses = groupClassesMapper.selectByGroupId(groupId);
             if (CollUtil.isNotEmpty(groupClasses)) {
@@ -449,6 +449,9 @@ public class AttendanceUtils {
      */
     public static boolean checkNeedAttendance(Long groupId, Date date) {
         AttendanceGroupClassVo groupClass = getGroupClass(groupId);
+        if(groupClass == null) {
+            return false;
+        }
         AttendanceGroup group = getGroup(groupId);
         if (YesNoEnum.YES.getName().equals(groupClass.getStatus())) {
             if (YesNoEnum.YES.getValue().equals(group.getHolidayLeave())) {
@@ -674,7 +677,7 @@ public class AttendanceUtils {
      * @return 缓存key
      */
     private static String getKey(CacheTypeEnum type, Object key) {
-        return ATTEND_CONFIG_PREFIX + type + ":" + key;
+        return AttendanceCacheNames.ATTENDANCE_CONFIG_CACHE + type + ":" + key;
     }
 
     /**
