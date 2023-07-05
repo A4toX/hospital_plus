@@ -2,7 +2,6 @@ package com.hospital.attendance.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.dromara.common.core.utils.MapstructUtils;
-import org.dromara.common.flowable.common.enums.ProcessStatus;
 import org.dromara.common.mybatis.core.mapper.LambdaQueryWrapperX;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +33,7 @@ public class AttendanceLeaveRecordServiceImpl extends BaseServiceImpl<Attendance
     public int insert(AttendanceLeaveRecordBo bo) {
         AttendanceLeaveRecord record = MapstructUtils.convert(bo, AttendanceLeaveRecord.class);
         record.setUserId(LoginHelper.getUserId());
-        record.setResult(ProcessStatus.RUNNING.getStatus());
+//        record.setResult(ProcessStatus.RUNNING.getStatus());
 
         return mapper.insert(record);
     }

@@ -65,10 +65,6 @@
             <artifactId>ruoyi-common-log</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-flowable</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

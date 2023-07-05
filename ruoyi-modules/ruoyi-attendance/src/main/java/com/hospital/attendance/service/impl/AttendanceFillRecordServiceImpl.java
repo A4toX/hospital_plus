@@ -1,7 +1,6 @@
 package com.hospital.attendance.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import org.dromara.common.flowable.common.enums.ProcessStatus;
 import org.dromara.common.mybatis.core.mapper.LambdaQueryWrapperX;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ public class AttendanceFillRecordServiceImpl extends BaseServiceImpl<AttendanceF
     @Override
     public int insert(AttendanceFillRecordBo bo) {
         bo.setUserId(LoginHelper.getUserId());
-        bo.setResult(ProcessStatus.RUNNING.getStatus());
+//        bo.setResult(ProcessStatus.RUNNING.getStatus());
         return super.insert(bo);
     }
 
