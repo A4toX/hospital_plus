@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 学员Service业务层处理
@@ -129,6 +130,14 @@ public class SysUserStudentServiceImpl implements ISysUserStudentService, Studen
     @Override
     public Long selectStudentBaseIdByUserId(Long userId) {
         return baseMapper.selectById(userId).getBaseId();
+    }
+    @Override
+    public String  selectStudentNameByUserId(Set<Long> userIds) {
+        List<Student> studentList = selectStudentByUserIds(userIds);
+        if (studentList == null || studentList.isEmpty()) {
+            return null;
+        }
+        return studentList.stream().map(Student::getRealName).collect(Collectors.joining(","));
     }
 
     @Override

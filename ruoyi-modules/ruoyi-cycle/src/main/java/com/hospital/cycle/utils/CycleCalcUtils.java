@@ -2,20 +2,23 @@ package com.hospital.cycle.utils;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.hospital.cycle.domain.*;
-import com.hospital.cycle.domain.vo.calc.CycleDeptCalcVo;
-import com.hospital.cycle.domain.vo.calc.CycleDeptCapacityVo;
-import com.hospital.cycle.domain.vo.calc.CycleStudentCalcVo;
-import com.hospital.cycle.domain.vo.calc.CycleStudentDeptCalcVo;
+import com.hospital.cycle.domain.vo.CycleCalcRecordVo;
+import com.hospital.cycle.domain.vo.calc.*;
 import com.hospital.cycle.mapper.*;
+import org.apache.poi.ss.formula.functions.Index;
 import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.service.DeptService;
 import org.dromara.common.core.service.StudentService;
 import org.dromara.common.core.utils.SpringUtils;
+import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.helper.DataBaseHelper;
+import org.dromara.common.redis.utils.RedisUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hospital.cycle.constant.CycleConstant.CYCLE_GROUP_METHOD_MUST;
+import static com.hospital.cycle.utils.CycleUtils.initStudentDept;
 
 /**
  * 用于初始化和计算轮转的工具类
@@ -31,52 +34,15 @@ public class CycleCalcUtils {
     public static CycleStudentMapper studentMapper = SpringUtils.getBean(CycleStudentMapper.class);
     public static StudentService studentService = SpringUtils.getBean(StudentService.class);
     public static CycleRecordMapper recordMapper = SpringUtils.getBean(CycleRecordMapper.class);
+    public static DeptService deptService = SpringUtils.getBean(DeptService.class);
+    public static CycleCalcRecordMapper calcRecordMapper = SpringUtils.getBean(CycleCalcRecordMapper.class);
+
+
 
 
     /**
-     * 初始化规则中的所有科室
-     * @param ruleId
-     * @param ruleTotalTimeUnit
-     * @return
-     */
-    public static List<CycleDeptCalcVo> calcAllDept(Long ruleId, Integer ruleTotalTimeUnit) {
-        //获取规则下所有科室
-        List<CycleGroupDept> cycleGroupDeptList = groupDeptMapper.selectList(Wrappers.<CycleGroupDept>lambdaQuery().eq(CycleGroupDept::getRuleId, ruleId));
-        if (cycleGroupDeptList.size() == 0) {
-            return null;
-        }
-        List<CycleDeptCalcVo> deptVoList = new ArrayList<>();
-
-        cycleGroupDeptList.forEach(dept->{
-            CycleDeptCalcVo deptVo = new CycleDeptCalcVo();
-            deptVo.setDeptId(dept.getDeptId());
-            //获取本科是需要轮转的学生人数
-            Long studentNum = recordMapper.selectCount(Wrappers.<CycleRecord>lambdaQuery()
-                .eq(CycleRecord::getRuleId, ruleId)
-                .eq(CycleRecord::getDeptId, dept.getDeptId())
-            );
-            List<CycleDeptCapacityVo> capacityVoList = new ArrayList<>();
-            if (ruleTotalTimeUnit<0){
-                throw new ServiceException("轮转总时间不能小于0");
-            }
-            for (int i = 1; i<=ruleTotalTimeUnit;i++){
-                CycleDeptCapacityVo capacityVo = new CycleDeptCapacityVo();
-                capacityVo.setDeptId(dept.getDeptId());
-                capacityVo.setDateIndex(i);
-                //科室容量 = 需要来本科室轮转的人数/时间人数,向上取整
-                capacityVo.setDeptCapacity((int) Math.ceil((double) studentNum.intValue() / ruleTotalTimeUnit));
-                //还没开始排，剩余容量和科室容量一致
-                capacityVo.setDeptCapacity(capacityVo.getDeptCapacity());
-                capacityVoList.add(capacityVo);
-            }
-            deptVo.setCapacityList(capacityVoList);
-            deptVoList.add(deptVo);
-        });
-        return deptVoList;
-    }
-
-    /**
-     * 获取轮转科室的整体轮转时间
+     * 获取规则下轮转科室的整体轮转时间
+     *
      * @param ruleId
      * @return
      */
@@ -91,16 +57,16 @@ public class CycleCalcUtils {
         //必选不设置规则组时间，直接获取科室的轮转时间
         List<CycleGroupDept> cycleGroupDeptList = groupDeptMapper.selectList(Wrappers.<CycleGroupDept>lambdaQuery()
             .eq(CycleGroupDept::getRuleId, ruleId)
-            .and(w->{
+            .and(w -> {
                 List<CycleGroup> mustGroupList = groupMapper.selectList(Wrappers.<CycleGroup>lambdaQuery()
                     .eq(CycleGroup::getRuleId, ruleId)
                     .eq(CycleGroup::getGroupMethod, CYCLE_GROUP_METHOD_MUST));
-                if (!mustGroupList.isEmpty()){
+                if (!mustGroupList.isEmpty()) {
                     w.in(CycleGroupDept::getGroupId, mustGroupList.stream().map(CycleGroup::getGroupId).collect(Collectors.toList()));
                 }
             })
         );
-        if (!cycleGroupDeptList.isEmpty()){
+        if (!cycleGroupDeptList.isEmpty()) {
             totalTimeUnit += cycleGroupDeptList.stream().mapToInt(CycleGroupDept::getDeptUnitNum).sum();
         }
         return totalTimeUnit;
@@ -108,13 +74,14 @@ public class CycleCalcUtils {
 
     /**
      * 获取规则中所有学生和要排课的科室
+     *
      * @param ruleId
      * @return
      */
     public static List<CycleStudentCalcVo> calcAllStudent(Long ruleId) {
         //获取规则
         CycleRule cycleRule = ruleMapper.selectById(ruleId);
-        if(cycleRule.getParentId()!=0L){
+        if (cycleRule.getParentId() != 0L) {
             //获取父规则
             CycleRule parentRule = ruleMapper.selectOne(Wrappers.<CycleRule>lambdaQuery()
                 .apply(DataBaseHelper.findInSet("rule_id", cycleRule.getAncestors()))
@@ -122,25 +89,26 @@ public class CycleCalcUtils {
             ruleId = parentRule.getRuleId();
         }
         //获取规则下的学生
-        List<CycleStudent> studentList = studentMapper.selectList(Wrappers.<CycleStudent>lambdaQuery().eq(CycleStudent::getRuleId, ruleId));
-        if(studentList.isEmpty()) {
+        List<CycleStudent> studentList = studentMapper.selectList(Wrappers.<CycleStudent>lambdaQuery()
+            .eq(CycleStudent::getRuleId, ruleId));
+        if (studentList.isEmpty()) {
             throw new ServiceException("该规则下没有学生");
         }
         Set<Long> userIds = studentList.stream().map(CycleStudent::getUserId).collect(Collectors.toSet());
         //获取所有学生的轮转记录
-        List<CycleRecord> recordList = recordMapper.selectList(Wrappers.<CycleRecord>lambdaQuery()
-            .in(CycleRecord::getUserId, userIds)
+       /* List<CycleRecord> recordList = recordMapper.selectList(Wrappers.<CycleRecord>lambdaQuery()
             .in(CycleRecord::getRuleId, ruleId)
-        );
+        );*/
         List<CycleStudentCalcVo> voList = new ArrayList<>();
         //提取每个学生的科室
-        studentList.forEach(student->{
-            List<CycleRecord> studentRecordList = recordList.stream().filter(record -> record.getUserId().equals(student.getUserId())).toList();
-            if (studentRecordList.isEmpty()){
+        studentList.forEach(student -> {
+//            List<CycleRecord> studentRecordList = recordList.stream().filter(record -> record.getUserId().equals(student.getUserId())).toList();
+            List<CycleRecord> studentRecordList = RedisUtils.getCacheList("cycle:student:"+cycleRule.getRuleId()+":"+student.getUserId());
+            if (studentRecordList.isEmpty()) {
                 return;
             }
             List<CycleStudentDeptCalcVo> studentDeptCalcVoList = new ArrayList<>();
-            studentRecordList.forEach(studentRecord->{
+            studentRecordList.forEach(studentRecord -> {
                 CycleStudentDeptCalcVo studentDeptCalcVo = new CycleStudentDeptCalcVo();
                 studentDeptCalcVo.setDeptId(studentRecord.getDeptId());
                 studentDeptCalcVo.setStudentDeptNum(studentRecord.getDeptNum());//每个科室的轮转时长
@@ -155,166 +123,160 @@ public class CycleCalcUtils {
     }
 
 
+    /**
+     * 轮转主主控方法
+     * @param allStudentList
+     * @param allDeptList
+     * @param ruleId
+     * @param ruleTotalTimeUnit
+     */
     public static void calc(List<CycleStudentCalcVo> allStudentList, List<CycleDeptCalcVo> allDeptList, Long ruleId, Integer ruleTotalTimeUnit) {
-        //对所有科室进行随机重排
-        Collections.shuffle(allDeptList);
-        allStudentList.forEach(student->{
-            //获取学生没有排班的科室
-            List<CycleStudentDeptCalcVo> unDeptList = student.getDeptList().stream().filter(dept -> !dept.getIsComplete()).toList();
-            if (unDeptList.isEmpty()){//全部排完
-                return;
-            }
-            //开始排序
-            for (int i = 0;i<=unDeptList.size();){
-                int dateIndex = i+1;//目前排序的编号
-                //计算出学生要排的科室
-                Integer thisNum = calcDeptMinByDateIndex(student,allDeptList,dateIndex);
-                i+=thisNum;
-            }
+        //allDeptList按照必修排序
+        allDeptList.sort(Comparator.comparing(CycleDeptCalcVo::getDeptMethod).reversed());
+        //过滤出必修的科室
+        allStudentList.forEach(student -> {
+            List<CycleDeptCalcVo> allDeptListCopy = new ArrayList<>(allDeptList);
+            //从allDeptList中去除unDeptList中不一样的科室
+            allDeptListCopy.removeIf(dept -> student.getDeptList().stream().noneMatch(unDept -> unDept.getDeptId().equals(dept.getDeptId())));
+            //获取学生的完整排班记录
+            List<CycleDeptCalcVo> realSortList = initStudentRealSort(allDeptListCopy,student.getDeptList());
+            List<Long> deptIdList = allDeptListCopy.stream().map(CycleDeptCalcVo::getDeptId).toList();
+            student.getStudentSortList().addAll(deptIdList);//增加排班
+            //对轮转进行授时
+            CycleUtils.studentCycleAddDate(student.getStudentSortList(), ruleId, student.getUserId());
+            //信息更新
+            updateDeptAndStudent(student,realSortList);
+            //把allDeptList中的第一位换到最后一位
+            CycleDeptCalcVo firstDept = allDeptList.remove(0);
+            allDeptList.add(firstDept);
         });
+
     }
 
-
     /**
-     * 获取排序+信息更新
-     * @param student
-     * @param allDeptList
-     * @param dateIndex
+     * 校验是否有超限，如果有寻找可以调换的单位,并返回新的排序
+     * @param realSortList
+     * @param allDeptListCopy
+     * @param deptList
      * @return
      */
-    private static Integer calcDeptMinByDateIndex(CycleStudentCalcVo student, List<CycleDeptCalcVo> allDeptList, int dateIndex) {
-        //获取学生没有排班的科室
-        List<CycleStudentDeptCalcVo> unDeptList = student.getDeptList().stream().filter(dept -> !dept.getIsComplete()).toList();
-        //获取所有科室的capacityList
-        List<CycleDeptCapacityVo> deptCalcList = allDeptList.stream().map(CycleDeptCalcVo::getCapacityList).flatMap(Collection::stream).toList();
-        //调用科室选优算法，获取最优的科室
-        Long deptId = deptOptimality(unDeptList,deptCalcList ,dateIndex);
-
-        //获取到最优的科室后，更新学生的选课信息
-        student.getStudentSortList().add(deptId);//插入要轮转的科室
-        Integer studentDeptNum = student.getDeptList().stream().filter(dept -> dept.getDeptId().equals(deptId)).findFirst().get().getStudentDeptNum();//获取科室轮转时长
-
-        student.getDeptList().forEach(dept->{
-            if (dept.getDeptId().equals(deptId)){
-                dept.setIsComplete(true);
+    private static List<Long> validateStudentSort(List<CycleDeptCalcVo> realSortList,List<CycleStudentDeptCalcVo> deptList,Long ruleId,Integer ruleTotalTimeUnit) {
+        List<CycleCalcRecord> records = calcRecordMapper.selectList(Wrappers.<CycleCalcRecord>lambdaQuery()
+            .eq(CycleCalcRecord::getRuleId, ruleId)
+            .gt(CycleCalcRecord::getUnDeptCapacity, 0)
+            .orderByAsc(CycleCalcRecord::getMargin)
+        );
+        // 创建 deptId 到 id 列表的映射
+        Map<Long, List<Integer>> deptIdToIdsMap = new HashMap<>();
+        // 遍历 records 列表，填充映射
+        for (CycleCalcRecord record : records) {
+            if (!deptIdToIdsMap.containsKey(record.getDeptId())) {
+                deptIdToIdsMap.put(record.getDeptId(), new ArrayList<>());
             }
-        });
-        //更新科室信息
-        allDeptList.forEach(dept->{
-            if (!dept.getDeptId().equals(deptId)){
-                return;
-            }
-            dept.getCapacityList().forEach(capacity->{
-                if (capacity.getDateIndex()>=dateIndex&&capacity.getDateIndex()<=(studentDeptNum+dateIndex-1)){
-                    capacity.getUserIds().add(student.getUserId());//把学生加入科室
-                    capacity.setUnDeptCapacity(capacity.getUnDeptCapacity()-1);//对应科室容量减1
+            deptIdToIdsMap.get(record.getDeptId()).add(record.getDeptIndex());
+        }
+
+        // 用于存储空闲时间及其出现次数的Map
+        Map<Integer, Integer> freeTimeCountMap = new HashMap<>();
+
+        for (Map.Entry<Long, List<Integer>> entry : deptIdToIdsMap.entrySet()) {
+            System.out.println(entry.getKey() + " " + entry.getValue());
+        }
+        // 遍历映射
+        for (Map.Entry<Long, List<Integer>> entry : deptIdToIdsMap.entrySet()) {
+            Long deptId = entry.getKey();
+            List<Integer> indexList = entry.getValue();
+            indexList.forEach(index -> {
+                if (!freeTimeCountMap.containsKey(index)) {
+                    freeTimeCountMap.put(index, 1);
+                } else {
+                   freeTimeCountMap.put(index, freeTimeCountMap.get(index) + 1);
                 }
             });
-        });
+        }
+        System.out.println(freeTimeCountMap);
 
-
-        return studentDeptNum;
+        // 遍历映射，找到具有至少两个 id 的 deptId 以及对应的 id 列表
+        throw new ServiceException("未完成");
+//        return null;
+//        return jList;
     }
 
+
     /**
-     * 科室选优算法
-     * @param unDeptList
-     * @param deptCalcList
-     * @param dateIndex
+     * 返回学生的完整排序
+     * @param allDeptListCopy
+     * @param deptList
      * @return
      */
-    private static Long deptOptimality(List<CycleStudentDeptCalcVo> unDeptList, List<CycleDeptCapacityVo> deptCalcList, int dateIndex) {
-        List<CycleDeptCapacityVo> googList = new ArrayList<>();
-        List<CycleDeptCapacityVo> normalList = new ArrayList<>();
-        List<CycleDeptCapacityVo> badList = new ArrayList<>();//满员和部分满员放在这里
+    private static List<CycleDeptCalcVo> initStudentRealSort(List<CycleDeptCalcVo> allDeptListCopy, List<CycleStudentDeptCalcVo> deptList) {
+        List<CycleDeptCalcVo> realSort = new ArrayList<>();
+        for (int i=0;i<allDeptListCopy.size();i++){
+            CycleDeptCalcVo dept = allDeptListCopy.get(i);
+            CycleStudentDeptCalcVo studentDeptCalcVo = deptList.stream().filter(deptVo -> deptVo.getDeptId().equals(dept.getDeptId())).findFirst().orElse(null);
+            if (studentDeptCalcVo==null){
+                throw new ServiceException("学生的科室信息不完整");
+            }
+            //根据学生在本科室的轮转时间，完成初始化
+            if(studentDeptCalcVo.getStudentDeptNum()==1){//加一个
+                realSort.add(dept);
+            }else {//有多个
+                for (int j=0;j<studentDeptCalcVo.getStudentDeptNum();j++){
+                    realSort.add(dept);
+                }
+            }
+        }
+        return realSort;
+    }
 
-        unDeptList.forEach(dept -> {
-            //获取科室的轮转时长
-            Integer studentDeptNum = dept.getStudentDeptNum();
-            //获取科室对应时间的信息
-            List<CycleDeptCapacityVo> deptCalcListByDateIndex = deptCalcList.stream().filter(deptCalc -> deptCalc.getDeptId().equals(dept.getDeptId()) && deptCalc.getDateIndex() == dateIndex && deptCalc.getDateIndex() <= (studentDeptNum + dateIndex - 1)).toList();
-            //先校验是否已经满员
-            List<CycleDeptCapacityVo> fullDeptCalcList = deptCalcListByDateIndex.stream().filter(deptCalc -> deptCalc.getUnDeptCapacity() == 0).toList();
-            if (!fullDeptCalcList.isEmpty()) {//有满员的，放入差的
-                badList.addAll(fullDeptCalcList);
-                return;
+
+    /**
+     * 更新学生和科室信息
+     * @param student
+     * @param deptList
+     */
+    private static void updateDeptAndStudent(CycleStudentCalcVo student, List<CycleDeptCalcVo> deptList) {
+        for (int i = 0;i<deptList.size();i++){
+            Integer index = i+1;
+            Long deptId = deptList.get(i).getDeptId();
+            CycleCalcRecord calcRecord = calcRecordMapper.selectOne(Wrappers.<CycleCalcRecord>lambdaQuery()
+                .eq(CycleCalcRecord::getDeptIndex, index)
+                .eq(CycleCalcRecord::getDeptId, deptId)
+            );
+            calcRecord.setUnDeptCapacity(calcRecord.getUnDeptCapacity()-1);//科室剩余容量减1
+            double margin = (double) calcRecord.getUnDeptCapacity() / calcRecord.getDeptCapacity() * 100;
+            double roundedMargin = Math.round(margin * 100.0) / 100.0;
+            calcRecord.setMargin(roundedMargin);//重新计算空闲率
+            if (calcRecord.getUserIds()==null){
+                calcRecord.setUserIds(student.getUserId().toString());
+            }else {
+                calcRecord.setUserIds(calcRecord.getUserIds()+","+student.getUserId());//增加学生id
             }
-            //查找出还没人进过的科室，放入优秀
-            List<CycleDeptCapacityVo> noDeptCalcList = deptCalcListByDateIndex.stream().filter(deptCalc -> deptCalc.getUserIds().isEmpty()).toList();
-            if (!noDeptCalcList.isEmpty() && noDeptCalcList.size() == deptCalcListByDateIndex.size()) {//全部为空，放入优秀
-                googList.addAll(noDeptCalcList);
-                return;
-            }
-            //其余的放入普通
-            normalList.addAll(deptCalcListByDateIndex);
-        });
-        //所有科室分完以后，再进行一次校验
-        if (!googList.isEmpty()) {//如果优秀不为空，选出其中轮转时间最长的，选出其中空余位置最多的
-            if (googList.size() == 1) {//如果只有一条的话，不用校验，直接返回
-                return googList.get(0).getDeptId();
-            }
-            //取出空位数最大的几条
-            List<CycleDeptCapacityVo> maxGoodList = calcMaxUnDeptCapacity(googList);
-            if (maxGoodList.size() == 1) {//如果只有一条的话，不用校验，直接返回
-                return maxGoodList.get(0).getDeptId();
-            } else {//有多条相同的数据,则根据学生在每个科室的轮转时间，比对出时间最长的
-                Set<Long> deptIds = maxGoodList.stream().map(CycleDeptCapacityVo::getDeptId).collect(Collectors.toSet());
-                //unDeptList按照deptId获取并按照轮转时长排序
-                List<CycleStudentDeptCalcVo> unDeptListByDeptId = calcMaxStudentDeptNum(unDeptList, deptIds);
-                return unDeptListByDeptId.get(0).getDeptId();
-            }
-        } else if (!normalList.isEmpty()){//优秀规则为空,从一般规则里取
-            List<CycleDeptCapacityVo> maxNormalList = calcMaxUnDeptCapacity(normalList);
-            if (maxNormalList.size() == 1) {//如果只有一条的话，不用校验，直接返回
-                return maxNormalList.get(0).getDeptId();
-            }else {//有多条，还是取出时间最长的
-                Set<Long> deptIds = maxNormalList.stream().map(CycleDeptCapacityVo::getDeptId).collect(Collectors.toSet());
-                List<CycleStudentDeptCalcVo> unDeptListByDeptId = calcMaxStudentDeptNum(unDeptList, deptIds);
-                return unDeptListByDeptId.get(0).getDeptId();
-            }
-        }else {//优秀和一般都为空，从差的里取
-            //人数都是满的，选择userIds最少的
-            List<CycleDeptCapacityVo> minBadList = badList.stream()
-                .collect(Collectors.groupingBy(v -> v.getUserIds().size()))
-                .values().stream()
-                .map(list -> list.stream().min(Comparator.comparing(CycleDeptCapacityVo::getDeptCapacity)).orElse(null))
-                .filter(Objects::nonNull)
-                .toList();
-            if (minBadList.size() == 1) {//如果只有一条的话，不用校验，直接返回
-                return minBadList.get(0).getDeptId();
-            }else {//有多条,取出时间最长的，优先进
-                // TODO: 2023/6/30 这里需要实验下，如果人满了 优先进长的还是进短的，有待考证
-                Set<Long> deptIds = minBadList.stream().map(CycleDeptCapacityVo::getDeptId).collect(Collectors.toSet());
-                List<CycleStudentDeptCalcVo> unDeptListByDeptId = calcMaxStudentDeptNum(unDeptList, deptIds);
-                return unDeptListByDeptId.get(0).getDeptId();
-            }
+            calcRecordMapper.updateById(calcRecord);
         }
     }
 
     /**
-     * 取出空位最多的数据
-     * @param deptList
+     * 获取所有需要排班的科室
+     * @param ruleId
      * @return
      */
-    public static List<CycleDeptCapacityVo> calcMaxUnDeptCapacity(List<CycleDeptCapacityVo> deptList){
-        return deptList.stream()
-            .collect(Collectors.groupingBy(CycleDeptCapacityVo::getUnDeptCapacity))
-            .values().stream()
-            .map(list -> list.stream().max(Comparator.comparing(CycleDeptCapacityVo::getDeptCapacity)).orElse(null))
-            .filter(Objects::nonNull)
-            .toList();
-    }
-
-    /**
-     * 取出时间最长的数据
-     * @param allUnDeptList
-     * @param deptIds
-     * @return
-     */
-    public static List<CycleStudentDeptCalcVo> calcMaxStudentDeptNum(List<CycleStudentDeptCalcVo> allUnDeptList,Set<Long> deptIds) {
-        return allUnDeptList.stream()
-            .filter(dept -> deptIds.contains(dept.getDeptId()))
-            .sorted(Comparator.comparing(CycleStudentDeptCalcVo::getStudentDeptNum).reversed()).toList();
+    public static List<CycleDeptCalcVo> calcAllDept(Long ruleId) {
+        //获取规则下所有科室
+        List<CycleGroupDept> cycleGroupDeptList = groupDeptMapper.selectList(Wrappers.<CycleGroupDept>lambdaQuery()
+            .eq(CycleGroupDept::getRuleId, ruleId));
+        if (cycleGroupDeptList.size() == 0) {
+            return null;
+        }
+        List<CycleDeptCalcVo> voList = new ArrayList<>();
+        cycleGroupDeptList.forEach(dept -> {
+            CycleDeptCalcVo  cycleDeptCalcVo = new CycleDeptCalcVo();
+            cycleDeptCalcVo.setDeptUnit(dept.getDeptUnitNum());
+            cycleDeptCalcVo.setDeptId(dept.getDeptId());
+            cycleDeptCalcVo.setDeptMethod(dept.getGroupMethod());
+            voList.add(cycleDeptCalcVo);
+        });
+        return voList;
     }
 
 }

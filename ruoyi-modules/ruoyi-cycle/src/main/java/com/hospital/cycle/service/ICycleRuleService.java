@@ -3,6 +3,7 @@ package com.hospital.cycle.service;
 import com.hospital.cycle.domain.CycleRule;
 import com.hospital.cycle.domain.vo.CycleRuleVo;
 import com.hospital.cycle.domain.bo.CycleRuleBo;
+import jakarta.servlet.http.HttpServletResponse;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 
@@ -53,5 +54,9 @@ public interface ICycleRuleService {
 
     void startCycle(Long ruleId);
 
-    void initStudent(Long ruleId);
+    void ValidAndInitCycle(Long ruleId);
+
+    void exportList(Long ruleId, HttpServletResponse response);
+
+//    void copyRule(String isChildren);
 }

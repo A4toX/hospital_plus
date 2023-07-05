@@ -8,6 +8,8 @@ import java.util.Set;
 public interface StudentService {
     Long selectStudentBaseIdByUserId(Long userId);
 
+    String  selectStudentNameByUserId(Set<Long> userIds);
+
     List<Student> selectStudentByUserIds(Set<Long> userIds);
 
 }

@@ -7,6 +7,7 @@ import com.hospital.cycle.domain.CycleGroupDept;
 import com.hospital.cycle.domain.CycleRule;
 import com.hospital.cycle.mapper.CycleGroupDeptMapper;
 import com.hospital.cycle.mapper.CycleRuleMapper;
+import com.hospital.cycle.utils.CycleCacheUtils;
 import com.hospital.cycle.utils.CycleValidUtils;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.MapstructUtils;
@@ -17,7 +18,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
-import org.dromara.common.satoken.utils.LoginHelper;
+import org.dromara.common.redis.utils.RedisUtils;
 import org.springframework.stereotype.Service;
 import com.hospital.cycle.domain.bo.CycleGroupBo;
 import com.hospital.cycle.domain.vo.CycleGroupVo;
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.Collection;
 
 import static com.hospital.cycle.constant.CycleConstant.*;
+import static com.hospital.cycle.constant.CycleRedisConstant.CYCLE_GROUP_PREFIX;
 
 /**
  * 轮转规则组Service业务层处理
@@ -108,6 +110,7 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
         if (flag) {
             bo.setRuleId(add.getRuleId());
         }
+        CycleCacheUtils.setGroup(add);
         return flag;
     }
 
@@ -118,7 +121,9 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
     public Boolean updateByBo(CycleGroupBo bo) {
         CycleGroup update = MapstructUtils.convert(bo, CycleGroup.class);
         validEntityBeforeSave(update);
-        return baseMapper.updateById(update) > 0;
+        baseMapper.updateById(update);
+        CycleCacheUtils.setGroup(update);
+        return true;
     }
 
     /**
@@ -133,9 +138,10 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
      */
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
+        //校验规则是否已完成排班，完成排班则不能删除
+        CycleRule cycleRule = ruleMapper.selectById(baseMapper.selectById(ids.iterator().next()).getRuleId());
         if (isValid) {
-            //校验规则是否已完成排班，完成排班则不能删除
-            CycleRule cycleRule = ruleMapper.selectById(baseMapper.selectById(ids.iterator().next()).getRuleId());
+
             if (CYCLE_STATUS_COMPLETE.equals(cycleRule.getRuleStatus())) {
                 throw new ServiceException("规则已经排班，不能删除");
             }
@@ -145,6 +151,9 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
                 throw new ServiceException("请删除其下科室在进行删除");
             }
         }
-        return baseMapper.deleteBatchIds(ids) > 0;
+        baseMapper.deleteBatchIds(ids);
+        //删除缓存
+        CycleCacheUtils.delGroup(ids);
+        return true;
     }
 }

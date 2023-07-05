@@ -6,6 +6,7 @@ import com.hospital.cycle.domain.CycleRule;
 import com.hospital.cycle.domain.bo.CycleGroupBo;
 import com.hospital.cycle.mapper.CycleGroupMapper;
 import com.hospital.cycle.mapper.CycleRuleMapper;
+import com.hospital.cycle.utils.CycleCacheUtils;
 import com.hospital.cycle.utils.CycleValidUtils;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.MapstructUtils;
@@ -16,6 +17,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
+import org.dromara.common.redis.utils.RedisUtils;
 import org.springframework.stereotype.Service;
 import com.hospital.cycle.domain.bo.CycleGroupDeptBo;
 import com.hospital.cycle.domain.vo.CycleGroupDeptVo;
@@ -29,6 +31,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import static com.hospital.cycle.constant.CycleConstant.*;
+import static com.hospital.cycle.constant.CycleRedisConstant.CYCLE_GROUP_DEPT_PREFIX;
 
 /**
  * 轮转规则组关联科室Service业务层处理
@@ -100,6 +103,7 @@ public class CycleGroupDeptServiceImpl implements ICycleGroupDeptService {
         lqw.eq(CycleGroupDept::getGroupId, bos.get(0).getGroupId());
         baseMapper.delete(lqw);
         baseMapper.insertBatch(adds);
+        CycleCacheUtils.setGroupDept(adds);
         return true;
     }
 
@@ -129,6 +133,8 @@ public class CycleGroupDeptServiceImpl implements ICycleGroupDeptService {
         if(isValid){
             //TODO 做一些业务上的校验,判断是否需要校验
         }
-        return baseMapper.deleteBatchIds(ids) > 0;
+        baseMapper.deleteBatchIds(ids);
+        RedisUtils.deleteObject(CYCLE_GROUP_DEPT_PREFIX+baseMapper.selectById(ids.iterator().next()).getRuleId()+":"+baseMapper.selectById(ids.iterator().next()).getGroupId());
+        return true;
     }
 }

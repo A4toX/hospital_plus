@@ -449,4 +449,22 @@ public class ExcelUtil {
         }
         return result;
     }
+
+
+    public static <T> void writeForHeaderList(HttpServletResponse response, String filename, String sheetName, List<List<String>> headers, int headerRowNum, List<T> data) {
+        try {
+            EasyExcel.write(response.getOutputStream())
+                .head(headers)
+                .automaticMergeHead(false)
+                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
+                .registerWriteHandler(new HeadMergeStrategy(headerRowNum))
+                .sheet(sheetName)
+                .doWrite(data);
+            response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, "UTF-8"));
+            response.setContentType("application/vnd.ms-excel;charset=UTF-8");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
 }

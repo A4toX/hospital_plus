@@ -1,18 +1,33 @@
 package com.hospital.cycle.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.hospital.cycle.domain.CycleCalcRecord;
+import com.hospital.cycle.domain.CycleGroupDept;
+import com.hospital.cycle.domain.CycleRecord;
 import com.hospital.cycle.domain.bo.CycleGroupBo;
 import com.hospital.cycle.domain.bo.CycleRuleBaseBo;
 import com.hospital.cycle.domain.vo.calc.CycleDeptCalcVo;
 import com.hospital.cycle.domain.vo.CycleGroupVo;
 import com.hospital.cycle.domain.vo.calc.CycleStudentCalcVo;
+import com.hospital.cycle.domain.vo.excel.CycleExcelExportByUserVo;
+import com.hospital.cycle.mapper.CycleCalcRecordMapper;
+import com.hospital.cycle.mapper.CycleGroupDeptMapper;
+import com.hospital.cycle.mapper.CycleRecordMapper;
 import com.hospital.cycle.service.ICycleGroupService;
 import com.hospital.cycle.service.ICycleRuleBaseService;
+import com.hospital.cycle.utils.CycleCacheUtils;
 import com.hospital.cycle.utils.CycleCalcUtils;
 import com.hospital.cycle.utils.CycleUtils;
+import com.hospital.cycle.utils.CycleValidUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.service.DeptService;
 import org.dromara.common.core.service.StudentService;
+import org.dromara.common.core.service.domain.Student;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.excel.utils.ExcelHeader;
+import org.dromara.common.excel.utils.ExcelUtil;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -20,6 +35,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.mybatis.helper.DataBaseHelper;
+import org.dromara.common.redis.utils.RedisUtils;
 import org.springframework.stereotype.Service;
 import com.hospital.cycle.domain.bo.CycleRuleBo;
 import com.hospital.cycle.domain.vo.CycleRuleVo;
@@ -27,11 +43,11 @@ import com.hospital.cycle.domain.CycleRule;
 import com.hospital.cycle.mapper.CycleRuleMapper;
 import com.hospital.cycle.service.ICycleRuleService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Collection;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.hospital.cycle.constant.CycleConstant.*;
+import static com.hospital.cycle.constant.CycleRedisConstant.CYCLE_RULE_PREFIX;
 
 /**
  * 轮转规则Service业务层处理
@@ -47,12 +63,22 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
     private final ICycleRuleBaseService cycleRuleBaseService;
     private final ICycleGroupService cycleGroupService;
     private final StudentService studentService;
+    private final CycleGroupDeptMapper groupDeptMapper;
+    private final DeptService deptService;
+    private final CycleRecordMapper recordMapper;
+    private final CycleCalcRecordMapper calcRecordMapper;
     /**
      * 查询轮转规则
      */
     @Override
     public CycleRuleVo queryById(Long ruleId){
-        CycleRuleVo vo = baseMapper.selectVoById(ruleId);
+//        CycleRuleVo vo = baseMapper.selectVoById(ruleId);
+        CycleRule cycleRule = RedisUtils.getCacheObject(CYCLE_RULE_PREFIX + ruleId);
+        if (cycleRule == null){
+            cycleRule = baseMapper.selectById(ruleId);
+            RedisUtils.setCacheObject(CYCLE_RULE_PREFIX + ruleId, cycleRule);
+        }
+        CycleRuleVo vo = MapstructUtils.convert(cycleRule, CycleRuleVo.class);
         if (vo != null){
             if (YES.equals(vo.getBaseFlag())){
                 CycleRuleBaseBo bo = new CycleRuleBaseBo();
@@ -131,6 +157,7 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
         if (flag) {
             bo.setRuleId(add.getRuleId());
         }
+        CycleCacheUtils.setRule(add);
         return flag;
     }
 
@@ -141,7 +168,9 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
     public Boolean updateByBo(CycleRuleBo bo) {
         CycleRule update = MapstructUtils.convert(bo, CycleRule.class);
         validEntityBeforeSave(update);
-        return baseMapper.updateById(update) > 0;
+        baseMapper.updateById(update);
+        CycleCacheUtils.setRule(update);
+        return true;
     }
 
     /**
@@ -221,7 +250,10 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
                 }
             });
         }
-        return baseMapper.deleteBatchIds(ids) > 0;
+        baseMapper.deleteBatchIds(ids);
+        //删除缓存
+        CycleCacheUtils.delRule(ids);
+        return true;
     }
 
     @Override
@@ -234,6 +266,7 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
         add.setStageIndex(info.getStageIndex() + 1);
         add.setRuleYear(info.getRuleYear());
         baseMapper.insert(add);
+        CycleCacheUtils.setRule(add);
     }
 
 
@@ -298,14 +331,85 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
         //获取规则的轮转时间
         Integer ruleTotalTimeUnit = CycleCalcUtils.getTotalTimeUnit(ruleId);
         //初始化规则科室
-        List<CycleDeptCalcVo> allDeptList = CycleCalcUtils.calcAllDept(ruleId,ruleTotalTimeUnit);
+        List<CycleDeptCalcVo> allDeptList = CycleCalcUtils.calcAllDept(ruleId);
         //排班
         CycleCalcUtils.calc(allStudentList,allDeptList,ruleId,ruleTotalTimeUnit);
     }
 
+    /**
+     * 校验规则初始化科室和学生
+     * @param ruleId
+     */
     @Override
-    public void initStudent(Long ruleId){
+    public void ValidAndInitCycle(Long ruleId){
+        //校验规则
+        CycleValidUtils.startValid(ruleId);
+        //通过后修改轮转状态
+        CycleRule cycleRule = new CycleRule();
+        cycleRule.setRuleId(ruleId);
+        cycleRule.setRuleValid(YES);
+        baseMapper.updateById(cycleRule);
+        //初始化学生
         CycleUtils.initStudentDept(ruleId);
+        Integer ruleTotalTimeUnit = CycleCalcUtils.getTotalTimeUnit(ruleId);
+        //初始化轮转科室
+        CycleUtils.initAllDept(ruleId,ruleTotalTimeUnit);
+    }
+
+    @Override
+    public void exportList(Long ruleId, HttpServletResponse response){
+        //设置表头
+//        List<List<String>> headList = CycleUtils.getCycleExportHeadByUser(ruleId);
+        List<List<String>> headList = new ArrayList<>();
+        List<String> deptHead = new ArrayList<>();
+        headList.add(deptHead);
+        deptHead.add("科室\\数字");
+        Integer ruleTotalTimeUnit = CycleCalcUtils.getTotalTimeUnit(ruleId);
+        for (int i=1;i<=ruleTotalTimeUnit;i++){
+            List<String> head = new ArrayList<>();
+            head.add(String.valueOf(i));
+            headList.add(head);
+        }
+        List<List<String>> dataList = new ArrayList<>();
+        //获取规则下所有科室
+        List<CycleGroupDept> cycleGroupDeptList = groupDeptMapper.selectList(Wrappers.<CycleGroupDept>lambdaQuery().eq(CycleGroupDept::getRuleId, ruleId));
+        //设置数据
+        cycleGroupDeptList.forEach(cycleGroupDept ->{
+            List<String> data = new ArrayList<>();
+            //先添加科室名
+            Long deptId = cycleGroupDept.getDeptId();
+            data.add(deptService.selectDeptNameById(deptId));//设置科室名
+            for (int i=1;i<headList.size();i++){
+                Integer headIndex = Integer.valueOf(headList.get(i).get(0));
+                CycleCalcRecord calcRecords = calcRecordMapper.selectOne(Wrappers.<CycleCalcRecord>lambdaQuery()
+                    .eq(CycleCalcRecord::getRuleId, ruleId)
+                    .eq(CycleCalcRecord::getDeptId, deptId)
+                    .eq(CycleCalcRecord::getDeptIndex, headIndex));
+                if (calcRecords.getUserIds()==null||"".equals(calcRecords.getUserIds())){
+                    data.add("无数据");
+                    continue;
+                }
+                Set<Long> studentIdList = Arrays.stream(calcRecords.getUserIds().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toSet());
+
+                List<Student> students = studentService.selectStudentByUserIds(studentIdList);
+                String studentNames = students.stream().map(Student::getRealName).collect(Collectors.joining(","));
+                data.add(studentNames);
+            }
+            dataList.add(data);
+        });
+
+
+            //循环表头
+//                String startTime = head.get(0).substring(0, 10);
+                //结束时间
+//                String endTime = head.get(0).substring(head.get(0).length() - 10);
+
+        //导出
+        ExcelUtil.writeForHeaderList(response,"轮转表.xlsx", "steet1", headList,headList.size(),dataList);
+
+
     }
 
 }

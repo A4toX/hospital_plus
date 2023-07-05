@@ -65,7 +65,7 @@ public class CycleRecord extends TenantEntity {
     /**
      * 科室排序
      */
-    private Long cycleRecordIndex;
+    private Integer cycleRecordIndex;
 
     /**
      * 规则组id

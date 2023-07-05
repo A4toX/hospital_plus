@@ -2,6 +2,7 @@ package com.hospital.cycle.domain.vo.calc;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -17,7 +18,7 @@ public class CycleDeptCapacityVo {
     private Integer dateIndex;
 
     /**
-     * 科室容量
+     * 科室总容量
      */
     private Integer deptCapacity;
 
@@ -31,13 +32,12 @@ public class CycleDeptCapacityVo {
      */
     private List<Long> userIds;
 
-    /**
-     * 权重
-     */
-    private Integer weight;
+
+
 
     public CycleDeptCapacityVo() {
         // 设置默认值
-        this.weight = 100;
+        this.userIds = new ArrayList<>();
     }
+
 }

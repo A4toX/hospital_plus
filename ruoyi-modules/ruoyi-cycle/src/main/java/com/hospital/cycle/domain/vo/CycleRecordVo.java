@@ -80,7 +80,7 @@ public class CycleRecordVo implements Serializable {
      * 科室排序
      */
     @ExcelProperty(value = "科室排序")
-    private Long cycleRecordIndex;
+    private Integer cycleRecordIndex;
 
 
 }
