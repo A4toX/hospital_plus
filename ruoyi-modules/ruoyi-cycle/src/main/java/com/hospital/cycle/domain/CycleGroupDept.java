@@ -51,5 +51,10 @@ public class CycleGroupDept extends BaseEntity {
      */
     private Integer assignedNum;
 
+    /**
+     *所属规则组的方法
+     */
+    private String groupMethod;
+
 
 }

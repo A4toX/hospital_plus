@@ -64,10 +64,12 @@ public class CycleRuleController extends BaseController {
      */
     @SaCheckPermission("cycle:rule:export")
     @Log(title = "轮转规则", businessType = BusinessType.EXPORT)
-    @PostMapping("/export")
-    public void export(CycleRuleBo bo, HttpServletResponse response) {
-        List<CycleRuleVo> list = cycleRuleService.queryList(bo);
-        ExcelUtil.exportExcel(list, "轮转规则", CycleRuleVo.class, response);
+    @PostMapping("/export/{ruleId}")
+    public R<Void> export(@PathVariable Long ruleId, HttpServletResponse response) {
+        cycleRuleService.exportList(ruleId, response);
+        return R.ok();
+//        List<CycleRuleVo> list = cycleRuleService.queryList(bo);
+//        ExcelUtil.exportExcel(list, "轮转规则", CycleRuleVo.class, response);
     }
 
     /**
@@ -148,17 +150,33 @@ public class CycleRuleController extends BaseController {
     }
 
     /**
-     * 初始化学生轮转记录
+     * 校验规则并初始化轮转
      * @param ruleId
      * @return
      */
     @SaCheckPermission("cycle:rule:edit")
     @Log(title = "轮转规则", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
-    @GetMapping("/initStudent/{ruleId}")
-    public R<Void> initStudent(@PathVariable Long ruleId) {
-        cycleRuleService.initStudent(ruleId);
+    @GetMapping("/ValidAndInitCycle/{ruleId}")
+    public R<Void> ValidAndInitCycle(@PathVariable Long ruleId) {
+        cycleRuleService.ValidAndInitCycle(ruleId);
         return R.ok();
     }
+
+    /**
+     * 从现有规则新增阶段
+     * @param bo
+     * @return
+     */
+    /*@SaCheckPermission("cycle:rule:add")
+    @Log(title = "复制轮转规则", businessType = BusinessType.INSERT)
+    @RepeatSubmit()
+    @PostMapping("/copyRule/{ruleId}}")
+    public R<Void> copyRule(String isChildren) {
+        cycleRuleService.copyRule(isChildren);
+        return R.ok();
+    }*/
+
+
 
 }

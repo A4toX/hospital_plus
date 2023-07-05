@@ -10,6 +10,7 @@ import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.service.StudentService;
 import org.dromara.common.core.service.domain.Student;
 import org.dromara.common.core.utils.SpringUtils;
+import org.dromara.common.redis.utils.RedisUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.hospital.cycle.constant.CycleConstant.*;
+import static com.hospital.cycle.constant.CycleRedisConstant.CYCLE_RULE_PREFIX;
 
 /**
  * 校验工具类
@@ -335,4 +337,20 @@ public class CycleValidUtils {
 
     }
 
+
+    public static void startValid(Long ruleId) {
+        //获取规则
+        CycleRule cycleRule;
+       if(RedisUtils.isExistsObject(CYCLE_RULE_PREFIX+ruleId)){
+           cycleRule = RedisUtils.getCacheObject(CYCLE_RULE_PREFIX+ruleId);
+    }else {
+           cycleRule = ruleMapper.selectById(ruleId);
+       }
+       if (cycleRule==null){
+           throw new ServiceException("轮转规则不存在");
+       }
+       //校验规则组和其下科室
+
+
+    }
 }

@@ -27,5 +27,6 @@ public class CycleStudentDeptCalcVo {
     public CycleStudentDeptCalcVo() {
         // 设置默认值
         this.isComplete = false; // 将 isComplete 的默认值设置为 false
+        this.studentDeptNum=0;
     }
 }

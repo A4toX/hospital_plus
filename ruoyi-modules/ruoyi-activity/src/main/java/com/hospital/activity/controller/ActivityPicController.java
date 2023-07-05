@@ -2,10 +2,12 @@ package com.hospital.activity.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import org.dromara.common.core.validate.ValidList;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import org.dromara.common.idempotent.annotation.RepeatSubmit;
@@ -54,7 +56,7 @@ public class ActivityPicController extends BaseController {
     @Log(title = "教学活动图片", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
-    public R<Void> add(@Validated(AddGroup.class) @RequestBody List<ActivityPicBo> bos) {
+    public R<Void> add(@Validated(AddGroup.class) @RequestBody ValidList<ActivityPicBo> bos) {
         activityPicService.insertByBo(bos);
         return R.ok();
     }
