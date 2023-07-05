@@ -2,22 +2,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.dromara</groupId>
         <artifactId>ruoyi-modules</artifactId>
         <version>${revision}</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ruoyi-attendance</artifactId>
+    <artifactId>ruoyi-flow</artifactId>
+
     <description>
-        考勤模块
+        flow模块
     </description>
 
     <dependencies>
+        <!-- 通用工具-->
         <dependency>
             <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-excel</artifactId>
+            <artifactId>ruoyi-common-core</artifactId>
         </dependency>
 
         <dependency>
@@ -33,6 +35,17 @@
         <dependency>
             <groupId>org.dromara</groupId>
             <artifactId>ruoyi-common-translation</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.dromara</groupId>
+            <artifactId>ruoyi-common-log</artifactId>
+        </dependency>
+
+        <!-- excel-->
+        <dependency>
+            <groupId>org.dromara</groupId>
+            <artifactId>ruoyi-common-excel</artifactId>
         </dependency>
 
         <dependency>
@@ -54,20 +67,6 @@
             <groupId>org.dromara</groupId>
             <artifactId>ruoyi-common-idempotent</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-sensitive</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-log</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-flow</artifactId>
-        </dependency>
     </dependencies>
+
 </project>
