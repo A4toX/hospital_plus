@@ -1,18 +1,18 @@
 package com.hospital.attendance.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import org.dromara.common.flowable.common.enums.ProcessStatus;
-import org.dromara.common.mybatis.core.mapper.LambdaQueryWrapperX;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import lombok.RequiredArgsConstructor;
-import org.dromara.common.mybatis.core.page.PageQuery;
-import org.dromara.common.mybatis.core.page.TableDataInfo;
-import org.dromara.common.mybatis.core.service.BaseServiceImpl;
 import com.hospital.attendance.domain.AttendanceFillRecord;
 import com.hospital.attendance.domain.bo.AttendanceFillRecordBo;
 import com.hospital.attendance.domain.vo.AttendanceFillRecordVo;
 import com.hospital.attendance.mapper.AttendanceFillRecordMapper;
 import com.hospital.attendance.service.IAttendanceFillRecordService;
+import com.hospital.flow.enums.FlowStatusEnum;
+import lombok.RequiredArgsConstructor;
+import org.dromara.common.mybatis.core.mapper.LambdaQueryWrapperX;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.mybatis.core.service.BaseServiceImpl;
 import org.dromara.common.satoken.utils.LoginHelper;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +30,7 @@ public class AttendanceFillRecordServiceImpl extends BaseServiceImpl<AttendanceF
     @Override
     public int insert(AttendanceFillRecordBo bo) {
         bo.setUserId(LoginHelper.getUserId());
-        bo.setResult(ProcessStatus.RUNNING.getStatus());
+        bo.setResult(FlowStatusEnum.RUNNING.getStatus());
         return super.insert(bo);
     }
 

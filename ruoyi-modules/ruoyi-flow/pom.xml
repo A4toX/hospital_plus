@@ -12,7 +12,7 @@
     <artifactId>ruoyi-flow</artifactId>
 
     <description>
-        workflow模块
+        flow模块
     </description>
 
     <dependencies>
@@ -67,12 +67,6 @@
             <groupId>org.dromara</groupId>
             <artifactId>ruoyi-common-idempotent</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-flowable</artifactId>
-        </dependency>
-
     </dependencies>
 
 </project>

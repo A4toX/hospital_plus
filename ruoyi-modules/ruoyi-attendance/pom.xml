@@ -67,8 +67,7 @@
 
         <dependency>
             <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-flowable</artifactId>
+            <artifactId>ruoyi-flow</artifactId>
         </dependency>
     </dependencies>
-
 </project>
