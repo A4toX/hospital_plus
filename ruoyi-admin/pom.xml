@@ -89,7 +89,7 @@
 
         <dependency>
             <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-workflow</artifactId>
+            <artifactId>ruoyi-flow</artifactId>
         </dependency>
 
         <dependency>

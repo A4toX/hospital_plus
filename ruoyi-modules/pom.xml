@@ -18,7 +18,7 @@
         <module>ruoyi-attendance</module>
         <module>ruoyi-cycle</module>
         <module>ruoyi-activity</module>
-        <module>ruoyi-workflow</module>
+        <module>ruoyi-flow</module>
     </modules>
 
     <artifactId>ruoyi-modules</artifactId>
