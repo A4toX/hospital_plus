@@ -70,5 +70,11 @@ public class CycleUserDeptVo implements Serializable {
     @ExcelProperty(value = "选修时长")
     private Integer selectTime;
 
+    /**
+     * 已分配人数
+     */
+    @ExcelProperty(value = "已分配人数")
+    private Integer assignedNum;
+
 
 }

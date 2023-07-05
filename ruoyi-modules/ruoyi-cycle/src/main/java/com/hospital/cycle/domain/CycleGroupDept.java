@@ -46,6 +46,10 @@ public class CycleGroupDept extends BaseEntity {
      * 科室轮转时长
      */
     private Integer deptUnitNum;
+    /**
+     * 已分配人数
+     */
+    private Integer assignedNum;
 
 
 }

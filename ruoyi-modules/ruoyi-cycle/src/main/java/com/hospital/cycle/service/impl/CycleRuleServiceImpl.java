@@ -1,19 +1,18 @@
 package com.hospital.cycle.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.hospital.cycle.domain.CycleRuleBase;
 import com.hospital.cycle.domain.bo.CycleGroupBo;
 import com.hospital.cycle.domain.bo.CycleRuleBaseBo;
+import com.hospital.cycle.domain.vo.calc.CycleDeptCalcVo;
 import com.hospital.cycle.domain.vo.CycleGroupVo;
-import com.hospital.cycle.mapper.CycleGroupMapper;
-import com.hospital.cycle.mapper.CycleRuleBaseMapper;
+import com.hospital.cycle.domain.vo.calc.CycleStudentCalcVo;
 import com.hospital.cycle.service.ICycleGroupService;
 import com.hospital.cycle.service.ICycleRuleBaseService;
+import com.hospital.cycle.utils.CycleCalcUtils;
+import com.hospital.cycle.utils.CycleUtils;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.service.StudentService;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
-import org.dromara.common.core.utils.system.UserUtils;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -21,7 +20,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.mybatis.helper.DataBaseHelper;
-import org.dromara.common.satoken.utils.LoginHelper;
 import org.springframework.stereotype.Service;
 import com.hospital.cycle.domain.bo.CycleRuleBo;
 import com.hospital.cycle.domain.vo.CycleRuleVo;
@@ -275,4 +273,39 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
         });
         return stageList;
     }
+
+    @Override
+    public void startCycle(Long ruleId){
+        //获取规则
+        CycleRule cycleRule = baseMapper.selectById(ruleId);
+        //如果规则状态为未通过校验则不能开始
+        if(NO.equals(cycleRule.getRuleValid())){
+            throw new ServiceException("规则未通过校验，不能开始");
+        }
+        //如果规则状态为已排完则不能开始
+        if(CYCLE_STATUS_COMPLETE.equals(cycleRule.getRuleStatus())){
+            throw new ServiceException("规则已排完，请选择重新排班");
+        }
+        if (cycleRule.getParentId()!=0){
+            //如果不是第一阶段则需要判断上一阶段是否已排完
+            CycleRule parentRule = baseMapper.selectById(cycleRule.getParentId());
+            if (CYCLE_STATUS_STAFF.equals(parentRule.getRuleStatus())){
+                throw new ServiceException("上一阶段未排完，不能开始");
+            }
+        }
+        //初始化规则中的所有学生
+        List<CycleStudentCalcVo> allStudentList = CycleCalcUtils.calcAllStudent(ruleId);
+        //获取规则的轮转时间
+        Integer ruleTotalTimeUnit = CycleCalcUtils.getTotalTimeUnit(ruleId);
+        //初始化规则科室
+        List<CycleDeptCalcVo> allDeptList = CycleCalcUtils.calcAllDept(ruleId,ruleTotalTimeUnit);
+        //排班
+        CycleCalcUtils.calc(allStudentList,allDeptList,ruleId,ruleTotalTimeUnit);
+    }
+
+    @Override
+    public void initStudent(Long ruleId){
+        CycleUtils.initStudentDept(ruleId);
+    }
+
 }

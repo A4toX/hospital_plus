@@ -148,9 +148,9 @@ public class CycleValidUtils {
         Integer sum = deptUnitNums.stream().reduce(0, Integer::sum);
 
         switch (cyclegroup.getGroupMethod()) {
-            case CYCLE_GROUP_METHOD_MUST://必选只需要校验时间是否满足
-                if (!sum.equals(cyclegroup.getGroupUnitNum())) {
-                    throw new ServiceException("必修规则中，所有科室轮转时间必须等于规则组的轮转时间");
+            case CYCLE_GROUP_METHOD_MUST:
+                if (cyclegroup.getGroupUnitNum()!=null) {
+                    throw new ServiceException("必修规则中，无需填写规则组轮转时间");
                 }
                 break;
             case CYCLE_GROUP_METHOD_ELECTIVE://任选其几
@@ -223,7 +223,7 @@ public class CycleValidUtils {
             case CYCLE_GROUP_ELECTIVE -> {
                 //选修不能使用必修方法
                 if (CYCLE_GROUP_METHOD_MUST.equals(cycleGroup.getGroupMethod())) {
-                    throw new ServiceException("选修规则组不能使用必修方法");
+                    throw new ServiceException("选修规则组不能使用必选方法");
                 }
                 //如果选修规则已经开启，则不能新增选修方法
                 if (YES.equals(cycleRule.getDeptSelectFlag())){
@@ -232,7 +232,6 @@ public class CycleValidUtils {
             }
             default -> throw new ServiceException("错误的规则组类型");
         }
-
         //校验规则组方法
         switch (cycleGroup.getGroupMethod()) {
             case CYCLE_GROUP_METHOD_MUST -> {
@@ -240,21 +239,31 @@ public class CycleValidUtils {
                 if(cycleGroup.getMethodNumber()!=null){
                     throw new ServiceException("必修规则组不能填写任选数");
                 }
+                if(cycleGroup.getGroupUnitNum()!=null){
+                    throw new ServiceException("必选规则组无需填写轮转时间");
+                }
             }
             case CYCLE_GROUP_METHOD_ELECTIVE -> {//任选其几
                 //任选其几时任选数不能为空
                 if(cycleGroup.getMethodNumber()==null){
                     throw new ServiceException("任选其几规则任选数不能为空");
                 }
+                if(cycleGroup.getGroupUnitNum()==null){
+                    throw new ServiceException("任选其几时轮转时间不能为空");
+                }
                 //如果任选数不能被科室数整除
                 if(cycleGroup.getGroupUnitNum()%cycleGroup.getMethodNumber()!=0){
                     throw new ServiceException("请修改科室数量或任选数，因为此规则无法操作");
                 }
+
             }
             case CYCLE_GROUP_METHOD_TIME -> {
                 //类型为必修时不能填写任选数
                 if(cycleGroup.getMethodNumber()!=null){
                     throw new ServiceException("时长满足规则不能填写任选数");
+                }
+                if(cycleGroup.getGroupUnitNum()==null){
+                    throw new ServiceException("时长满足规则轮转时间不能为空");
                 }
             }
             default -> throw new ServiceException("错误的规则组方法");
