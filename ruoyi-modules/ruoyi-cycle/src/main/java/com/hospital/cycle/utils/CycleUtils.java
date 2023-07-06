@@ -16,8 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hospital.cycle.constant.CycleConstant.*;
-import static com.hospital.cycle.constant.CycleRedisConstant.CYCLE_CALC_DEPT_PREFIX;
-import static com.hospital.cycle.constant.CycleRedisConstant.CYCLE_CALC_STUDENT_PREFIX;
+import static com.hospital.cycle.constant.CycleRedisConstant.*;
 
 public class CycleUtils {
     public static CycleRuleMapper ruleMapper = SpringUtils.getBean(CycleRuleMapper.class);
@@ -45,34 +44,37 @@ public class CycleUtils {
         if (studentIds.size() == 0) {//没有获取到就返回
             return;
         }
-        studentIds.forEach(userId->{
+        List<CycleGroup> cycleGroupList = groupMapper.selectList(Wrappers.<CycleGroup>lambdaQuery().eq(CycleGroup::getRuleId, ruleId));
+        if (cycleGroupList.size() == 0) {
+            return;
+        }
+        for (Long userId : studentIds) {
             List<CycleRecord> cycleRecordList = new ArrayList<>();
-            List<CycleGroup> cycleGroupList;
             //判断规则组是否需要区分专业
             if (YES.equals(cycleRule.getBaseFlag())) {
                 //获取学生专业id
                 Long baseId = studentService.selectStudentBaseIdByUserId(userId);
-                cycleGroupList = groupMapper.selectList(Wrappers.<CycleGroup>lambdaQuery().eq(CycleGroup::getRuleId, ruleId).eq(CycleGroup::getBaseId, baseId));
-            }else {
-                cycleGroupList = groupMapper.selectList(Wrappers.<CycleGroup>lambdaQuery().eq(CycleGroup::getRuleId, ruleId));
+                cycleGroupList = cycleGroupList.stream().filter(group -> baseId.equals(group.getBaseId())).collect(Collectors.toList());
             }
-               if (cycleGroupList.size() == 0) {
-                   return;
-               }
-               cycleGroupList.forEach(group->{
-                   if (CYCLE_GROUP_ELECTIVE.equals(group.getGroupType())){//选修的数据不处理
-                       return;
-                   }
-                   //获取组下所有科室
-                   List<CycleGroupDept> cycleGroupDeptList = groupDeptMapper.selectList(Wrappers.<CycleGroupDept>lambdaQuery().eq(CycleGroupDept::getGroupId, group.getGroupId()));
-                   if (cycleGroupDeptList.size() == 0) {
-                       return;
-                   }
+                cycleGroupList.forEach(group -> {
+                    if (CYCLE_GROUP_ELECTIVE.equals(group.getGroupType())) {//选修的数据不处理
+                        return;
+                    }
+                    //获取组下所有科室
+                    List<CycleGroupDept> cycleGroupDeptList;
+                    cycleGroupDeptList = RedisUtils.getCacheList(CYCLE_GROUP_DEPT_PREFIX + group.getGroupId());
+                    if (cycleGroupDeptList.isEmpty()) {
+                        cycleGroupDeptList = groupDeptMapper.selectList(Wrappers.<CycleGroupDept>lambdaQuery().eq(CycleGroupDept::getGroupId, group.getGroupId()));
+                    }
 
-                   switch (group.getGroupMethod()){
-                       case CYCLE_GROUP_METHOD_MUST:
+                    if (cycleGroupDeptList.size() == 0) {
+                        return;
+                    }
+
+                    switch (group.getGroupMethod()) {
+                        case CYCLE_GROUP_METHOD_MUST:
                             //新增
-                           cycleGroupDeptList.forEach(groupDept->{
+                            cycleGroupDeptList.forEach(groupDept -> {
                                 CycleRecord cycleRecord = new CycleRecord();
                                 cycleRecord.setRuleId(ruleId);//规则id
                                 cycleRecord.setGroupId(group.getGroupId());//规则组id
@@ -80,65 +82,66 @@ public class CycleUtils {
                                 cycleRecord.setDeptId(groupDept.getDeptId());//科室id
                                 cycleRecord.setDeptType(group.getGroupMethod());//科室所属规则组方法类型
                                 cycleRecord.setDeptNum(groupDept.getDeptUnitNum());//科室轮转时长
-                                if (group.getBaseId()!=null){
+                                if (group.getBaseId() != null) {
                                     cycleRecord.setBaseId(group.getBaseId());
                                 }
                                 cycleRecordList.add(cycleRecord);
                             });
                             break;
-                       case CYCLE_GROUP_METHOD_ELECTIVE:
+                        case CYCLE_GROUP_METHOD_ELECTIVE:
                             //任选其几
                             Integer deptNum = group.getMethodNumber();
-                            //所有人都选择前deptNum个科室
                             List<CycleGroupDept> optionalDeptList = optionalDept(cycleGroupDeptList, deptNum);
-                           optionalDeptList.forEach(groupDept->{
-                               CycleRecord cycleRecord = new CycleRecord();
-                               cycleRecord.setRuleId(ruleId);//规则id
-                               cycleRecord.setGroupId(group.getGroupId());//规则组id
-                               cycleRecord.setUserId(userId);//用户id
-                               cycleRecord.setDeptId(groupDept.getDeptId());//科室id
-                               cycleRecord.setDeptType(group.getGroupMethod());//科室所属规则组方法类型
-                               cycleRecord.setDeptNum(groupDept.getDeptUnitNum());//科室轮转时长
-                                if (group.getBaseId()!=null){
+                            optionalDeptList.forEach(groupDept -> {
+                                CycleRecord cycleRecord = new CycleRecord();
+                                cycleRecord.setRuleId(ruleId);//规则id
+                                cycleRecord.setGroupId(group.getGroupId());//规则组id
+                                cycleRecord.setUserId(userId);//用户id
+                                cycleRecord.setDeptId(groupDept.getDeptId());//科室id
+                                cycleRecord.setDeptType(group.getGroupMethod());//科室所属规则组方法类型
+                                cycleRecord.setDeptNum(groupDept.getDeptUnitNum());//科室轮转时长
+                                if (group.getBaseId() != null) {
                                     cycleRecord.setBaseId(group.getBaseId());
                                 }
                                 cycleRecordList.add(cycleRecord);
                             });
-                           //在任选科室的人数选则上加一
-                           optionalDeptList.forEach(dept->{
-                                dept.setAssignedNum(dept.getAssignedNum()+1);
-                           });
+                            //在任选科室的人数选则上加一
+                            optionalDeptList.forEach(dept -> {
+                                dept.setAssignedNum(dept.getAssignedNum() + 1);
+                            });
                             groupDeptMapper.updateBatchById(optionalDeptList);//更新
                             break;
-                       default:
-                           break;
-                   }
-                   //获取学生的选修科室
-                   List<CycleUserDept> userDeptList = userDeptMapper.selectList(Wrappers.<CycleUserDept>lambdaQuery().eq(CycleUserDept::getUserId, userId));
-                   if (userDeptList.size() == 0) {
-                       return;
-                   }
+                        default:
+                            break;
+                    }
+                    //获取学生的选修科室
+                    List<CycleUserDept> userDeptList = userDeptMapper.selectList(Wrappers.<CycleUserDept>lambdaQuery().eq(CycleUserDept::getUserId, userId));
+                    if (userDeptList.size() == 0) {
+                        return;
+                    }
 
-                   userDeptList.forEach(userDept->{
-                       CycleRecord cycleRecord = new CycleRecord();
-                       cycleRecord.setRuleId(ruleId);//规则id
-                       cycleRecord.setGroupId(group.getGroupId());//规则组id
-                       cycleRecord.setUserId(userId);//用户id
-                       cycleRecord.setDeptId(userDept.getDeptId());//科室id
-                       cycleRecord.setDeptType(group.getGroupMethod());//科室所属规则组方法类型
-                       cycleRecord.setDeptNum(userDept.getSelectTime());//科室轮转时长
-                      if (group.getBaseId()!=null){
-                        cycleRecord.setBaseId(group.getBaseId());
-                      }
-                      cycleRecordList.add(cycleRecord);
-                 });
-               });
-            //批量新增
-            RedisUtils.setCacheList(CYCLE_CALC_STUDENT_PREFIX+":"+ruleId+":"+userId,cycleRecordList);
+                    userDeptList.forEach(userDept -> {
+                        CycleRecord cycleRecord = new CycleRecord();
+                        cycleRecord.setRuleId(ruleId);//规则id
+                        cycleRecord.setGroupId(group.getGroupId());//规则组id
+                        cycleRecord.setUserId(userId);//用户id
+                        cycleRecord.setDeptId(userDept.getDeptId());//科室id
+                        cycleRecord.setDeptType(group.getGroupMethod());//科室所属规则组方法类型
+                        cycleRecord.setDeptNum(userDept.getSelectTime());//科室轮转时长
+                        if (group.getBaseId() != null) {
+                            cycleRecord.setBaseId(group.getBaseId());
+                        }
+                        cycleRecordList.add(cycleRecord);
+                    });
+                });
+                //批量新增
+                RedisUtils.setCacheList(CYCLE_CALC_STUDENT_PREFIX + ":" + ruleId + ":" + userId, cycleRecordList);
 //            recordMapper.insertBatch(cycleRecordList);
-           });
+
+        }
 
     }
+
 
 
     /**
