@@ -147,6 +147,7 @@ tenant:
     - cycle_student
     - cycle_group_dept
     - cycle_rule_base
+    - cycle_calc_record
 
 # MyBatisPlus配置
 # https://baomidou.com/config/
