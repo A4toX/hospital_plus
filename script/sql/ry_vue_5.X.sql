@@ -7,9 +7,9 @@ create table sys_social
     id                 bigint           not null        comment '主键',
     user_id            bigint           not null        comment '用户ID',
     tenant_id          varchar(20)      default null    comment '租户id',
-    auth_id            varchar(255)     not null        comment '授权+授权openid',
+    auth_id            varchar(255)     not null        comment '平台+平台唯一id',
     source             varchar(255)     not null        comment '用户来源',
-    open_id            varchar(255)     default null    comment '原生open id',
+    open_id            varchar(255)     default null    comment '平台编号唯一id',
     user_name          varchar(30)      not null        comment '登录账号',
     nick_name          varchar(30)      default ''      comment '用户昵称',
     email              varchar(255)     default ''      comment '用户邮箱',
@@ -285,7 +285,7 @@ insert into sys_menu values('114',  '表单构建',     '3',   '1', 'build',    
 insert into sys_menu values('115',  '代码生成',     '3',   '2', 'gen',              'tool/gen/index',               '', 1, 0, 'C', '0', '0', 'tool:gen:list',               'code',          103, 1, sysdate(), null, null, '代码生成菜单');
 insert into sys_menu values('121',  '租户管理',     '6',   '1', 'tenant',           'system/tenant/index',          '', 1, 0, 'C', '0', '0', 'system:tenant:list',          'list',          103, 1, sysdate(), null, null, '租户管理菜单');
 insert into sys_menu values('122',  '租户套餐管理', '6',   '2', 'tenantPackage',    'system/tenantPackage/index',   '', 1, 0, 'C', '0', '0', 'system:tenantPackage:list',   'form',          103, 1, sysdate(), null, null, '租户套餐管理菜单');
-insert into sys_menu values('123',  '客户端管理',   '1',   '1', 'client',           'system/client/index',          '', 1, 0, 'C', '0', '0', 'system:client:list',          'international', 103, 1, sysdate(), null, null, '客户端管理菜单');
+insert into sys_menu values('123',  '客户端管理',   '1',   '11', 'client',           'system/client/index',          '', 1, 0, 'C', '0', '0', 'system:client:list',          'international', 103, 1, sysdate(), null, null, '客户端管理菜单');
 
 -- springboot-admin监控
 insert into sys_menu values('117',  'Admin监控',   '2',   '5',  'Admin',            'monitor/admin/index',         '', 1, 0, 'C', '0', '0', 'monitor:admin:list',           'dashboard',     103, 1, sysdate(), null, null, 'Admin监控菜单');

@@ -56,12 +56,6 @@ EXEC sys.sp_addextendedproperty
     'COLUMN', N'id'
 GO
 EXEC sys.sp_addextendedproperty
-    'MS_Description', N'主键' ,
-    'SCHEMA', N'dbo',
-    'TABLE', N'sys_social',
-    'COLUMN', N'id'
-GO
-EXEC sys.sp_addextendedproperty
     'MS_Description', N'用户ID' ,
     'SCHEMA', N'dbo',
     'TABLE', N'sys_social',
@@ -74,7 +68,7 @@ EXEC sys.sp_addextendedproperty
     'COLUMN', N'tenant_id'
 GO
 EXEC sys.sp_addextendedproperty
-    'MS_Description', N'授权+授权openid' ,
+    'MS_Description', N'平台+平台唯一id' ,
     'SCHEMA', N'dbo',
     'TABLE', N'sys_social',
     'COLUMN', N'auth_id'
@@ -86,7 +80,7 @@ EXEC sys.sp_addextendedproperty
     'COLUMN', N'source'
 GO
 EXEC sys.sp_addextendedproperty
-    'MS_Description', N'原生openid' ,
+    'MS_Description', N'平台编号唯一id' ,
     'SCHEMA', N'dbo',
     'TABLE', N'sys_social',
     'COLUMN', N'open_id'
@@ -234,8 +228,8 @@ GO
 CREATE TABLE sys_client
 (
     id                  bigint                              NOT NULL,
-    client_id           nvarchar(20)  DEFAULT ''            NULL,
-    client_key          nvarchar(255) DEFAULT ''            NULL,
+    client_id           nvarchar(64)  DEFAULT ''            NULL,
+    client_key          nvarchar(32) DEFAULT ''            NULL,
     client_secret       nvarchar(255) DEFAULT ''            NULL,
     grant_type          nvarchar(255) DEFAULT ''            NULL,
     device_type         nvarchar(32) DEFAULT ''            NULL,
@@ -265,7 +259,7 @@ EXEC sys.sp_addextendedproperty
 'MS_Description', N'客户端id' ,
 'SCHEMA', N'dbo',
 'TABLE', N'sys_client',
-'COLUMN', N'tenant_id'
+'COLUMN', N'client_id'
 GO
 EXEC sp_addextendedproperty
 'MS_Description', N'客户端key',
@@ -377,7 +371,7 @@ INSERT sys_dict_data VALUES (36, N'000000', 0, N'APP端', N'`app`', N'sys_device
 GO
 
 -- 二级菜单
-INSERT sys_menu VALUES (123, N'客户端管理', 1, 1, N'client', N'system/client/index', N'', 1, 0, N'C', N'0', N'0', N'system:client:list', N'international', 103, 1, getdate(), NULL, NULL, N'客户端管理菜单')
+INSERT sys_menu VALUES (123, N'客户端管理', 1, 11, N'client', N'system/client/index', N'', 1, 0, N'C', N'0', N'0', N'system:client:list', N'international', 103, 1, getdate(), NULL, NULL, N'客户端管理菜单')
 GO
 -- 客户端管理按钮
 INSERT sys_menu VALUES (1061, N'客户端管理查询', 123, 1, N'#', N'', N'', 1, 0, N'F', N'0', N'0', N'system:client:query', N'#', 103, 1, getdate(), NULL, NULL, N'');

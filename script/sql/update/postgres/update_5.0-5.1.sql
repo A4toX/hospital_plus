@@ -20,7 +20,7 @@ create table sys_social
     email              varchar(255)     default ''::varchar,
     avatar             varchar(500)     default ''::varchar,
     access_token       varchar(255)     not null,
-    expire_in          int8             default null::varchar,
+    expire_in          int8             default null,
     refresh_token      varchar(255)     default null::varchar,
     access_code        varchar(255)     default null::varchar,
     union_id           varchar(255)     default null::varchar,
@@ -45,9 +45,9 @@ comment on table   sys_social                   is '社会化关系表';
 comment on column  sys_social.id                is '主键';
 comment on column  sys_social.user_id           is '用户ID';
 comment on column  sys_social.tenant_id         is '租户id';
-comment on column  sys_social.auth_id           is '授权+授权openid';
+comment on column  sys_social.auth_id           is '平台+平台唯一id';
 comment on column  sys_social.source            is '用户来源';
-comment on column  sys_social.open_id           is '原生openid';
+comment on column  sys_social.open_id           is '平台编号唯一id';
 comment on column  sys_social.user_name         is '登录账号';
 comment on column  sys_social.nick_name         is '用户昵称';
 comment on column  sys_social.email             is '用户邮箱';
@@ -78,11 +78,11 @@ comment on column  sys_social.del_flag          is '删除标志（0代表存在
 drop table if exists sys_client;
 create table sys_client (
     id                  int8,
-    client_id           varchar(64)   ''::varchar,
-    client_key          varchar(32)   ''::varchar,
-    client_secret       varchar(255)  ''::varchar,
-    grant_type          varchar(255)  ''::varchar,
-    device_type         varchar(32)   ''::varchar,
+    client_id           varchar(64)   default ''::varchar,
+    client_key          varchar(32)   default ''::varchar,
+    client_secret       varchar(255)  default ''::varchar,
+    grant_type          varchar(255)  default ''::varchar,
+    device_type         varchar(32)   default ''::varchar,
     active_timeout      int4          default 1800,
     timeout             int4          default 604800,
     status              char(1)       default '0'::bpchar,
@@ -93,7 +93,7 @@ create table sys_client (
     update_by           int8,
     update_time         timestamp,
     constraint sys_client_pk primary key (id)
-)
+);
 
 comment on table sys_client                         is '系统授权表';
 comment on column sys_client.id                     is '主建';
@@ -127,7 +127,7 @@ insert into sys_dict_data values(35, '000000', 0,  'PC端', 'pc',            'sy
 insert into sys_dict_data values(36, '000000', 0,  'APP端', 'app',          'sys_device_type',   '',   'default', 'N', '0', 103, 1, now(), null, null, 'APP端');
 
 -- 二级菜单
-insert into sys_menu values('123',  '客户端管理',   '1',   '1', 'client',           'system/client/index',          '', '1', '0', 'C', '0', '0', 'system:client:list',          'international', 103, 1, now(), null, null, '客户端管理菜单');
+insert into sys_menu values('123',  '客户端管理',   '1',   '11', 'client',           'system/client/index',          '', '1', '0', 'C', '0', '0', 'system:client:list',          'international', 103, 1, now(), null, null, '客户端管理菜单');
 -- 客户端管理按钮
 insert into sys_menu values('1061', '客户端管理查询', '123', '1',  '#', '', '', '1', '0', 'F', '0', '0', 'system:client:query',        '#', 103, 1, now(), null, null, '');
 insert into sys_menu values('1062', '客户端管理新增', '123', '2',  '#', '', '', '1', '0', 'F', '0', '0', 'system:client:add',          '#', 103, 1, now(), null, null, '');
