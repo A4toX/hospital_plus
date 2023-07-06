@@ -157,7 +157,6 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
         if (flag) {
             bo.setRuleId(add.getRuleId());
         }
-        CycleCacheUtils.setRule(add);
         return flag;
     }
 
@@ -169,7 +168,6 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
         CycleRule update = MapstructUtils.convert(bo, CycleRule.class);
         validEntityBeforeSave(update);
         baseMapper.updateById(update);
-        CycleCacheUtils.setRule(update);
         return true;
     }
 
@@ -266,7 +264,6 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
         add.setStageIndex(info.getStageIndex() + 1);
         add.setRuleYear(info.getRuleYear());
         baseMapper.insert(add);
-        CycleCacheUtils.setRule(add);
     }
 
 
@@ -354,62 +351,6 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
         Integer ruleTotalTimeUnit = CycleCalcUtils.getTotalTimeUnit(ruleId);
         //初始化轮转科室
         CycleUtils.initAllDept(ruleId,ruleTotalTimeUnit);
-    }
-
-    @Override
-    public void exportList(Long ruleId, HttpServletResponse response){
-        //设置表头
-//        List<List<String>> headList = CycleUtils.getCycleExportHeadByUser(ruleId);
-        List<List<String>> headList = new ArrayList<>();
-        List<String> deptHead = new ArrayList<>();
-        headList.add(deptHead);
-        deptHead.add("科室\\数字");
-        Integer ruleTotalTimeUnit = CycleCalcUtils.getTotalTimeUnit(ruleId);
-        for (int i=1;i<=ruleTotalTimeUnit;i++){
-            List<String> head = new ArrayList<>();
-            head.add(String.valueOf(i));
-            headList.add(head);
-        }
-        List<List<String>> dataList = new ArrayList<>();
-        //获取规则下所有科室
-        List<CycleGroupDept> cycleGroupDeptList = groupDeptMapper.selectList(Wrappers.<CycleGroupDept>lambdaQuery().eq(CycleGroupDept::getRuleId, ruleId));
-        //设置数据
-        cycleGroupDeptList.forEach(cycleGroupDept ->{
-            List<String> data = new ArrayList<>();
-            //先添加科室名
-            Long deptId = cycleGroupDept.getDeptId();
-            data.add(deptService.selectDeptNameById(deptId));//设置科室名
-            for (int i=1;i<headList.size();i++){
-                Integer headIndex = Integer.valueOf(headList.get(i).get(0));
-                CycleCalcRecord calcRecords = calcRecordMapper.selectOne(Wrappers.<CycleCalcRecord>lambdaQuery()
-                    .eq(CycleCalcRecord::getRuleId, ruleId)
-                    .eq(CycleCalcRecord::getDeptId, deptId)
-                    .eq(CycleCalcRecord::getDeptIndex, headIndex));
-                if (calcRecords.getUserIds()==null||"".equals(calcRecords.getUserIds())){
-                    data.add("无数据");
-                    continue;
-                }
-                Set<Long> studentIdList = Arrays.stream(calcRecords.getUserIds().split(","))
-                    .map(Long::parseLong)
-                    .collect(Collectors.toSet());
-
-                List<Student> students = studentService.selectStudentByUserIds(studentIdList);
-                String studentNames = students.stream().map(Student::getRealName).collect(Collectors.joining(","));
-                data.add(studentNames);
-            }
-            dataList.add(data);
-        });
-
-
-            //循环表头
-//                String startTime = head.get(0).substring(0, 10);
-                //结束时间
-//                String endTime = head.get(0).substring(head.get(0).length() - 10);
-
-        //导出
-        ExcelUtil.writeForHeaderList(response,"轮转表.xlsx", "steet1", headList,headList.size(),dataList);
-
-
     }
 
 }

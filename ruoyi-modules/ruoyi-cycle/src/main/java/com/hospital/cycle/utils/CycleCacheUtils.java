@@ -1,15 +1,13 @@
 package com.hospital.cycle.utils;
 
-import com.hospital.cycle.domain.CycleGroup;
-import com.hospital.cycle.domain.CycleGroupDept;
-import com.hospital.cycle.domain.CycleRule;
-import com.hospital.cycle.domain.CycleStudent;
+import com.hospital.cycle.domain.*;
 import com.hospital.cycle.mapper.CycleGroupDeptMapper;
 import com.hospital.cycle.mapper.CycleGroupMapper;
 import com.hospital.cycle.mapper.CycleRuleMapper;
 import com.hospital.cycle.mapper.CycleStudentMapper;
 import org.dromara.common.core.utils.SpringUtils;
 import org.dromara.common.redis.utils.RedisUtils;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,8 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.hospital.cycle.constant.CycleRedisConstant.CYCLE_GROUP_PREFIX;
-import static com.hospital.cycle.constant.CycleRedisConstant.CYCLE_RULE_PREFIX;
+import static com.hospital.cycle.constant.CycleRedisConstant.*;
 
 public class CycleCacheUtils {
     public static CycleRuleMapper ruleMapper = SpringUtils.getBean(CycleRuleMapper.class);
@@ -46,7 +43,6 @@ public class CycleCacheUtils {
         String key = CYCLE_RULE_PREFIX + rule.getRuleId();
         RedisUtils.setCacheObject(key, rule);
     }
-
     /**
      * 删除规则
      *
@@ -61,6 +57,35 @@ public class CycleCacheUtils {
     }
 
 
+    /**
+     * 轮转新增专业缓存
+     * @param baseList 专业列表
+     */
+    public static void setBase(List<CycleRuleBase> baseList){
+        String key = CYCLE_BASE_PREFIX + baseList.get(0).getRuleId();
+        if (RedisUtils.isExistsObject(key)) {
+            Collection<Long> baseIds = baseList.stream().map(CycleRuleBase::getBaseId).toList();
+            delBase(baseIds);
+        }
+        RedisUtils.setCacheList(key, baseList);
+    }
+
+    private static void delBase(Collection<Long> baseIds) {
+        CycleRule rule = ruleMapper.selectById(baseIds.iterator().next());
+        String key = CYCLE_BASE_PREFIX + rule.getRuleId();
+        if (RedisUtils.isExistsObject(key)) {
+            List<CycleRuleBase> baseList = RedisUtils.getCacheList(key);
+            baseList = baseList.stream()
+                .filter(base -> !baseIds.contains(base.getBaseId()))
+                .collect(Collectors.toList());
+            RedisUtils.deleteObject(key);
+            if (!baseList.isEmpty()){
+                RedisUtils.setCacheList(key, baseList);
+            }
+        }
+
+    }
+
 
     /**
      * 插入或更新规则缓存
@@ -71,14 +96,16 @@ public class CycleCacheUtils {
         String key = CYCLE_GROUP_PREFIX + group.getRuleId();
         if (!RedisUtils.isExistsObject(key)) {
             List<CycleGroup> groupList = new ArrayList<>();
+            groupList.add(group);
             RedisUtils.setCacheList(key, groupList);
         } else {
             List<CycleGroup> groups = RedisUtils.getCacheList(key);
             //groupList中是否存在该group
             groups = groups.stream()
-                .filter(cacheGroup -> !Objects.equals(cacheGroup.getGroupId(), group.getRuleId()))
+                .filter(cacheGroup -> !Objects.equals(cacheGroup.getGroupId(), group.getGroupId()))
                 .collect(Collectors.toList());
             groups.add(group);
+            System.out.println(groups);
             //删除并重新缓存
             RedisUtils.deleteObject(key);
             RedisUtils.setCacheList(key, groups);
@@ -105,19 +132,24 @@ public class CycleCacheUtils {
             }
         }
     }
+    public static List<CycleGroup> getGroupList(Long ruleId) {
+        return RedisUtils.getCacheList(CYCLE_GROUP_PREFIX + ruleId);
+    }
+
+
 
     /**
      * 新增科室缓存
      * @param groupDepts 科室列表
      */
     public static void setGroupDept(List<CycleGroupDept> groupDepts) {
-        String key = CYCLE_GROUP_PREFIX + groupDepts.get(0).getRuleId()+":"+groupDepts.get(0).getGroupId();
+        String key = CYCLE_GROUP_DEPT_PREFIX + groupDepts.get(0).getRuleId()+":"+groupDepts.get(0).getGroupId();
         if (RedisUtils.isExistsObject(key)) {
             Collection<Long> deptIds = groupDepts.stream().map(CycleGroupDept::getDeptId).toList();
             delGroupDept(deptIds);
-            RedisUtils.setCacheList(key, groupDepts);
             }
-        }
+        RedisUtils.setCacheList(key, groupDepts);
+    }
 
     /**
      * 删除科室组
@@ -125,7 +157,7 @@ public class CycleCacheUtils {
      */
     public static void delGroupDept(Collection<Long> deptIds) {
         CycleGroupDept groupDept = groupDeptMapper.selectById(deptIds.iterator().next());
-        String key = CYCLE_GROUP_PREFIX + groupDept.getRuleId()+":"+groupDept.getGroupId();
+        String key = CYCLE_GROUP_DEPT_PREFIX + groupDept.getRuleId()+":"+groupDept.getGroupId();
         if (RedisUtils.isExistsObject(key)) {
             List<CycleGroupDept> groupDepts = RedisUtils.getCacheList(key);
 

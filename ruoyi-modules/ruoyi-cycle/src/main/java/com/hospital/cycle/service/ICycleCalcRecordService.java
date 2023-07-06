@@ -3,6 +3,7 @@ package com.hospital.cycle.service;
 import com.hospital.cycle.domain.CycleCalcRecord;
 import com.hospital.cycle.domain.vo.CycleCalcRecordVo;
 import com.hospital.cycle.domain.bo.CycleCalcRecordBo;
+import jakarta.servlet.http.HttpServletResponse;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 
@@ -46,4 +47,6 @@ public interface ICycleCalcRecordService {
      * 校验并批量删除轮转计算过程记录信息
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+
+    void exportList(Long ruleId, HttpServletResponse response);
 }

@@ -50,10 +50,9 @@ public class CycleCalcRecordController extends BaseController {
      */
     @SaCheckPermission("cycle:calcRecord:export")
     @Log(title = "轮转计算过程记录", businessType = BusinessType.EXPORT)
-    @PostMapping("/export")
-    public void export(CycleCalcRecordBo bo, HttpServletResponse response) {
-        List<CycleCalcRecordVo> list = cycleCalcRecordService.queryList(bo);
-        ExcelUtil.exportExcel(list, "轮转计算过程记录", CycleCalcRecordVo.class, response);
+    @PostMapping("/export/{ruleId}}")
+    public void export(@PathVariable Long ruleId, HttpServletResponse response) {
+        cycleCalcRecordService.exportList(ruleId, response);
     }
 
     /**

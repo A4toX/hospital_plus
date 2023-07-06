@@ -59,18 +59,7 @@ public class CycleRuleController extends BaseController {
         return cycleRuleService.queryPageList(bo, pageQuery);
     }
 
-    /**
-     * 导出轮转规则列表
-     */
-    @SaCheckPermission("cycle:rule:export")
-    @Log(title = "轮转规则", businessType = BusinessType.EXPORT)
-    @PostMapping("/export/{ruleId}")
-    public R<Void> export(@PathVariable Long ruleId, HttpServletResponse response) {
-        cycleRuleService.exportList(ruleId, response);
-        return R.ok();
-//        List<CycleRuleVo> list = cycleRuleService.queryList(bo);
-//        ExcelUtil.exportExcel(list, "轮转规则", CycleRuleVo.class, response);
-    }
+
 
     /**
      * 获取轮转规则详细信息

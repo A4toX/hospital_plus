@@ -260,9 +260,9 @@ public class CycleUtils {
     }
 
     /**
-     * 获取轮转导出表头(学员)
+     * 获取轮转导出表头(学员维护-时间表头)
      */
-    public static List<List<String>> getCycleExportHeadByUser(Long ruleId){
+    public static List<List<String>> getCycleExportHeadByUserWtihTime(Long ruleId){
         List<List<String>> headList = new ArrayList<>();
         // TODO: 2023/7/1 后期要添加是否跳过节假日的规则
         CycleRule cycleRule = ruleMapper.selectById(ruleId);
@@ -301,6 +301,30 @@ public class CycleUtils {
         }
 
     return headList;
+    }
+
+    public static List<List<String>> getCycleExportHeadByUserWtihUnit(Long ruleId){
+        CycleRule cycleRule = ruleMapper.selectById(ruleId);
+        if (cycleRule == null){
+            throw new ServiceException("没有找到对应的规则");
+        }
+        String unitName;
+        if (CYCLE_UNIT_MONTH.equals(cycleRule.getRuleUnit())) {
+            unitName = "月";
+        }else {
+            unitName = "周";
+        }
+        List<List<String>> headList = new ArrayList<>();
+        Integer ruleTotalTimeUnit = CycleCalcUtils.getTotalTimeUnit(ruleId);
+        List<String> firstHeadList = new ArrayList<>();//首列表头
+        firstHeadList.add("科室\\时间");
+        headList.add(firstHeadList);
+        for (int i=0;i<ruleTotalTimeUnit;i++){
+            List<String> unitHead = new ArrayList<>();
+            unitHead.add("第"+(i+1)+unitName);
+            headList.add(unitHead);
+        }
+        return headList;
     }
 
 }
