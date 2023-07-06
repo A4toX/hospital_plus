@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hospital.cycle.constant.CycleConstant.CYCLE_GROUP_METHOD_MUST;
+import static com.hospital.cycle.constant.CycleRedisConstant.*;
 import static com.hospital.cycle.utils.CycleUtils.initStudentDept;
 
 /**
@@ -88,9 +89,13 @@ public class CycleCalcUtils {
                 .eq(CycleRule::getParentId, 0L));
             ruleId = parentRule.getRuleId();
         }
+        List<CycleStudent> studentList;
         //获取规则下的学生
-        List<CycleStudent> studentList = studentMapper.selectList(Wrappers.<CycleStudent>lambdaQuery()
-            .eq(CycleStudent::getRuleId, ruleId));
+        studentList = RedisUtils.getCacheList(CYCLE_STUDENT_PREFIX + ruleId);
+        if (studentList.isEmpty()){
+            studentList = studentMapper.selectList(Wrappers.<CycleStudent>lambdaQuery()
+                .eq(CycleStudent::getRuleId, ruleId));
+        }
         if (studentList.isEmpty()) {
             throw new ServiceException("该规则下没有学生");
         }
@@ -103,7 +108,7 @@ public class CycleCalcUtils {
         //提取每个学生的科室
         studentList.forEach(student -> {
 //            List<CycleRecord> studentRecordList = recordList.stream().filter(record -> record.getUserId().equals(student.getUserId())).toList();
-            List<CycleRecord> studentRecordList = RedisUtils.getCacheList("cycle:student:"+cycleRule.getRuleId()+":"+student.getUserId());
+            List<CycleRecord> studentRecordList = RedisUtils.getCacheList(CYCLE_CALC_STUDENT_PREFIX+cycleRule.getRuleId()+":"+student.getUserId());
             if (studentRecordList.isEmpty()) {
                 return;
             }

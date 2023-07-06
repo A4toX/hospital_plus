@@ -23,118 +23,6 @@ public class CycleCacheUtils {
     public static CycleGroupDeptMapper groupDeptMapper = SpringUtils.getBean(CycleGroupDeptMapper.class);
     public static CycleStudentMapper studentMapper = SpringUtils.getBean(CycleStudentMapper.class);
 
-    /**
-     * 插入或更新规则缓存
-     *
-     * @param ruleId 轮转规则ID
-     */
-    public static void setRule(Long ruleId) {
-        CycleRule rule = ruleMapper.selectById(ruleId);
-        String key = CYCLE_RULE_PREFIX + ruleId;
-        RedisUtils.setCacheObject(key, rule);
-    }
-
-    /**
-     * 插入或更新规则缓存
-     *
-     * @param rule 轮转规则
-     */
-    public static void setRule(CycleRule rule) {
-        String key = CYCLE_RULE_PREFIX + rule.getRuleId();
-        RedisUtils.setCacheObject(key, rule);
-    }
-    /**
-     * 删除规则
-     *
-     * @param ruleId 轮转规则id
-     */
-    public static void delRule(Long ruleId) {
-        String key = CYCLE_RULE_PREFIX + ruleId;
-        RedisUtils.deleteObject(key);
-    }
-    public static void delRule(Collection<Long> ruleIds) {
-        ruleIds.forEach(CycleCacheUtils::delRule);
-    }
-
-
-    /**
-     * 轮转新增专业缓存
-     * @param baseList 专业列表
-     */
-    public static void setBase(List<CycleRuleBase> baseList){
-        String key = CYCLE_BASE_PREFIX + baseList.get(0).getRuleId();
-        if (RedisUtils.isExistsObject(key)) {
-            Collection<Long> baseIds = baseList.stream().map(CycleRuleBase::getBaseId).toList();
-            delBase(baseIds);
-        }
-        RedisUtils.setCacheList(key, baseList);
-    }
-
-    private static void delBase(Collection<Long> baseIds) {
-        CycleRule rule = ruleMapper.selectById(baseIds.iterator().next());
-        String key = CYCLE_BASE_PREFIX + rule.getRuleId();
-        if (RedisUtils.isExistsObject(key)) {
-            List<CycleRuleBase> baseList = RedisUtils.getCacheList(key);
-            baseList = baseList.stream()
-                .filter(base -> !baseIds.contains(base.getBaseId()))
-                .collect(Collectors.toList());
-            RedisUtils.deleteObject(key);
-            if (!baseList.isEmpty()){
-                RedisUtils.setCacheList(key, baseList);
-            }
-        }
-
-    }
-
-
-    /**
-     * 插入或更新规则缓存
-     *
-     * @param group 轮转规则组
-     */
-    public static void setGroup(CycleGroup group) {
-        String key = CYCLE_GROUP_PREFIX + group.getRuleId();
-        if (!RedisUtils.isExistsObject(key)) {
-            List<CycleGroup> groupList = new ArrayList<>();
-            groupList.add(group);
-            RedisUtils.setCacheList(key, groupList);
-        } else {
-            List<CycleGroup> groups = RedisUtils.getCacheList(key);
-            //groupList中是否存在该group
-            groups = groups.stream()
-                .filter(cacheGroup -> !Objects.equals(cacheGroup.getGroupId(), group.getGroupId()))
-                .collect(Collectors.toList());
-            groups.add(group);
-            System.out.println(groups);
-            //删除并重新缓存
-            RedisUtils.deleteObject(key);
-            RedisUtils.setCacheList(key, groups);
-        }
-    }
-
-    /**
-     * 删除规则组
-     * @param groupIds
-     */
-    public static void delGroup(Collection<Long> groupIds) {
-        CycleGroup group = groupMapper.selectById(groupIds.iterator().next());
-        String key = CYCLE_GROUP_PREFIX + group.getRuleId();
-        if (RedisUtils.isExistsObject(key)) {
-            List<CycleGroup> groups = RedisUtils.getCacheList(key);
-            //groupList中是否存在该group
-            groups = groups.stream()
-                .filter(cacheGroup -> !groupIds.contains(cacheGroup.getGroupId()))
-                .collect(Collectors.toList());
-            //删除并重新缓存
-            RedisUtils.deleteObject(key);
-            if (!groups.isEmpty()){
-                RedisUtils.setCacheList(key, groups);
-            }
-        }
-    }
-    public static List<CycleGroup> getGroupList(Long ruleId) {
-        return RedisUtils.getCacheList(CYCLE_GROUP_PREFIX + ruleId);
-    }
 
 
 
@@ -143,7 +31,7 @@ public class CycleCacheUtils {
      * @param groupDepts 科室列表
      */
     public static void setGroupDept(List<CycleGroupDept> groupDepts) {
-        String key = CYCLE_GROUP_DEPT_PREFIX + groupDepts.get(0).getRuleId()+":"+groupDepts.get(0).getGroupId();
+        String key = CYCLE_GROUP_DEPT_PREFIX+groupDepts.get(0).getGroupId();
         if (RedisUtils.isExistsObject(key)) {
             Collection<Long> deptIds = groupDepts.stream().map(CycleGroupDept::getDeptId).toList();
             delGroupDept(deptIds);
@@ -157,7 +45,7 @@ public class CycleCacheUtils {
      */
     public static void delGroupDept(Collection<Long> deptIds) {
         CycleGroupDept groupDept = groupDeptMapper.selectById(deptIds.iterator().next());
-        String key = CYCLE_GROUP_DEPT_PREFIX + groupDept.getRuleId()+":"+groupDept.getGroupId();
+        String key = CYCLE_GROUP_DEPT_PREFIX+groupDept.getGroupId();
         if (RedisUtils.isExistsObject(key)) {
             List<CycleGroupDept> groupDepts = RedisUtils.getCacheList(key);
 
@@ -177,7 +65,7 @@ public class CycleCacheUtils {
      * @param student 人员列表
      */
     public static void setStudent(List<CycleStudent> student){
-        String key = CYCLE_GROUP_PREFIX + student.get(0).getRuleId();
+        String key = CYCLE_STUDENT_PREFIX + student.get(0).getRuleId();
         if (RedisUtils.isExistsObject(key)) {
             Collection<Long> studentIds = student.stream().map(CycleStudent::getUserId).toList();
             delStudent(studentIds);
@@ -186,9 +74,9 @@ public class CycleCacheUtils {
         RedisUtils.setCacheList(key, student);
     }
 
-    private static void delStudent(Collection<Long> cycleStudentIds) {
+    public static void delStudent(Collection<Long> cycleStudentIds) {
         CycleStudent cycleStudent = studentMapper.selectById(cycleStudentIds.iterator().next());
-        String key = CYCLE_GROUP_PREFIX + cycleStudent.getRuleId();
+        String key = CYCLE_STUDENT_PREFIX + cycleStudent.getRuleId();
         if (RedisUtils.isExistsObject(key)) {
             List<CycleStudent> students = RedisUtils.getCacheList(key);
             students = students.stream()

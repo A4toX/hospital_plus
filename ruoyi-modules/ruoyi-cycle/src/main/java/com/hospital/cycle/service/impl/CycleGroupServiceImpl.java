@@ -112,7 +112,6 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
         if (flag) {
             bo.setRuleId(add.getRuleId());
         }
-        CycleCacheUtils.setGroup(add);
         return flag;
     }
 
@@ -124,7 +123,6 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
         CycleGroup update = MapstructUtils.convert(bo, CycleGroup.class);
         validEntityBeforeSave(update);
         baseMapper.updateById(update);
-        CycleCacheUtils.setGroup(update);
         return true;
     }
 
@@ -154,7 +152,6 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
             }
         }
         //删除缓存
-        CycleCacheUtils.delGroup(ids);
         baseMapper.deleteBatchIds(ids);
 
         return true;

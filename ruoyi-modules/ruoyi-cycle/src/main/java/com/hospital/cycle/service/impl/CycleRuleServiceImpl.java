@@ -249,8 +249,6 @@ public class CycleRuleServiceImpl implements ICycleRuleService {
             });
         }
         baseMapper.deleteBatchIds(ids);
-        //删除缓存
-        CycleCacheUtils.delRule(ids);
         return true;
     }
 
