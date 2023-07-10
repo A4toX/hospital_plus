@@ -11,27 +11,27 @@ create table sys_social
 (
     id                 number(20)       not null,
     user_id            number(20)       not null,
-    tenant_id          varchar(20)      default null,
-    auth_id            varchar(255)     not null,
-    source             varchar(255)     not null,
-    open_id            varchar(255)     default null,
-    user_name          varchar(30)      not null,
-    nick_name          varchar(30)      default '',
-    email              varchar(255)     default '',
-    avatar             varchar(500)     default '',
-    access_token       varchar(255)     not null,
+    tenant_id          varchar2(20)      default null,
+    auth_id            varchar2(255)     not null,
+    source             varchar2(255)     not null,
+    open_id            varchar2(255)     default null,
+    user_name          varchar2(30)      not null,
+    nick_name          varchar2(30)      default '',
+    email              varchar2(255)     default '',
+    avatar             varchar2(500)     default '',
+    access_token       varchar2(255)     not null,
     expire_in          number(100)      default null,
-    refresh_token      varchar(255)     default null,
-    access_code        varchar(255)     default null,
-    union_id           varchar(255)     default null,
-    scope              varchar(255)     default null,
-    token_type         varchar(255)     default null,
-    id_token           varchar(255)     default null,
-    mac_algorithm      varchar(255)     default null,
-    mac_key            varchar(255)     default null,
-    code               varchar(255)     default null,
-    oauth_token        varchar(255)     default null,
-    oauth_token_secret varchar(255)     default null,
+    refresh_token      varchar2(255)     default null,
+    access_code        varchar2(255)     default null,
+    union_id           varchar2(255)     default null,
+    scope              varchar2(255)     default null,
+    token_type         varchar2(255)     default null,
+    id_token           varchar2(255)     default null,
+    mac_algorithm      varchar2(255)     default null,
+    mac_key            varchar2(255)     default null,
+    code               varchar2(255)     default null,
+    oauth_token        varchar2(255)     default null,
+    oauth_token_secret varchar2(255)     default null,
     create_dept        number(20),
     create_by          number(20),
     create_time        date,
@@ -46,9 +46,9 @@ comment on table   sys_social                   is '社会化关系表';
 comment on column  sys_social.id                is '主键';
 comment on column  sys_social.user_id           is '用户ID';
 comment on column  sys_social.tenant_id         is '租户id';
-comment on column  sys_social.auth_id           is '授权+授权openid';
+comment on column  sys_social.auth_id           is '平台+平台唯一id';
 comment on column  sys_social.source            is '用户来源';
-comment on column  sys_social.open_id           is '原生openid';
+comment on column  sys_social.open_id           is '平台编号唯一id';
 comment on column  sys_social.user_name         is '登录账号';
 comment on column  sys_social.nick_name         is '用户昵称';
 comment on column  sys_social.email             is '用户邮箱';
@@ -78,11 +78,11 @@ comment on column  sys_social.del_flag          is '删除标志（0代表存在
 -- ----------------------------
 create table sys_client (
     id                  number(20)    not null,
-    client_id           varchar(64)   default null,
-    client_key          varchar(32)   default null,
-    client_secret       varchar(255)  default null,
-    grant_type          varchar(255)  default null,
-    device_type         varchar(32)   default null,
+    client_id           varchar2(64)   default null,
+    client_key          varchar2(32)   default null,
+    client_secret       varchar2(255)  default null,
+    grant_type          varchar2(255)  default null,
+    device_type         varchar2(32)   default null,
     active_timeout      number(11)    default 1800,
     timeout             number(11)    default 604800,
     status              char(1)       default '0',
@@ -128,7 +128,7 @@ insert into sys_dict_data values(35, '000000', 0,  'PC端',      'pc',        's
 insert into sys_dict_data values(36, '000000', 0,  'APP端',     'app',       'sys_device_type',  '',   'default', 'N', '0', 103, 1, sysdate, null, null, 'APP端');
 
 -- 二级菜单
-insert into sys_menu values('123',  '客户端管理',   '1',   '1', 'client',           'system/client/index',          '', 1, 0, 'C', '0', '0', 'system:client:list',          'international', 103, 1, sysdate, null, null, '客户端管理菜单');
+insert into sys_menu values('123',  '客户端管理',   '1',   '11', 'client',           'system/client/index',          '', 1, 0, 'C', '0', '0', 'system:client:list',          'international', 103, 1, sysdate, null, null, '客户端管理菜单');
 -- 客户端管理按钮
 insert into sys_menu values('1061', '客户端管理查询', '123', '1',  '#', '', '', 1, 0, 'F', '0', '0', 'system:client:query',        '#', 103, 1, sysdate, null, null, '');
 insert into sys_menu values('1062', '客户端管理新增', '123', '2',  '#', '', '', 1, 0, 'F', '0', '0', 'system:client:add',          '#', 103, 1, sysdate, null, null, '');

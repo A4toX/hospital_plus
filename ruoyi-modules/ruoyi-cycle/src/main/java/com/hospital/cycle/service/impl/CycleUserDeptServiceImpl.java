@@ -108,7 +108,7 @@ public class CycleUserDeptServiceImpl implements ICycleUserDeptService {
      */
     private void validEntityBeforeSave(List<CycleUserDept> entitys){
         //校验
-        CycleValidUtils.ValidstudentSelectDept(entitys);
+        CycleValidUtils.ValidStudentSelectDept(entitys);
     }
 
 

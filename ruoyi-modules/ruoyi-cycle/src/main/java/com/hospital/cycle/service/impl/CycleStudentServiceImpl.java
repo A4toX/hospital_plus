@@ -2,10 +2,12 @@ package com.hospital.cycle.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.common.hash.BloomFilter;
 import com.hospital.cycle.domain.CycleRule;
 import com.hospital.cycle.domain.CycleRuleBase;
 import com.hospital.cycle.mapper.CycleRuleBaseMapper;
 import com.hospital.cycle.mapper.CycleRuleMapper;
+import com.hospital.cycle.utils.CycleCacheUtils;
 import com.hospital.cycle.utils.CycleValidUtils;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.service.StudentService;
@@ -19,6 +21,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.redis.utils.RedisUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import com.hospital.cycle.domain.bo.CycleStudentBo;
 import com.hospital.cycle.domain.vo.CycleStudentVo;
@@ -102,7 +105,7 @@ public class CycleStudentServiceImpl implements ICycleStudentService {
         List<CycleStudent> cycleStudents = baseMapper.selectList(Wrappers.<CycleStudent>lambdaQuery().eq(CycleStudent::getRuleId, adds.get(0).getRuleId()));
         if (cycleStudents.isEmpty()){//如果没有人员的话直接新增
             baseMapper.insertBatch(adds);
-            RedisUtils.setCacheList(CYCLE_STUDENT_PREFIX + adds.get(0).getRuleId(), adds);
+            CycleCacheUtils.setStudent(adds);
             return true;
         }
         //新增人员
@@ -124,12 +127,13 @@ public class CycleStudentServiceImpl implements ICycleStudentService {
         //新增
         if (!add.isEmpty()){
             baseMapper.insertBatch(add);
-            RedisUtils.setCacheList(CYCLE_STUDENT_PREFIX + add.get(0).getRuleId(), add);
+            CycleCacheUtils.setStudent(add);
         }
         //删除
         if (!del.isEmpty()){
             baseMapper.deleteBatchIds(del.stream().map(CycleStudent::getCycleStudentId).collect(Collectors.toList()));
-            RedisUtils.deleteObject(CYCLE_STUDENT_PREFIX + del.get(0).getRuleId());
+            Collection<Long> userIds = del.stream().map(CycleStudent::getCycleStudentId).collect(Collectors.toList());
+            CycleCacheUtils.delStudent(userIds);
         }
         return true;
     }

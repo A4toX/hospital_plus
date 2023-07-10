@@ -12,13 +12,14 @@ import org.dromara.common.core.service.domain.Student;
 import org.dromara.common.core.utils.SpringUtils;
 import org.dromara.common.redis.utils.RedisUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.hospital.cycle.constant.CycleConstant.*;
-import static com.hospital.cycle.constant.CycleRedisConstant.CYCLE_RULE_PREFIX;
+import static com.hospital.cycle.constant.CycleRedisConstant.*;
 
 /**
  * 校验工具类
@@ -39,7 +40,7 @@ public class CycleValidUtils {
      * @param userDepts
      * @return
      */
-    public  static void ValidstudentSelectDept(List<CycleUserDept> userDepts) {
+    public  static void ValidStudentSelectDept(List<CycleUserDept> userDepts) {
         //判断groupUserDepts中的ruleId是否都相同，不相同返回异常
         if (userDepts.stream().anyMatch(userDept -> !userDept.getRuleId().equals(userDepts.get(0).getRuleId()))){
             throw new ServiceException("每次提交，只允许提交同规则同阶段的数据");
@@ -349,8 +350,46 @@ public class CycleValidUtils {
        if (cycleRule==null){
            throw new ServiceException("轮转规则不存在");
        }
-       //校验规则组和其下科室
+       if (YES.equals(cycleRule.getBaseFlag())){
+           // TODO: 2023/7/5 获取专业,如果没有专业，提示先配置专业
+       }
 
+       //校验规则组和其下科室
+        List<CycleGroup> cycleGroupList;
+        if(RedisUtils.isExistsObject(CYCLE_GROUP_PREFIX+ruleId)){
+            cycleGroupList = RedisUtils.getCacheList(CYCLE_GROUP_PREFIX+ruleId);
+        }else {
+            cycleGroupList = groupMapper.selectList(Wrappers.<CycleGroup>lambdaQuery().eq(CycleGroup::getRuleId, ruleId));
+        }
+        if (cycleGroupList.isEmpty()){
+            throw new ServiceException("规则组未配置");
+        }
+        //校验规则组下是否有科室
+        List<CycleGroupDept> cycleGroupDepts = new ArrayList<>();
+
+        for (CycleGroup group : cycleGroupList){
+            //先校验redis中是否有数据
+            if(RedisUtils.isExistsObject(CYCLE_GROUP_DEPT_PREFIX+ruleId+":"+group.getGroupId())) {
+                cycleGroupDepts = RedisUtils.getCacheList(CYCLE_GROUP_DEPT_PREFIX + ruleId+":"+group.getGroupId());
+            }
+            if (cycleGroupDepts==null||cycleGroupDepts.isEmpty()){
+                cycleGroupDepts = groupDeptMapper.selectList(Wrappers.<CycleGroupDept>lambdaQuery().eq(CycleGroupDept::getGroupId, group.getGroupId()));
+            }
+            if (cycleGroupDepts.isEmpty()){
+                throw new ServiceException("规则组"+group.getGroupName()+"下科室未配置");
+            }
+        }
+
+        //查看下规则下是是否有人
+        List<CycleStudent> cycleStudents;
+        if(RedisUtils.isExistsObject(CYCLE_STUDENT_PREFIX+ruleId)) {
+            cycleStudents = RedisUtils.getCacheList(CYCLE_STUDENT_PREFIX + ruleId);
+        }else {
+            cycleStudents = studentMapper.selectList(Wrappers.<CycleStudent>lambdaQuery().eq(CycleStudent::getRuleId, ruleId));
+        }
+        if (cycleStudents.isEmpty()){
+            throw new ServiceException("学员未配置");
+        }
 
     }
 }

@@ -11,9 +11,9 @@ create table sys_social
     id                 bigint           not null        comment '主键',
     user_id            bigint           not null        comment '用户ID',
     tenant_id          varchar(20)      default null    comment '租户id',
-    auth_id            varchar(255)     not null        comment '授权+授权openid',
+    auth_id            varchar(255)     not null        comment '平台+平台唯一id',
     source             varchar(255)     not null        comment '用户来源',
-    open_id            varchar(255)     default null    comment '原生open id',
+    open_id            varchar(255)     default null    comment '平台编号唯一id',
     user_name          varchar(30)      not null        comment '登录账号',
     nick_name          varchar(30)      default ''      comment '用户昵称',
     email              varchar(255)     default ''      comment '用户邮箱',
@@ -78,7 +78,7 @@ insert into sys_dict_data values(35, '000000', 0,  'PC端', 'pc',          'sys_
 insert into sys_dict_data values(36, '000000', 0,  'APP端', 'app',        'sys_device_type',     '',   'default', 'N', '0', 103, 1, sysdate(), null, null, 'APP端');
 
 -- 二级菜单
-insert into sys_menu values('123',  '客户端管理',   '1',   '1', 'client',           'system/client/index',          '', 1, 0, 'C', '0', '0', 'system:client:list',          'international', 103, 1, sysdate(), null, null, '客户端管理菜单');
+insert into sys_menu values('123',  '客户端管理',   '1',   '11', 'client',           'system/client/index',          '', 1, 0, 'C', '0', '0', 'system:client:list',          'international', 103, 1, sysdate(), null, null, '客户端管理菜单');
 -- 客户端管理按钮
 insert into sys_menu values('1061', '客户端管理查询', '123', '1',  '#', '', '', 1, 0, 'F', '0', '0', 'system:client:query',        '#', 103, 1, sysdate(), null, null, '');
 insert into sys_menu values('1062', '客户端管理新增', '123', '2',  '#', '', '', 1, 0, 'F', '0', '0', 'system:client:add',          '#', 103, 1, sysdate(), null, null, '');

@@ -52,4 +52,15 @@ public class CycleGroupDeptBo extends BaseEntity {
     private Integer deptUnitNum;
 
 
+    @NotNull(message = "规则组方法不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String groupMethod;
+
+    /**
+     * 已分配人数
+     */
+    private Integer assignedNum = 0;
+
+
+
+
 }

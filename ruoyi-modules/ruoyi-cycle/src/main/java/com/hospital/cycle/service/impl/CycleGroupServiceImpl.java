@@ -19,6 +19,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.redis.utils.RedisUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import com.hospital.cycle.domain.bo.CycleGroupBo;
 import com.hospital.cycle.domain.vo.CycleGroupVo;
@@ -103,6 +104,7 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
      * 新增轮转规则组
      */
     @Override
+    @Cacheable(cacheNames = CYCLE_GROUP_PREFIX, key = "#bo.getGroupId()" )
     public Boolean insertByBo(CycleGroupBo bo) {
         CycleGroup add = MapstructUtils.convert(bo, CycleGroup.class);
         validEntityBeforeSave(add);
@@ -110,7 +112,6 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
         if (flag) {
             bo.setRuleId(add.getRuleId());
         }
-        CycleCacheUtils.setGroup(add);
         return flag;
     }
 
@@ -122,7 +123,6 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
         CycleGroup update = MapstructUtils.convert(bo, CycleGroup.class);
         validEntityBeforeSave(update);
         baseMapper.updateById(update);
-        CycleCacheUtils.setGroup(update);
         return true;
     }
 
@@ -151,9 +151,9 @@ public class CycleGroupServiceImpl implements ICycleGroupService {
                 throw new ServiceException("请删除其下科室在进行删除");
             }
         }
-        baseMapper.deleteBatchIds(ids);
         //删除缓存
-        CycleCacheUtils.delGroup(ids);
+        baseMapper.deleteBatchIds(ids);
+
         return true;
     }
 }

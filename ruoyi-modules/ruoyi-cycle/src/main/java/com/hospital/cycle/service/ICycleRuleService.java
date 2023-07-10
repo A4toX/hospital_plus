@@ -56,7 +56,5 @@ public interface ICycleRuleService {
 
     void ValidAndInitCycle(Long ruleId);
 
-    void exportList(Long ruleId, HttpServletResponse response);
 
-//    void copyRule(String isChildren);
 }
