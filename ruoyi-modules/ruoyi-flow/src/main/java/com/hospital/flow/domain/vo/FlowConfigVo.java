@@ -32,13 +32,13 @@ public class FlowConfigVo implements Serializable {
      * 流程名称
      */
     @ExcelProperty(value = "流程名称")
-    private String name;
+    private String flowName;
 
     /**
      * 关键字
      */
     @ExcelProperty(value = "关键字")
-    private String key;
+    private String flowKey;
 
     /**
      * 流程配置内容
@@ -50,7 +50,7 @@ public class FlowConfigVo implements Serializable {
      * 版本
      */
     @ExcelProperty(value = "版本")
-    private Integer version;
+    private Integer flowVersion;
 
     /**
      * 是否最新版本

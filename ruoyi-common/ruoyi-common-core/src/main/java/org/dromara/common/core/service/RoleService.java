@@ -1,5 +1,8 @@
 package org.dromara.common.core.service;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * 通用 角色服务
  *
@@ -14,4 +17,6 @@ public interface RoleService {
      * @return 角色名称
      */
     String selectRoleNameById(Long roleId);
+
+    List<Long> selectUsersByRoleId(Long roleId);
 }

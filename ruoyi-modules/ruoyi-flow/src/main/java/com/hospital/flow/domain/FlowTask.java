@@ -26,9 +26,9 @@ public class FlowTask extends TenantEntity {
     private Long id;
 
     /**
-     * 流程关键字
+     * 申请ID
      */
-    private String key;
+    private Long applyId;
 
     /**
      * 审核节点ID

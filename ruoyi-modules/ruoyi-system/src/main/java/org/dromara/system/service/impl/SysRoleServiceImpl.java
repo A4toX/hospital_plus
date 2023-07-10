@@ -493,4 +493,9 @@ public class SysRoleServiceImpl implements ISysRoleService, RoleService {
             .select(SysRole::getRoleName).eq(SysRole::getRoleId, roleId));
         return ObjectUtil.isNull(sysRole) ? null : sysRole.getRoleName();
     }
+
+    @Override
+    public List<Long> selectUsersByRoleId(Long roleId) {
+        return userRoleMapper.selectUserIdsByRoleId(roleId);
+    }
 }

@@ -24,12 +24,12 @@ public class FlowConfigBo extends BaseEntity {
     /**
      * 流程名称
      */
-    private String name;
+    private String flowName;
 
     /**
      * 关键字
      */
-    private String key;
+    private String flowKey;
 
     /**
      * 流程配置内容
@@ -39,7 +39,7 @@ public class FlowConfigBo extends BaseEntity {
     /**
      * 版本
      */
-    private Integer version;
+    private Integer flowVersion;
 
     /**
      * 是否最新版本

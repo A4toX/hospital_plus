@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hospital.flow.domain.FlowConfig;
 import com.hospital.flow.domain.bo.FlowConfigBo;
 import com.hospital.flow.domain.vo.FlowConfigVo;
+import com.hospital.flow.exception.FlowException;
 import com.hospital.flow.mapper.FlowConfigMapper;
 import com.hospital.flow.service.IFlowConfigService;
 import com.hospital.flow.utils.FlowUtils;
@@ -34,13 +35,13 @@ public class FlowConfigServiceImpl extends BaseServiceImpl<FlowConfigMapper, Flo
     @Override
     @Transactional
     public int insert(FlowConfigBo bo) {
-        FlowConfig flowConfig = mapper.selectByKey(bo.getKey());
+        FlowConfig flowConfig = mapper.selectByKey(bo.getFlowKey());
         if(flowConfig != null) {
-            throw new ServiceException(String.format("关键字【%s】已存在", bo.getKey()));
+            throw new FlowException(String.format("关键字【%s】已存在", bo.getFlowKey()));
         }
         flowConfig = new FlowConfig();
-        flowConfig.setName(bo.getName());
-        flowConfig.setKey(bo.getKey());
+        flowConfig.setFlowName(bo.getFlowName());
+        flowConfig.setFlowKey(bo.getFlowKey());
         flowConfig.setBpmnConfig(bo.getBpmnConfig());
         flowConfig.setVersionFlag(YesNoEnum.YES.getValue());
         flowConfig.setRemark(bo.getRemark());
@@ -54,9 +55,10 @@ public class FlowConfigServiceImpl extends BaseServiceImpl<FlowConfigMapper, Flo
         if(flowConfig == null) {
             throw new ServiceException("配置不存在");
         }
-        flowConfig.setName(bo.getName());
+        flowConfig.setFlowName(bo.getFlowName());
         flowConfig.setBpmnConfig(bo.getBpmnConfig());
         flowConfig.setRemark(bo.getRemark());
+        FlowUtils.handleNodeAndEdge(flowConfig);
         return mapper.updateById(flowConfig);
     }
 
@@ -81,7 +83,7 @@ public class FlowConfigServiceImpl extends BaseServiceImpl<FlowConfigMapper, Flo
             throw new ServiceException("配置不存在");
         }
         if(StrUtil.isBlank(flowConfig.getPublishTime())) {
-            flowConfig.setVersion(1);
+            flowConfig.setFlowVersion(1);
             flowConfig.setVersionFlag(YesNoEnum.YES.getValue());
             flowConfig.setPublishTime(DateUtil.now());
             FlowUtils.handleNodeAndEdge(flowConfig);
@@ -94,7 +96,7 @@ public class FlowConfigServiceImpl extends BaseServiceImpl<FlowConfigMapper, Flo
         flowConfig.setId(null);
         flowConfig.setPublishTime(DateUtil.now());
         flowConfig.setVersionFlag(YesNoEnum.YES.getValue());
-        flowConfig.setVersion(flowConfig.getVersion() + 1);
+        flowConfig.setFlowVersion(flowConfig.getFlowVersion() + 1);
         int result = mapper.insert(flowConfig);
         FlowUtils.handleNodeAndEdge(flowConfig);
         return result;
@@ -102,8 +104,8 @@ public class FlowConfigServiceImpl extends BaseServiceImpl<FlowConfigMapper, Flo
 
     private LambdaQueryWrapper<FlowConfig> buildQueryWrapper(FlowConfigBo bo) {
         return new LambdaQueryWrapperX<FlowConfig>()
-                .likeIfPresent(FlowConfig::getName, bo.getName())
-                .eqIfPresent(FlowConfig::getKey, bo.getKey())
+                .likeIfPresent(FlowConfig::getFlowName, bo.getFlowName())
+                .eqIfPresent(FlowConfig::getFlowKey, bo.getFlowKey())
                 .eq(FlowConfig::getVersionFlag, YesNoEnum.YES.getValue())
                 .likeIfPresent(FlowConfig::getRemark, bo.getRemark())
         ;

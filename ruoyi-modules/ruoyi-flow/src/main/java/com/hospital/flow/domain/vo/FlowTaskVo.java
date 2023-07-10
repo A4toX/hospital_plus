@@ -29,10 +29,10 @@ public class FlowTaskVo implements Serializable {
     private Long id;
 
     /**
-     * 流程关键字
+     * 申请ID
      */
-    @ExcelProperty(value = "流程关键字")
-    private String key;
+    @ExcelProperty(value = "申请ID")
+    private Long applyId;
 
     /**
      * 审核节点ID

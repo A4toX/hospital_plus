@@ -15,4 +15,6 @@ public interface IFlowApplyService extends IBaseService<FlowApplyVo, FlowApplyBo
     int approve(AuditReq req);
 
     int reject(AuditReq req);
+
+    int cancel(Long[] applyIds);
 }

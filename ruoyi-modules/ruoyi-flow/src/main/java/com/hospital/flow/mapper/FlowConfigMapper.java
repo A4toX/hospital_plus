@@ -13,9 +13,9 @@ import org.dromara.common.mybatis.core.mapper.LambdaQueryWrapperX;
  */
 public interface FlowConfigMapper extends BaseMapperPlus<FlowConfig, FlowConfigVo> {
 
-    default FlowConfig selectByKey(String key) {
+    default FlowConfig selectByKey(String flowKey) {
         return selectOne(new LambdaQueryWrapperX<FlowConfig>()
-            .eq(FlowConfig::getKey, key)
+            .eq(FlowConfig::getFlowKey, flowKey)
             .eq(FlowConfig::getVersionFlag, YesNoEnum.YES.getValue()));
     }
 }

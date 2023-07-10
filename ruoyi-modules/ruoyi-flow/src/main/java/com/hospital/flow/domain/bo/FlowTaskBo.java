@@ -22,9 +22,9 @@ public class FlowTaskBo extends BaseEntity {
     private Long id;
 
     /**
-     * 流程关键字
+     * 申请ID
      */
-    private String key;
+    private Long applyId;
 
     /**
      * 审核节点ID

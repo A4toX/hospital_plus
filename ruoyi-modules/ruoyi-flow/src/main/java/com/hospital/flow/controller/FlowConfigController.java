@@ -1,6 +1,8 @@
 package com.hospital.flow.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.dev33.satoken.annotation.SaIgnore;
+import com.hospital.flow.domain.vo.FlowTypeVo;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.domain.R;
 import org.dromara.common.log.annotation.Log;
@@ -14,6 +16,9 @@ import com.hospital.flow.service.IFlowConfigService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * 流程管理/流程配置
  *
@@ -23,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/flow/flowConfig")
+@SaIgnore
 public class FlowConfigController extends BaseController {
 
     private final IFlowConfigService flowConfigService;
@@ -35,6 +41,18 @@ public class FlowConfigController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo<FlowConfigVo> list(FlowConfigBo bo, PageQuery pageQuery) {
         return flowConfigService.selectPageList(bo, pageQuery);
+    }
+
+    /**
+     * 获取流程类别
+     * @return
+     */
+    @SaCheckPermission("flowConfig:flowType")
+    @GetMapping(value = "/flowType")
+    public R<List<FlowTypeVo>> flowType(FlowConfigBo bo) {
+        List<FlowConfigVo> vos = flowConfigService.selectList(bo);
+        List<FlowTypeVo> list = vos.stream().map(v -> new FlowTypeVo(v.getFlowKey(), v.getFlowName())).collect(Collectors.toList());
+        return R.ok(list);
     }
 
     /**
@@ -77,7 +95,7 @@ public class FlowConfigController extends BaseController {
      */
     @SaCheckPermission("flowConfig:remove")
     @Log(title = "流程配置管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @DeleteMapping("/{id}")
     public R<Void> remove(@PathVariable Long id) {
         return toAjax(flowConfigService.deleteById(id));
     }
@@ -93,5 +111,7 @@ public class FlowConfigController extends BaseController {
     public R<Void> publish(Long id) {
         return toAjax(flowConfigService.publish(id));
     }
+
+
 }
 

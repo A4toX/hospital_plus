@@ -33,7 +33,7 @@ public class FlowApply extends TenantEntity {
     /**
      * 流程关键字
      */
-    private String key;
+    private String flowKey;
 
     /**
      * 审核状态(1进行中，2完成，3终止，4撤销)

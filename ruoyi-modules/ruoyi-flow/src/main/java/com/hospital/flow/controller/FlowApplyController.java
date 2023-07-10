@@ -30,6 +30,17 @@ public class FlowApplyController extends BaseController {
     private final IFlowApplyService flowApplyService;
 
     /**
+     * 申请撤回
+     * @param applyIds 撤回ID集合
+     * @return
+     */
+    @PutMapping("/cancel")
+    @SaCheckPermission("apply:cancel")
+    public R<Void> cancel(Long[] applyIds) {
+        return toAjax(flowApplyService.cancel(applyIds));
+    }
+
+    /**
      * 申请通过
      * @param req
      * @return
@@ -52,12 +63,32 @@ public class FlowApplyController extends BaseController {
     }
 
     /**
-     * 分页查询流程申请
+     * 分页查询我的流程
      * @return
      */
-    @SaCheckPermission("flowApply:list")
-    @GetMapping("/list")
-    public TableDataInfo<FlowApplyVo> list(FlowApplyBo bo, PageQuery pageQuery) {
+    @SaCheckPermission("flowApply:myFlow")
+    @GetMapping("/myFlow")
+    public TableDataInfo<FlowApplyVo> myFlow(FlowApplyBo bo, PageQuery pageQuery) {
+        return flowApplyService.selectPageList(bo, pageQuery);
+    }
+
+    /**
+     * 分页查询我的待办流程
+     * @return
+     */
+    @SaCheckPermission("flowApply:todoFlow")
+    @GetMapping("/todoFlow")
+    public TableDataInfo<FlowApplyVo> todoFlow(FlowApplyBo bo, PageQuery pageQuery) {
+        return flowApplyService.selectPageList(bo, pageQuery);
+    }
+
+    /**
+     * 分页查询我的已办流程
+     * @return
+     */
+    @SaCheckPermission("flowApply:doneFlow")
+    @GetMapping("/doneFlow")
+    public TableDataInfo<FlowApplyVo> doneFlow(FlowApplyBo bo, PageQuery pageQuery) {
         return flowApplyService.selectPageList(bo, pageQuery);
     }
 
@@ -70,40 +101,6 @@ public class FlowApplyController extends BaseController {
     @GetMapping(value = "/{id}")
     public R<FlowApplyVo> getInfo(@PathVariable Long id) {
         return R.ok(flowApplyService.selectById(id));
-    }
-
-    /**
-     * 新增流程申请
-     * @return
-     */
-    @SaCheckPermission("flowApply:add")
-    @Log(title = "流程申请管理", businessType = BusinessType.INSERT)
-    @PostMapping
-    public R<Void> add(@Validated @RequestBody FlowApplyBo bo) {
-        return toAjax(flowApplyService.insert(bo));
-    }
-
-    /**
-     * 修改流程申请
-     * @return
-     */
-    @SaCheckPermission("flowApply:edit")
-    @Log(title = "流程申请管理", businessType = BusinessType.UPDATE)
-    @PutMapping
-    public R<Void> edit(@Validated @RequestBody FlowApplyBo bo) {
-        return toAjax(flowApplyService.update(bo));
-    }
-
-    /**
-     * 删除流程申请
-     * @param ids 数据ID字符串集合
-     * @return
-     */
-    @SaCheckPermission("flowApply:remove")
-    @Log(title = "流程申请管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
-    public R<Void> remove(@PathVariable Long[] ids) {
-        return toAjax(flowApplyService.deleteByIds(ids));
     }
 }
 

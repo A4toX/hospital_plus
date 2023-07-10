@@ -7,8 +7,11 @@ import com.hospital.attendance.domain.bo.AttendanceLeaveRecordBo;
 import com.hospital.attendance.domain.vo.AttendanceLeaveRecordVo;
 import com.hospital.attendance.mapper.AttendanceLeaveRecordMapper;
 import com.hospital.attendance.service.IAttendanceLeaveRecordService;
+import com.hospital.flow.enums.FlowKeyEnum;
 import com.hospital.flow.enums.FlowStatusEnum;
+import com.hospital.flow.utils.FlowUtils;
 import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.mybatis.core.mapper.LambdaQueryWrapperX;
 import org.dromara.common.mybatis.core.page.PageQuery;
@@ -33,8 +36,12 @@ public class AttendanceLeaveRecordServiceImpl extends BaseServiceImpl<Attendance
         AttendanceLeaveRecord record = MapstructUtils.convert(bo, AttendanceLeaveRecord.class);
         record.setUserId(LoginHelper.getUserId());
         record.setResult(FlowStatusEnum.RUNNING.getStatus());
-
-        return mapper.insert(record);
+        int result = mapper.insert(record);
+        boolean apply = FlowUtils.apply(FlowKeyEnum.LEAVE.getKey(), record.getId(), null);
+        if(!apply) {
+            throw new ServiceException("申请失败");
+        }
+        return result;
     }
 
     @Override

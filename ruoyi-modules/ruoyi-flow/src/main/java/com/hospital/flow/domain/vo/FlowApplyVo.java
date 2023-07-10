@@ -38,7 +38,7 @@ public class FlowApplyVo implements Serializable {
      * 流程关键字
      */
     @ExcelProperty(value = "流程关键字")
-    private String key;
+    private String flowKey;
 
     /**
      * 审核状态(1进行中，2完成，3终止，4撤销)

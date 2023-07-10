@@ -42,7 +42,7 @@ public class FlowApplyServiceImpl extends BaseServiceImpl<FlowApplyMapper, FlowA
     private LambdaQueryWrapper<FlowApply> buildQueryWrapper(FlowApplyBo bo) {
         return new LambdaQueryWrapperX<FlowApply>()
                 .eqIfPresent(FlowApply::getConfigId, bo.getConfigId())
-                .eqIfPresent(FlowApply::getKey, bo.getKey())
+                .eqIfPresent(FlowApply::getFlowKey, bo.getFlowKey())
                 .eqIfPresent(FlowApply::getStatus, bo.getStatus())
                 .eqIfPresent(FlowApply::getBusinessId, bo.getBusinessId())
                 .eqIfPresent(FlowApply::getCreateDept, bo.getCreateDept())
@@ -57,6 +57,11 @@ public class FlowApplyServiceImpl extends BaseServiceImpl<FlowApplyMapper, FlowA
 
     @Override
     public int reject(AuditReq req) {
+        return 0;
+    }
+
+    @Override
+    public int cancel(Long[] applyIds) {
         return 0;
     }
 }
