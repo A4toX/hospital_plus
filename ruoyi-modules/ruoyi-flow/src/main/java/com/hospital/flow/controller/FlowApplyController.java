@@ -1,6 +1,7 @@
 package com.hospital.flow.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.dev33.satoken.annotation.SaIgnore;
 import com.hospital.flow.domain.req.AuditReq;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 流程申请
+ * 流程管理/流程申请
  *
  * @author liguoxian
  */
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/flow/flowApply")
+@SaIgnore
 public class FlowApplyController extends BaseController {
 
     private final IFlowApplyService flowApplyService;

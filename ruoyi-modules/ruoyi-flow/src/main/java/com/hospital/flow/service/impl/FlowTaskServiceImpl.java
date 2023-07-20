@@ -40,7 +40,6 @@ public class FlowTaskServiceImpl extends BaseServiceImpl<FlowTaskMapper, FlowTas
 
     private LambdaQueryWrapper<FlowTask> buildQueryWrapper(FlowTaskBo bo) {
         return new LambdaQueryWrapperX<FlowTask>()
-                .eqIfPresent(FlowTask::getFlowKey, bo.getFlowKey())
                 .eqIfPresent(FlowTask::getNodeId, bo.getNodeId())
                 .eqIfPresent(FlowTask::getAssigneeUserId, bo.getAssigneeUserId())
                 .eqIfPresent(FlowTask::getResult, bo.getResult())

@@ -52,6 +52,11 @@ public class FlowTaskBo extends BaseEntity {
     private String currentFlag;
 
     /**
+     * 审核时间
+     */
+    private String auditTime;
+
+    /**
      * 备注
      */
     private String remark;

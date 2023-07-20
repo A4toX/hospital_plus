@@ -1,5 +1,6 @@
 package com.hospital.flow.domain.req;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -11,6 +12,7 @@ public class AuditReq {
     /**
      * 审核任务ID集合
      */
+    @NotNull(message = "审核任务ID不能为空")
     private String taskIds;
 
     /**

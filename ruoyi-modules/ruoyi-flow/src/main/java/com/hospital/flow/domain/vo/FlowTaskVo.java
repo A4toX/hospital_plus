@@ -65,6 +65,12 @@ public class FlowTaskVo implements Serializable {
     private String currentFlag;
 
     /**
+     * 审核时间
+     */
+    @ExcelProperty(value = "审核时间")
+    private String auditTime;
+
+    /**
      * 备注
      */
     @ExcelProperty(value = "备注")

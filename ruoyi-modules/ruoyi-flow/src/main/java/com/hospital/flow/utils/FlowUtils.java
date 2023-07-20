@@ -29,6 +29,7 @@ public class FlowUtils {
     private final static FlowNodeMapper nodeMapper = SpringUtils.getBean(FlowNodeMapper.class);
     private final static FlowEdgeMapper edgeMapper = SpringUtils.getBean(FlowEdgeMapper.class);
     private final static FlowTaskMapper taskMapper = SpringUtils.getBean(FlowTaskMapper.class);
+    private final static FlowVariableMapper variableMapper = SpringUtils.getBean(FlowVariableMapper.class);
 
     public static boolean apply(String flowKey, Long businessId, Map<String, Object> variables) {
         FlowConfig config = getConfig(flowKey);
@@ -51,6 +52,7 @@ public class FlowUtils {
             flowTask.setApplyId(apply.getId());
             taskMapper.insert(flowTask);
         }
+        setVariable(apply.getId(), variables);
         return result > 0;
     }
 
@@ -198,5 +200,37 @@ public class FlowUtils {
             return nodeMapper.selectById(defaultEdge.getTargetNodeId());
         }
         return null;
+    }
+
+    public static Map<String, Object> getVariable(Long applyId) {
+        List<FlowVariable> flowVariables = variableMapper.selectByApplyId(applyId);
+        Map<String, Object> variables = new HashMap<>();
+        for (FlowVariable flowVariable : flowVariables) {
+            switch (flowVariable.getParamType()) {
+                case "Integer" -> variables.put(flowVariable.getParamName(), Integer.parseInt(flowVariable.getParamValue()));
+                case "Long" -> variables.put(flowVariable.getParamName(), Long.parseLong(flowVariable.getParamValue()));
+                case "Float" -> variables.put(flowVariable.getParamName(), Float.parseFloat(flowVariable.getParamValue()));
+                case "Double" -> variables.put(flowVariable.getParamName(), Double.parseDouble(flowVariable.getParamValue()));
+                case "Boolean" -> variables.put(flowVariable.getParamName(), Boolean.parseBoolean(flowVariable.getParamValue()));
+                case "Character" -> variables.put(flowVariable.getParamName(), flowVariable.getParamValue().charAt(0));
+                case "Byte" -> variables.put(flowVariable.getParamName(), Byte.parseByte(flowVariable.getParamValue()));
+            }
+        }
+        return variables;
+    }
+
+    public static void setVariable(Long applyId, Map<String, Object> variables) {
+        if(variables != null) {
+            for (Map.Entry<String, Object> entity : variables.entrySet()) {
+                if(entity.getValue() != null) {
+                    FlowVariable variable = new FlowVariable();
+                    variable.setApplyId(applyId);
+                    variable.setParamType(entity.getValue().getClass().getSimpleName());
+                    variable.setParamName(entity.getKey());
+                    variable.setParamValue(entity.getValue().toString());
+                    variableMapper.insert(variable);
+                }
+            }
+        }
     }
 }
