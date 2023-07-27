@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * 流程工具类
  * @author lgx
  */
-public class FlowUtils {
+public final class FlowUtils {
 
     private final static FlowConfigMapper configMapper = SpringUtils.getBean(FlowConfigMapper.class);
     private final static FlowApplyMapper applyMapper = SpringUtils.getBean(FlowApplyMapper.class);
@@ -88,7 +88,10 @@ public class FlowUtils {
                 } else if(NodeTypeEnum.END.getType().equals(type)) {
                     hasEnd = true;
                 }
+                JSONObject text = nodeJsonObject.getByPath("text", JSONObject.class);
+
                 node.setType(type);
+                node.setName(text.get("value", String.class));
                 String multiType = nodeJsonObject.get("multiType", String.class);
 
                 node.setMultiType(StrUtil.isNotBlank(multiType) ? multiType : MultiTypeEnum.NO.getType());

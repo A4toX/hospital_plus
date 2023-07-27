@@ -32,6 +32,11 @@ public class FlowNode extends TenantEntity {
     private String type;
 
     /**
+     * 名称
+     */
+    private String name;
+
+    /**
      * 配置ID
      */
     private Long configId;
