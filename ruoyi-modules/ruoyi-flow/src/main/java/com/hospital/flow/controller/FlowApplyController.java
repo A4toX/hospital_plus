@@ -3,6 +3,9 @@ package com.hospital.flow.controller;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaIgnore;
 import com.hospital.flow.domain.req.AuditReq;
+import com.hospital.flow.domain.req.MyFlowReq;
+import com.hospital.flow.domain.req.TodoFlowReq;
+import com.hospital.flow.domain.resp.ApplyResp;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.domain.R;
@@ -70,8 +73,8 @@ public class FlowApplyController extends BaseController {
      */
     @SaCheckPermission("flowApply:myFlow")
     @GetMapping("/myFlow")
-    public TableDataInfo<FlowApplyVo> myFlow(FlowApplyBo bo, PageQuery pageQuery) {
-        return flowApplyService.selectPageList(bo, pageQuery);
+    public TableDataInfo<ApplyResp> myFlow(MyFlowReq req, PageQuery pageQuery) {
+        return flowApplyService.myFlow(req, pageQuery);
     }
 
     /**
@@ -80,8 +83,8 @@ public class FlowApplyController extends BaseController {
      */
     @SaCheckPermission("flowApply:todoFlow")
     @GetMapping("/todoFlow")
-    public TableDataInfo<FlowApplyVo> todoFlow(FlowApplyBo bo, PageQuery pageQuery) {
-        return flowApplyService.selectPageList(bo, pageQuery);
+    public TableDataInfo<ApplyResp> todoFlow(TodoFlowReq req, PageQuery pageQuery) {
+        return flowApplyService.todoFlow(req, pageQuery);
     }
 
     /**

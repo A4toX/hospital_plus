@@ -6,6 +6,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hospital.flow.domain.FlowNode;
 import com.hospital.flow.domain.FlowTask;
 import com.hospital.flow.domain.req.AuditReq;
+import com.hospital.flow.domain.req.MyFlowReq;
+import com.hospital.flow.domain.req.TodoFlowReq;
+import com.hospital.flow.domain.resp.ApplyResp;
 import com.hospital.flow.enums.FlowResultEnum;
 import com.hospital.flow.enums.FlowStatusEnum;
 import com.hospital.flow.enums.MultiTypeEnum;
@@ -198,5 +201,17 @@ public class FlowApplyServiceImpl extends BaseServiceImpl<FlowApplyMapper, FlowA
                 .eq(FlowTask::getResult, FlowResultEnum.PROCESS.getResult()));
         }
         return result;
+    }
+
+    @Override
+    public TableDataInfo<ApplyResp> myFlow(MyFlowReq req, PageQuery pageQuery) {
+        Page<ApplyResp> pageResp = mapper.myFlow(pageQuery.build(), req);
+        return TableDataInfo.build(pageResp);
+    }
+
+    @Override
+    public TableDataInfo<ApplyResp> todoFlow(TodoFlowReq req, PageQuery pageQuery) {
+        Page<ApplyResp> pageResp = mapper.todoFlow(pageQuery.build(), req, LoginHelper.getUserId());
+        return TableDataInfo.build(pageResp);
     }
 }

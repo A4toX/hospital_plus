@@ -2,4 +2,32 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hospital.flow.mapper.FlowApplyMapper">
 
+    <select id="myFlow" resultType="com.hospital.flow.domain.resp.ApplyResp">
+
+    </select>
+    <select id="todoFlow" resultType="com.hospital.flow.domain.resp.ApplyResp">
+        SELECT
+            fa.id AS 'applyId',
+            ft.id AS 'taskId',
+            fc.flow_name AS '',
+            fn.name,
+            fa.create_by,
+            fa.create_time
+        FROM
+            flow_task ft
+                JOIN flow_apply fa ON ft.apply_id = fa.id AND fa.del_flag = '0'
+                JOIN flow_node fn ON ft.node_id = fn.id AND fn.del_flag = '0'
+                JOIN flow_config fc ON fa.config_id = fc.id AND fc.del_flag = '0'
+        WHERE ft.del_flag = '0'
+          AND ft.assignee_user_id = #{userId}
+        <if test="param.flowName != null and param.flowName != ''">
+            AND fc.flow_name like CONCAT('%', #{param.flowName}, '%')
+        </if>
+        <if test="param.applyStartDate != null and param.applyStartDate != ''">
+            AND fa.create_time >= #{param.applyStartDate}
+        </if>
+        <if test="param.applyEndTime != null and param.applyEndTime != ''">
+            AND fa.create_time &lt;= #{param.applyEndTime}
+        </if>
+    </select>
 </mapper>

@@ -12,14 +12,29 @@ public class UserUtils {
 
     private static UserService userService = SpringUtils.getBean(UserService.class);
 
+    /**
+     * 获取用户
+     * @param userId 用户id
+     * @return 用户
+     */
     public static User getUser(Long userId) {
         return userService.getUserById(userId);
     }
 
+    /**
+     * 获取用户名
+     * @param userId 用户id
+     * @return 用户名
+     */
     public static String getUserName(Long userId) {
         return userService.selectUserNameById(userId);
     }
 
+    /**
+     * 获取真实姓名
+     * @param userId 用户id
+     * @return 真实姓名
+     */
     public static String getRealName(Long userId) {
         return userService.selectRealNameById(userId);
     }
