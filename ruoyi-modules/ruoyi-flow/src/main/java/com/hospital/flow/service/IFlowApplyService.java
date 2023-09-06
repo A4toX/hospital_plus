@@ -19,13 +19,40 @@ import java.util.List;
  */
 public interface IFlowApplyService extends IBaseService<FlowApplyVo, FlowApplyBo> {
 
+    /**
+     * 同意申请
+     * @param req
+     * @return
+     */
     int approve(AuditReq req);
 
+    /**
+     * 拒绝申请
+     * @param req
+     * @return
+     */
     int reject(AuditReq req);
 
+    /**
+     * 取消申请
+     * @param applyIds
+     * @return
+     */
     int cancel(Long[] applyIds);
 
+    /**
+     * 我的流程
+     * @param req
+     * @param pageQuery
+     * @return
+     */
     TableDataInfo<ApplyResp> myFlow(MyFlowReq req, PageQuery pageQuery);
 
+    /**
+     * 待办流程
+     * @param req
+     * @param pageQuery
+     * @return
+     */
     TableDataInfo<ApplyResp> todoFlow(TodoFlowReq req, PageQuery pageQuery);
 }

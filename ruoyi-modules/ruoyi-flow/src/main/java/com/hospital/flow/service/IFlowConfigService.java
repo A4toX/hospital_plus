@@ -11,5 +11,10 @@ import com.hospital.flow.domain.vo.FlowConfigVo;
  */
 public interface IFlowConfigService extends IBaseService<FlowConfigVo, FlowConfigBo> {
 
+    /**
+     * 配置发布
+     * @param id
+     * @return
+     */
     int publish(Long id);
 }
